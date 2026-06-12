@@ -29,19 +29,19 @@
     }
 
     .app {
-      padding: 28px 22px 92px;
+      padding: 24px 22px 92px;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 22px;
+      margin-bottom: 16px;
     }
 
     .menu-icon,
     .bell-icon {
-      font-size: 26px;
+      font-size: 25px;
       color: #4a2f2d;
     }
 
@@ -52,73 +52,79 @@
     }
 
     .logo-small {
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 2px;
       font-weight: 500;
     }
 
     .logo-main {
-      font-size: 30px;
+      font-size: 29px;
       letter-spacing: 2px;
       font-family: Georgia, serif;
     }
 
     .saudacao {
-      font-size: 25px;
-      font-weight: 700;
-      margin-bottom: 4px;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 3px;
     }
 
     .frase {
-      font-size: 14px;
+      font-size: 12px;
       color: #8b6f6c;
-      margin-bottom: 18px;
+      margin-bottom: 15px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .cards-resumo {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 24px;
+      gap: 9px;
+      margin-bottom: 22px;
     }
 
     .card-resumo {
       background: #ffffff;
       border: 1px solid #eadada;
-      border-radius: 14px;
-      height: 48px;
+      border-radius: 13px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+      gap: 5px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+      cursor: pointer;
     }
 
     .card-resumo .numero {
-      font-size: 24px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 900;
       color: #dc6572;
       line-height: 1;
     }
 
     .card-resumo .texto {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 9px;
+      font-weight: 800;
       color: #cf6973;
-      line-height: 1.1;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .secao-titulo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin: 22px 0 14px;
+      gap: 8px;
+      margin: 20px 0 12px;
     }
 
     .secao-titulo h2 {
-      font-size: 15px;
+      font-size: 14px;
       color: #e15f70;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       white-space: nowrap;
     }
 
@@ -129,10 +135,11 @@
     }
 
     .ver-todos {
-      font-size: 12px;
+      font-size: 11px;
       color: #9a6b70;
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
+      cursor: pointer;
     }
 
     .casal-card,
@@ -140,29 +147,30 @@
       background: #ffffff;
       border: 1px solid #eadada;
       border-radius: 16px;
-      padding: 15px 16px;
-      margin-bottom: 12px;
+      padding: 14px 15px;
+      margin-bottom: 11px;
       box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      cursor: pointer;
     }
 
     .linha-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .avatar {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 14px;
       background: #f8e9ea;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #d85f6f;
-      font-weight: 800;
-      font-size: 18px;
+      font-weight: 900;
+      font-size: 17px;
       flex-shrink: 0;
     }
 
@@ -172,14 +180,14 @@
     }
 
     .nome {
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 900;
       color: #2f2423;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .sub {
-      font-size: 12px;
+      font-size: 11px;
       color: #8b6f6c;
       line-height: 1.3;
     }
@@ -187,16 +195,16 @@
     .tag {
       background: #fde8e9;
       color: #a35d61;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 7px 9px;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 7px 8px;
       border-radius: 9px;
       white-space: nowrap;
     }
 
     .seta {
       color: #b98286;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 300;
     }
 
@@ -209,7 +217,7 @@
       align-items: center;
       justify-content: center;
       color: #c98923;
-      font-size: 18px;
+      font-size: 17px;
       flex-shrink: 0;
     }
 
@@ -234,20 +242,21 @@
       border-top: 1px solid #eadada;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      padding: 10px 0 12px;
+      padding: 9px 0 10px;
     }
 
     .nav-item {
       text-align: center;
       color: #8a8585;
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     .nav-item span {
       display: block;
-      font-size: 21px;
-      margin-bottom: 3px;
+      font-size: 20px;
+      margin-bottom: 2px;
     }
 
     .nav-item.active {
@@ -292,23 +301,23 @@
       </header>
 
       <section class="cards-resumo">
-        <div class="card-resumo">
+        <div class="card-resumo" onclick="irParaSecao('novos')">
           <div class="numero">3</div>
-          <div class="texto">Novos<br>Casais</div>
+          <div class="texto">Novos</div>
         </div>
 
-        <div class="card-resumo">
+        <div class="card-resumo" onclick="irParaSecao('prioridades')">
           <div class="numero">5</div>
-          <div class="texto">Prioridades<br>Hoje</div>
+          <div class="texto">Prioridades</div>
         </div>
 
-        <div class="card-resumo">
+        <div class="card-resumo" onclick="irParaSecao('negociacoes')">
           <div class="numero">2</div>
-          <div class="texto">Negociações<br>Ativas</div>
+          <div class="texto">Negociações</div>
         </div>
       </section>
 
-      <section>
+      <section id="novos">
         <div class="secao-titulo">
           <h2>📥 NOVOS CASAIS</h2>
           <div class="linha"></div>
@@ -352,7 +361,7 @@
         </div>
       </section>
 
-      <section>
+      <section id="prioridades">
         <div class="secao-titulo">
           <h2>⚠️ PRIORIDADES HOJE</h2>
           <div class="linha"></div>
@@ -384,7 +393,7 @@
         </div>
       </section>
 
-      <section>
+      <section id="negociacoes">
         <div class="secao-titulo">
           <h2>💍 NEGOCIAÇÕES</h2>
           <div class="linha"></div>
@@ -418,24 +427,24 @@
     </main>
 
     <nav class="bottom-nav">
-      <div class="nav-item active">
+      <div class="nav-item active" onclick="irParaTopo()">
         <span>🏠</span>
         Início
       </div>
 
-      <div class="nav-item">
-        <span>❤️</span>
-        Casais
+      <div class="nav-item" onclick="irParaSecao('novos')">
+        <span>📥</span>
+        Novos
       </div>
 
-      <div class="nav-item">
+      <div class="nav-item" onclick="irParaSecao('prioridades')">
         <span>📋</span>
         Prioridades
       </div>
 
-      <div class="nav-item">
-        <span>👤</span>
-        Perfil
+      <div class="nav-item" onclick="irParaSecao('negociacoes')">
+        <span>💍</span>
+        Negociações
       </div>
     </nav>
   </div>
@@ -443,16 +452,30 @@
   <script>
     const frases = [
       "Vamos encantar noivas hoje?",
-      "Cada atendimento pode começar uma linda história. ❤️",
-      "Encante primeiro. Venda depois.",
-      "Hoje é dia de transformar dúvidas em confiança.",
-      "Cada casal merece se sentir único.",
-      "Mais importante que falar é ouvir com carinho.",
-      "O amor já existe. Nós ajudamos a celebrá-lo."
+      "Cada casal merece sentir que é único.",
+      "Encantar é ouvir antes de apresentar.",
+      "Hoje alguém pode encontrar o lugar dos sonhos.",
+      "Uma visita pode mudar toda uma história.",
+      "Cuidado transforma conversa em confiança.",
+      "O amor já existe. Nós ajudamos a celebrar."
     ];
 
     const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
     document.getElementById("fraseMotivacional").textContent = fraseEscolhida;
+
+    function irParaSecao(id) {
+      document.getElementById(id).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    function irParaTopo() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
   </script>
 </body>
 </html>
