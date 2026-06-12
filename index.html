@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Espaço Margô - Home Office</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f4f0ef;
+      color: #2f2423;
+      min-height: 100vh;
+    }
+
+    .phone-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      padding: 28px 22px 92px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .menu-icon,
+    .bell-icon {
+      font-size: 26px;
+      color: #4a2f2d;
+    }
+
+    .logo {
+      text-align: center;
+      color: #b98286;
+      line-height: 1.1;
+    }
+
+    .logo-small {
+      font-size: 12px;
+      letter-spacing: 2px;
+      font-weight: 500;
+    }
+
+    .logo-main {
+      font-size: 30px;
+      letter-spacing: 2px;
+      font-family: Georgia, serif;
+    }
+
+    .saudacao {
+      font-size: 25px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .frase {
+      font-size: 14px;
+      color: #8b6f6c;
+      margin-bottom: 18px;
+    }
+
+    .cards-resumo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .card-resumo {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 14px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+    }
+
+    .card-resumo .numero {
+      font-size: 24px;
+      font-weight: 800;
+      color: #dc6572;
+      line-height: 1;
+    }
+
+    .card-resumo .texto {
+      font-size: 10px;
+      font-weight: 700;
+      color: #cf6973;
+      line-height: 1.1;
+    }
+
+    .secao-titulo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 22px 0 14px;
+    }
+
+    .secao-titulo h2 {
+      font-size: 15px;
+      color: #e15f70;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .linha {
+      flex: 1;
+      height: 1px;
+      background: #eadada;
+    }
+
+    .ver-todos {
+      font-size: 12px;
+      color: #9a6b70;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .casal-card,
+    .tarefa-card {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 16px;
+      padding: 15px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+    }
+
+    .linha-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: #f8e9ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d85f6f;
+      font-weight: 800;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .nome {
+      font-size: 15px;
+      font-weight: 800;
+      color: #2f2423;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: #8b6f6c;
+      line-height: 1.3;
+    }
+
+    .tag {
+      background: #fde8e9;
+      color: #a35d61;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 7px 9px;
+      border-radius: 9px;
+      white-space: nowrap;
+    }
+
+    .seta {
+      color: #b98286;
+      font-size: 24px;
+      font-weight: 300;
+    }
+
+    .tarefa-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: #fff3d9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c98923;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .negociacao .avatar {
+      background: #eef7e9;
+      color: #4f9d5b;
+    }
+
+    .negociacao .tag {
+      background: #eef7e9;
+      color: #4f9d5b;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-top: 1px solid #eadada;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 10px 0 12px;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #8a8585;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #e15f70;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 20px 0;
+      }
+
+      .phone-frame {
+        min-height: calc(100vh - 40px);
+        border-radius: 34px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      }
+
+      .bottom-nav {
+        border-radius: 0 0 34px 34px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone-frame">
+    <main class="app">
+      <header>
+        <div class="top-bar">
+          <div class="menu-icon">☰</div>
+
+          <div class="logo">
+            <div class="logo-small">ESPAÇO</div>
+            <div class="logo-main">MARGÔ</div>
+          </div>
+
+          <div class="bell-icon">🔔</div>
+        </div>
+
+        <div class="saudacao">Bom dia, Maria ☀️</div>
+        <div class="frase" id="fraseMotivacional">Vamos encantar noivas hoje?</div>
+      </header>
+
+      <section class="cards-resumo">
+        <div class="card-resumo">
+          <div class="numero">3</div>
+          <div class="texto">Novos<br>Casais</div>
+        </div>
+
+        <div class="card-resumo">
+          <div class="numero">5</div>
+          <div class="texto">Prioridades<br>Hoje</div>
+        </div>
+
+        <div class="card-resumo">
+          <div class="numero">2</div>
+          <div class="texto">Negociações<br>Ativas</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="secao-titulo">
+          <h2>📥 NOVOS CASAIS</h2>
+          <div class="linha"></div>
+          <div class="ver-todos">Ver todos</div>
+        </div>
+
+        <div class="casal-card">
+          <div class="linha-card">
+            <div class="avatar">A</div>
+            <div class="info">
+              <div class="nome">Amanda e Rafael</div>
+              <div class="sub">Entrou há 5 min · Instagram</div>
+            </div>
+            <div class="tag">Novo</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+
+        <div class="casal-card">
+          <div class="linha-card">
+            <div class="avatar">J</div>
+            <div class="info">
+              <div class="nome">Juliana e Pedro</div>
+              <div class="sub">Entrou há 12 min · Site</div>
+            </div>
+            <div class="tag">Novo</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+
+        <div class="casal-card">
+          <div class="linha-card">
+            <div class="avatar">F</div>
+            <div class="info">
+              <div class="nome">Fernanda e Lucas</div>
+              <div class="sub">Entrou há 40 min · Indicação</div>
+            </div>
+            <div class="tag">Novo</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="secao-titulo">
+          <h2>⚠️ PRIORIDADES HOJE</h2>
+          <div class="linha"></div>
+          <div class="ver-todos">Ver todos</div>
+        </div>
+
+        <div class="tarefa-card">
+          <div class="linha-card">
+            <div class="tarefa-icon">⏰</div>
+            <div class="info">
+              <div class="nome">Amanda e Rafael</div>
+              <div class="sub">Acompanhar pós-visita</div>
+            </div>
+            <div class="sub">Hoje 10:00</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+
+        <div class="tarefa-card">
+          <div class="linha-card">
+            <div class="tarefa-icon">⏰</div>
+            <div class="info">
+              <div class="nome">Juliana e Pedro</div>
+              <div class="sub">Confirmar visita</div>
+            </div>
+            <div class="sub">Hoje 14:00</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="secao-titulo">
+          <h2>💍 NEGOCIAÇÕES</h2>
+          <div class="linha"></div>
+          <div class="ver-todos">Ver todos</div>
+        </div>
+
+        <div class="casal-card negociacao">
+          <div class="linha-card">
+            <div class="avatar">C</div>
+            <div class="info">
+              <div class="nome">Camila e Bruno</div>
+              <div class="sub">Aguardando decisão</div>
+            </div>
+            <div class="tag">Negociação</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+
+        <div class="casal-card negociacao">
+          <div class="linha-card">
+            <div class="avatar">M</div>
+            <div class="info">
+              <div class="nome">Mariana e Thiago</div>
+              <div class="sub">Follow-up pendente</div>
+            </div>
+            <div class="tag">Negociação</div>
+            <div class="seta">›</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active">
+        <span>🏠</span>
+        Início
+      </div>
+
+      <div class="nav-item">
+        <span>❤️</span>
+        Casais
+      </div>
+
+      <div class="nav-item">
+        <span>📋</span>
+        Prioridades
+      </div>
+
+      <div class="nav-item">
+        <span>👤</span>
+        Perfil
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    const frases = [
+      "Vamos encantar noivas hoje?",
+      "Cada atendimento pode começar uma linda história. ❤️",
+      "Encante primeiro. Venda depois.",
+      "Hoje é dia de transformar dúvidas em confiança.",
+      "Cada casal merece se sentir único.",
+      "Mais importante que falar é ouvir com carinho.",
+      "O amor já existe. Nós ajudamos a celebrá-lo."
+    ];
+
+    const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
+    document.getElementById("fraseMotivacional").textContent = fraseEscolhida;
+  </script>
+</body>
+</html>
