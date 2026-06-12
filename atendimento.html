@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Espaço Margô - Atendimento</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f4f0ef;
+      color: #2f2423;
+      min-height: 100vh;
+    }
+
+    .phone-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding-bottom: 122px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid #f1dddd;
+      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .top-nav {
+      display: grid;
+      grid-template-columns: 40px 1fr 40px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .nav-arrow {
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #fff;
+      color: #d85f6f;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .couple-name {
+      text-align: center;
+      font-size: 21px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.1;
+    }
+
+    .queue {
+      text-align: center;
+      font-size: 11px;
+      color: #d85f6f;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+      color: #7d6461;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dreams {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .dreams::-webkit-scrollbar {
+      display: none;
+    }
+
+    .dream-chip {
+      flex: 0 0 auto;
+      background: #f8e9ea;
+      border: 1px solid #efd2d5;
+      color: #a35d61;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .chat-area {
+      flex: 1;
+      padding: 18px 16px 16px;
+      background:
+        radial-gradient(circle at top left, rgba(248, 233, 234, .45), transparent 30%),
+        #fffaf9;
+      overflow-y: auto;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+
+    .message-row.received {
+      justify-content: flex-start;
+    }
+
+    .message-row.sent {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 78%;
+      border-radius: 18px;
+      padding: 10px 12px 8px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    }
+
+    .received .bubble {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-bottom-left-radius: 6px;
+    }
+
+    .sent .bubble {
+      background: #f5dfe2;
+      border: 1px solid #efc9ce;
+      border-bottom-right-radius: 6px;
+    }
+
+    .sender {
+      font-size: 10px;
+      font-weight: 900;
+      color: #b86f76;
+      margin-bottom: 4px;
+    }
+
+    .text {
+      font-size: 14px;
+      line-height: 1.35;
+      color: #2f2423;
+    }
+
+    .time {
+      text-align: right;
+      font-size: 9px;
+      color: #9f8a87;
+      margin-top: 5px;
+      font-weight: 700;
+    }
+
+    .composer {
+      position: fixed;
+      bottom: 63px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-top: 1px solid #f1dddd;
+      padding: 9px 12px;
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .composer input {
+      border: 1px solid #eadada;
+      border-radius: 18px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 14px;
+      color: #2f2423;
+      background: #fffaf9;
+    }
+
+    .send-btn {
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #df6475, #d45167);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-top: 1px solid #eadada;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 9px 0 10px;
+      z-index: 20;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #8a8585;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: #e15f70;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 36, 35, .32);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 430px;
+      max-height: 86vh;
+      background: #ffffff;
+      border-radius: 26px 26px 0 0;
+      padding: 18px 18px 24px;
+      overflow-y: auto;
+      box-shadow: 0 -18px 40px rgba(0,0,0,.15);
+      animation: subir .18s ease-out;
+    }
+
+    @keyframes subir {
+      from { transform: translateY(18px); opacity: .7; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .sheet-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #2f2423;
+    }
+
+    .close-btn {
+      border: none;
+      background: #f8e9ea;
+      color: #a35d61;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 900;
+      color: #9a6b70;
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid #eadada;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 14px;
+      outline: none;
+      background: #fffaf9;
+      color: #2f2423;
+    }
+
+    .field textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    .slot {
+      border: 1px solid #eadada;
+      background: #ffffff;
+      color: #a35d61;
+      border-radius: 14px;
+      padding: 11px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .slot.selected {
+      background: #f8e9ea;
+      border-color: #d85f6f;
+      color: #d85f6f;
+    }
+
+    .location-btn {
+      width: 100%;
+      border: 1.5px solid #e15f70;
+      background: #ffffff;
+      color: #e15f70;
+      border-radius: 15px;
+      height: 44px;
+      font-size: 13px;
+      font-weight: 900;
+      margin: 4px 0 10px;
+      cursor: pointer;
+    }
+
+    .primary-btn {
+      width: 100%;
+      border: none;
+      background: linear-gradient(135deg, #df6475, #d45167);
+      color: #ffffff;
+      border-radius: 15px;
+      height: 46px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: #f1d6da;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+      padding: 12px 12px;
+      background: #fffaf9;
+      border: 1px solid #eadada;
+      border-radius: 15px;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -17px;
+      top: 17px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d85f6f;
+    }
+
+    .timeline-date {
+      color: #d85f6f;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .timeline-text {
+      color: #2f2423;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 20px 0;
+      }
+
+      .phone-frame {
+        min-height: calc(100vh - 40px);
+        border-radius: 34px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      }
+
+      .composer,
+      .bottom-nav {
+        border-radius: 0 0 34px 34px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone-frame">
+    <main class="app">
+      <header class="header">
+        <div class="top-nav">
+          <button class="nav-arrow" onclick="trocarCasal(-1)">‹</button>
+          <div class="couple-name" id="nomeCasal">Amanda ❤️ Rafael</div>
+          <button class="nav-arrow" onclick="trocarCasal(1)">›</button>
+        </div>
+
+        <div class="queue" id="filaCasal">📥 Novos Casais (1 de 12)</div>
+
+        <div class="info-row">
+          <div id="dataCasamento">📅 12/09/2027</div>
+          <div id="qtdConvidados">👥 180 convidados</div>
+        </div>
+
+        <div class="dreams" id="sonhosCasal">
+          <div class="dream-chip">✨ Pôr do sol</div>
+          <div class="dream-chip">✨ Familiar</div>
+          <div class="dream-chip">✨ Emocionante</div>
+        </div>
+      </header>
+
+      <section class="chat-area" id="chatArea">
+        <div class="message-row received">
+          <div class="bubble">
+            <div class="sender">Amanda</div>
+            <div class="text">Oi Maria, tudo bem? Vi o Espaço Margô no Instagram e achei lindo.</div>
+            <div class="time">09:12</div>
+          </div>
+        </div>
+
+        <div class="message-row sent">
+          <div class="bubble">
+            <div class="sender">Maria</div>
+            <div class="text">Oi Amanda, tudo ótimo! Que alegria receber sua mensagem. ❤️</div>
+            <div class="time">09:14</div>
+          </div>
+        </div>
+
+        <div class="message-row received">
+          <div class="bubble">
+            <div class="sender">Amanda</div>
+            <div class="text">Estamos procurando um lugar para casar em 2027. Sonhamos com uma cerimônia ao ar livre.</div>
+            <div class="time">09:16</div>
+          </div>
+        </div>
+
+        <div class="message-row sent">
+          <div class="bubble">
+            <div class="sender">Maria</div>
+            <div class="text">Que lindo! A cerimônia ao pôr do sol é um dos momentos mais emocionantes por aqui.</div>
+            <div class="time">09:18</div>
+          </div>
+        </div>
+
+        <div class="message-row received">
+          <div class="bubble">
+            <div class="sender">Amanda</div>
+            <div class="text">Gostaríamos muito de conhecer pessoalmente.</div>
+            <div class="time">09:20</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="composer">
+      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." />
+      <button class="send-btn" onclick="enviarMensagem()">➤</button>
+    </div>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active" onclick="window.location.href='index.html'">
+        <span>🏠</span>
+        Início
+      </div>
+
+      <div class="nav-item" onclick="abrirModal('modalConsultoria')">
+        <span>📅</span>
+        Consultoria
+      </div>
+
+      <div class="nav-item" onclick="abrirModal('modalHistorico')">
+        <span>📜</span>
+        Histórico
+      </div>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="modalConsultoria">
+    <div class="sheet">
+      <div class="sheet-header">
+        <div class="sheet-title">📅 Agendar Consultoria</div>
+        <button class="close-btn" onclick="fecharModal('modalConsultoria')">×</button>
+      </div>
+
+      <div class="field">
+        <label>Nome do noivo</label>
+        <input type="text" value="Rafael" />
+      </div>
+
+      <div class="field">
+        <label>Email da noiva</label>
+        <input type="email" placeholder="amanda@email.com" />
+      </div>
+
+      <div class="field">
+        <label>Como conheceram o Espaço Margô?</label>
+        <select>
+          <option>Instagram</option>
+          <option>Google</option>
+          <option>Indicação</option>
+          <option>Facebook</option>
+          <option>TikTok</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Observações</label>
+        <textarea placeholder="Ex: mãe participa da decisão, casal valoriza área externa..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Encantamentos percebidos</label>
+        <textarea placeholder="Ex: pôr do sol, jardim, cerimônia ao ar livre...">Pôr do sol, cerimônia ao ar livre, clima familiar.</textarea>
+      </div>
+
+      <div class="field">
+        <label>Horários disponíveis</label>
+        <div class="slot-grid">
+          <button class="slot" onclick="selecionarHorario(this)">14/07 • 14h</button>
+          <button class="slot" onclick="selecionarHorario(this)">14/07 • 16h</button>
+          <button class="slot" onclick="selecionarHorario(this)">15/07 • 10h</button>
+          <button class="slot" onclick="selecionarHorario(this)">15/07 • 14h</button>
+        </div>
+      </div>
+
+      <button class="location-btn" onclick="alert('Localização enviada para a conversa.')">📍 Enviar localização</button>
+      <button class="primary-btn" onclick="alert('Consultoria confirmada!')">Confirmar consultoria</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalHistorico">
+    <div class="sheet">
+      <div class="sheet-header">
+        <div class="sheet-title">📜 Jornada do Casal</div>
+        <button class="close-btn" onclick="fecharModal('modalHistorico')">×</button>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-date">12/06 - 09:12</div>
+          <div class="timeline-text">Lead entrou pelo Instagram.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">12/06 - 09:14</div>
+          <div class="timeline-text">Primeiro atendimento iniciado por Maria.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">12/06 - 09:18</div>
+          <div class="timeline-text">Sonho identificado: cerimônia ao pôr do sol e ambiente familiar.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">12/06 - 09:20</div>
+          <div class="timeline-text">Casal demonstrou interesse em conhecer o espaço pessoalmente.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const casais = [
+      {
+        nome: "Amanda ❤️ Rafael",
+        fila: "📥 Novos Casais (1 de 12)",
+        data: "📅 12/09/2027",
+        convidados: "👥 180 convidados",
+        sonhos: ["✨ Pôr do sol", "✨ Familiar", "✨ Emocionante"]
+      },
+      {
+        nome: "Juliana ❤️ Pedro",
+        fila: "📥 Novos Casais (2 de 12)",
+        data: "📅 15/11/2027",
+        convidados: "👥 120 convidados",
+        sonhos: ["✨ Intimista", "✨ Elegante", "✨ Natureza"]
+      },
+      {
+        nome: "Fernanda ❤️ Lucas",
+        fila: "📥 Novos Casais (3 de 12)",
+        data: "📅 05/10/2027",
+        convidados: "👥 200 convidados",
+        sonhos: ["✨ Gastronomia", "✨ Festa animada", "✨ Família"]
+      }
+    ];
+
+    let casalAtual = 0;
+
+    function trocarCasal(direcao) {
+      casalAtual += direcao;
+
+      if (casalAtual < 0) {
+        casalAtual = casais.length - 1;
+      }
+
+      if (casalAtual >= casais.length) {
+        casalAtual = 0;
+      }
+
+      const casal = casais[casalAtual];
+
+      document.getElementById("nomeCasal").textContent = casal.nome;
+      document.getElementById("filaCasal").textContent = casal.fila;
+      document.getElementById("dataCasamento").textContent = casal.data;
+      document.getElementById("qtdConvidados").textContent = casal.convidados;
+
+      const sonhos = document.getElementById("sonhosCasal");
+      sonhos.innerHTML = "";
+
+      casal.sonhos.forEach(sonho => {
+        const chip = document.createElement("div");
+        chip.className = "dream-chip";
+        chip.textContent = sonho;
+        sonhos.appendChild(chip);
+      });
+    }
+
+    function enviarMensagem() {
+      const input = document.getElementById("messageInput");
+      const texto = input.value.trim();
+
+      if (!texto) return;
+
+      const chat = document.getElementById("chatArea");
+
+      const row = document.createElement("div");
+      row.className = "message-row sent";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      const sender = document.createElement("div");
+      sender.className = "sender";
+      sender.textContent = "Maria";
+
+      const text = document.createElement("div");
+      text.className = "text";
+      text.textContent = texto;
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      bubble.appendChild(sender);
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chat.appendChild(row);
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function abrirModal(id) {
+      document.getElementById(id).classList.add("open");
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+
+    function selecionarHorario(botao) {
+      document.querySelectorAll(".slot").forEach(slot => {
+        slot.classList.remove("selected");
+      });
+
+      botao.classList.add("selected");
+    }
+  </script>
+</body>
+</html>
