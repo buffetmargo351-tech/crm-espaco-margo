@@ -324,7 +324,7 @@
           <div class="ver-todos">Ver todos</div>
         </div>
 
-        <div class="casal-card" onclick="window.location.href='atendimento.html'">
+        <div class="casal-card" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="avatar">A</div>
             <div class="info">
@@ -336,7 +336,7 @@
           </div>
         </div>
 
-        <div class="casal-card" onclick="window.location.href='atendimento.html'">
+        <div class="casal-card" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="avatar">J</div>
             <div class="info">
@@ -348,7 +348,7 @@
           </div>
         </div>
 
-        <div class="casal-card" onclick="window.location.href='atendimento.html'">
+        <div class="casal-card" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="avatar">F</div>
             <div class="info">
@@ -368,7 +368,7 @@
           <div class="ver-todos">Ver todos</div>
         </div>
 
-        <div class="tarefa-card">
+        <div class="tarefa-card" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="tarefa-icon">⏰</div>
             <div class="info">
@@ -380,7 +380,7 @@
           </div>
         </div>
 
-        <div class="tarefa-card">
+        <div class="tarefa-card" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="tarefa-icon">⏰</div>
             <div class="info">
@@ -400,7 +400,7 @@
           <div class="ver-todos">Ver todos</div>
         </div>
 
-        <div class="casal-card negociacao">
+        <div class="casal-card negociacao" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="avatar">C</div>
             <div class="info">
@@ -412,7 +412,7 @@
           </div>
         </div>
 
-        <div class="casal-card negociacao">
+        <div class="casal-card negociacao" onclick="abrirAtendimento()">
           <div class="linha-card">
             <div class="avatar">M</div>
             <div class="info">
@@ -462,6 +462,10 @@
 
     const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
     document.getElementById("fraseMotivacional").textContent = fraseEscolhida;
+
+    function abrirAtendimento() {
+      window.location.href = "atendimento.html";
+    }
 
     function irParaSecao(id) {
       document.getElementById(id).scrollIntoView({
