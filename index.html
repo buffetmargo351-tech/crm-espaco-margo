@@ -221,12 +221,12 @@
       flex-shrink: 0;
     }
 
-    .negociacao .avatar {
+    .oportunidade .avatar {
       background: #eef7e9;
       color: #4f9d5b;
     }
 
-    .negociacao .tag {
+    .oportunidade .tag {
       background: #eef7e9;
       color: #4f9d5b;
     }
@@ -311,9 +311,9 @@
           <div class="texto">Prioridades</div>
         </div>
 
-        <div class="card-resumo" onclick="irParaSecao('negociacoes')">
-          <div class="numero">2</div>
-          <div class="texto">Negociações</div>
+        <div class="card-resumo" onclick="abrirOportunidades()">
+          <div class="numero">18</div>
+          <div class="texto">Oportunidades</div>
         </div>
       </section>
 
@@ -393,33 +393,33 @@
         </div>
       </section>
 
-      <section id="negociacoes">
+      <section id="oportunidades">
         <div class="secao-titulo">
-          <h2>💍 NEGOCIAÇÕES</h2>
+          <h2>🎯 OPORTUNIDADES</h2>
           <div class="linha"></div>
-          <div class="ver-todos">Ver todos</div>
+          <div class="ver-todos" onclick="abrirOportunidades()">Abrir</div>
         </div>
 
-        <div class="casal-card negociacao" onclick="abrirAtendimento()">
+        <div class="casal-card oportunidade" onclick="abrirOportunidades()">
           <div class="linha-card">
             <div class="avatar">C</div>
             <div class="info">
               <div class="nome">Camila e Bruno</div>
-              <div class="sub">Aguardando decisão</div>
+              <div class="sub">Visitaram · 7 dias sem retorno</div>
             </div>
-            <div class="tag">Negociação</div>
+            <div class="tag">Resgatar</div>
             <div class="seta">›</div>
           </div>
         </div>
 
-        <div class="casal-card negociacao" onclick="abrirAtendimento()">
+        <div class="casal-card oportunidade" onclick="abrirOportunidades()">
           <div class="linha-card">
             <div class="avatar">M</div>
             <div class="info">
               <div class="nome">Mariana e Thiago</div>
               <div class="sub">Follow-up pendente</div>
             </div>
-            <div class="tag">Negociação</div>
+            <div class="tag">Oportunidade</div>
             <div class="seta">›</div>
           </div>
         </div>
@@ -442,9 +442,9 @@
         Prioridades
       </div>
 
-      <div class="nav-item" onclick="irParaSecao('negociacoes')">
-        <span>💍</span>
-        Negociações
+      <div class="nav-item" onclick="abrirOportunidades()">
+        <span>🎯</span>
+        Oportunidades
       </div>
     </nav>
   </div>
@@ -465,6 +465,10 @@
 
     function abrirAtendimento() {
       window.location.href = "atendimento.html";
+    }
+
+    function abrirOportunidades() {
+      window.location.href = "oportunidades.html";
     }
 
     function irParaSecao(id) {
