@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Espaço Margô - Agendar Consultoria</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f4f0ef;
+      color: #2f2423;
+      min-height: 100vh;
+    }
+
+    .phone-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      padding: 22px 18px 26px;
+      min-height: 100vh;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #ffffff;
+      color: #d85f6f;
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .title-area {
+      flex: 1;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: #9a6b70;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #e15f70;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-card {
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+    }
+
+    .date-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #2f2423;
+      margin-bottom: 10px;
+    }
+
+    .slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .slot {
+      border: 1px solid #eadada;
+      background: #ffffff;
+      color: #a35d61;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .slot.selected {
+      background: #f8e9ea;
+      border-color: #d85f6f;
+      color: #d85f6f;
+      box-shadow: 0 6px 14px rgba(216,95,111,0.15);
+    }
+
+    .missing-card {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: #9a6b70;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 14px;
+      color: #2f2423;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 74px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid #eadada;
+      background: #ffffff;
+      color: #a35d61;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .chip.selected {
+      background: #f8e9ea;
+      color: #d85f6f;
+      border-color: #d85f6f;
+      box-shadow: 0 6px 14px rgba(216,95,111,0.13);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 0.8fr 1.4fr;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn-home,
+    .btn-confirm {
+      height: 48px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn-home {
+      border: 1.5px solid #e15f70;
+      background: #ffffff;
+      color: #e15f70;
+    }
+
+    .btn-confirm {
+      border: none;
+      background: linear-gradient(135deg, #df6475, #d45167);
+      color: #ffffff;
+    }
+
+    .success {
+      display: none;
+      margin-top: 14px;
+      background: #eef7e9;
+      border: 1px solid #cfe7c9;
+      color: #4f8f5a;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .success.open {
+      display: block;
+    }
+
+    .location-btn {
+      margin-top: 10px;
+      width: 100%;
+      height: 42px;
+      border-radius: 14px;
+      border: 1.5px solid #4f8f5a;
+      background: #ffffff;
+      color: #4f8f5a;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 20px 0;
+      }
+
+      .phone-frame {
+        min-height: calc(100vh - 40px);
+        border-radius: 34px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone-frame">
+    <main class="app">
+      <header class="top">
+        <button class="back" onclick="window.location.href='atendimento.html'">‹</button>
+
+        <div class="title-area">
+          <div class="title">Agendar Consultoria</div>
+          <div class="subtitle">Amanda ❤️ Rafael</div>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="section-title">✨ Próximas vagas disponíveis</div>
+
+        <div class="date-card">
+          <div class="date-title">Sábado • 27/06</div>
+          <div class="slots">
+            <button class="slot" onclick="selecionarHorario(this)">11h</button>
+            <button class="slot" onclick="selecionarHorario(this)">13h</button>
+            <button class="slot" onclick="selecionarHorario(this)">15h</button>
+          </div>
+        </div>
+
+        <div class="date-card">
+          <div class="date-title">Sábado • 04/07</div>
+          <div class="slots">
+            <button class="slot" onclick="selecionarHorario(this)">11h</button>
+            <button class="slot" onclick="selecionarHorario(this)">13h</button>
+            <button class="slot" onclick="selecionarHorario(this)">15h</button>
+            <button class="slot" onclick="selecionarHorario(this)">17h</button>
+          </div>
+        </div>
+
+        <div class="date-card">
+          <div class="date-title">Domingo • 05/07</div>
+          <div class="slots">
+            <button class="slot" onclick="selecionarHorario(this)">11h</button>
+            <button class="slot" onclick="selecionarHorario(this)">13h</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">📌 Informações faltantes</div>
+
+        <div class="missing-card">
+          <div class="field">
+            <label>Nome do noivo</label>
+            <input type="text" placeholder="Digite o nome do noivo" />
+          </div>
+
+          <div class="field">
+            <label>Email da noiva</label>
+            <input type="email" placeholder="Digite o email da noiva" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">🌎 Como conheceram o Margô?</div>
+
+        <div class="chips">
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">Instagram</button>
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">Google</button>
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">Indicação</button>
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">TikTok</button>
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">Facebook</button>
+          <button class="chip" onclick="selecionarUnico(this, 'origem')">Outro</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">✨ O que encantou o casal?</div>
+
+        <div class="chips">
+          <button class="chip" onclick="alternarChip(this)">Pôr do sol</button>
+          <button class="chip" onclick="alternarChip(this)">Lago</button>
+          <button class="chip" onclick="alternarChip(this)">Jardim</button>
+          <button class="chip" onclick="alternarChip(this)">Cerimônia externa</button>
+          <button class="chip" onclick="alternarChip(this)">Gastronomia</button>
+          <button class="chip" onclick="alternarChip(this)">Atendimento</button>
+          <button class="chip" onclick="alternarChip(this)">Estrutura</button>
+          <button class="chip" onclick="alternarChip(this)">Exclusividade</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">📝 Observações</div>
+
+        <textarea placeholder="Ex: mãe participa da decisão, casal valoriza área externa..."></textarea>
+      </section>
+
+      <div class="actions">
+        <button class="btn-home" onclick="window.location.href='index.html'">🏠 Início</button>
+        <button class="btn-confirm" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
+      </div>
+
+      <div class="success" id="successBox">
+        Consultoria agendada com sucesso. ❤️<br>
+        Deseja enviar a localização agora?
+
+        <button class="location-btn" onclick="alert('Localização enviada para a conversa.')">
+          📍 Enviar localização
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function selecionarHorario(botao) {
+      document.querySelectorAll(".slot").forEach(slot => {
+        slot.classList.remove("selected");
+      });
+
+      botao.classList.add("selected");
+    }
+
+    function alternarChip(botao) {
+      botao.classList.toggle("selected");
+    }
+
+    function selecionarUnico(botao, grupo) {
+      const container = botao.parentElement;
+
+      container.querySelectorAll(".chip").forEach(chip => {
+        chip.classList.remove("selected");
+      });
+
+      botao.classList.add("selected");
+    }
+
+    function confirmarConsultoria() {
+      const horarioSelecionado = document.querySelector(".slot.selected");
+
+      if (!horarioSelecionado) {
+        alert("Selecione uma vaga disponível antes de confirmar.");
+        return;
+      }
+
+      document.getElementById("successBox").classList.add("open");
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  </script>
+</body>
+</html>
