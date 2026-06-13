@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM Espaço Margô - Minhas Oportunidades</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f4f0ef;
+      color: #2f2423;
+      min-height: 100vh;
+    }
+
+    .phone-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      padding: 22px 18px 28px;
+      min-height: 100vh;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 42px 1fr 42px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .back {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #ffffff;
+      color: #d85f6f;
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page-title {
+      text-align: center;
+      font-size: 21px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #9a6b70;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .cards-resumo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+
+    .card-resumo {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 14px;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.05);
+      cursor: pointer;
+      padding: 8px 4px;
+    }
+
+    .card-resumo.active {
+      background: #f8e9ea;
+      border-color: #d85f6f;
+      box-shadow: 0 8px 18px rgba(216,95,111,0.14);
+    }
+
+    .numero {
+      font-size: 22px;
+      font-weight: 950;
+      color: #dc6572;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .texto {
+      font-size: 10px;
+      font-weight: 900;
+      color: #cf6973;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .card-resumo.resgatar .numero,
+    .card-resumo.resgatar .texto {
+      color: #c98923;
+    }
+
+    .card-resumo.fechados .numero,
+    .card-resumo.fechados .texto {
+      color: #4f9d5b;
+    }
+
+    .card-resumo.resgatar.active {
+      background: #fff3d9;
+      border-color: #e0ae56;
+    }
+
+    .card-resumo.fechados.active {
+      background: #eef7e9;
+      border-color: #8fc98d;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #e15f70;
+      margin-bottom: 12px;
+    }
+
+    .card-casal {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 18px;
+      padding: 15px;
+      margin-bottom: 13px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+
+    .casal-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      background: #f8e9ea;
+      color: #d85f6f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 950;
+      flex-shrink: 0;
+    }
+
+    .info-principal {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .nome {
+      font-size: 15px;
+      font-weight: 950;
+      color: #2f2423;
+      margin-bottom: 3px;
+    }
+
+    .status {
+      font-size: 11px;
+      color: #9a6b70;
+      font-weight: 800;
+    }
+
+    .seta {
+      color: #b98286;
+      font-size: 24px;
+      font-weight: 300;
+    }
+
+    .dados {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .dado {
+      background: #fffaf9;
+      border: 1px solid #f0dddd;
+      border-radius: 13px;
+      padding: 9px;
+      font-size: 11px;
+      color: #7d6461;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .dado strong {
+      display: block;
+      font-size: 12px;
+      color: #2f2423;
+      margin-bottom: 2px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      background: #f8e9ea;
+      color: #a35d61;
+      border: 1px solid #efd2d5;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .alerta {
+      margin-top: 10px;
+      background: #fff3d9;
+      color: #a66d16;
+      border: 1px solid #efd9a6;
+      border-radius: 13px;
+      padding: 9px;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .money {
+      margin-top: 10px;
+      background: #eef7e9;
+      color: #4f8f5a;
+      border: 1px solid #cfe7c9;
+      border-radius: 13px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .empty {
+      display: none;
+      text-align: center;
+      margin-top: 50px;
+      color: #9a6b70;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 20px 0;
+      }
+
+      .phone-frame {
+        min-height: calc(100vh - 40px);
+        border-radius: 34px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone-frame">
+    <main class="app">
+      <header class="top">
+        <button class="back" onclick="window.location.href='index.html'">‹</button>
+
+        <div>
+          <div class="page-title">Minhas Oportunidades</div>
+          <div class="subtitle">Onde ainda existe dinheiro na mesa</div>
+        </div>
+
+        <div></div>
+      </header>
+
+      <section class="cards-resumo">
+        <div class="card-resumo active" id="card-agendar" onclick="trocarAba('agendar')">
+          <div class="numero">10</div>
+          <div class="texto">Agendar</div>
+        </div>
+
+        <div class="card-resumo resgatar" id="card-resgatar" onclick="trocarAba('resgatar')">
+          <div class="numero">5</div>
+          <div class="texto">Resgatar</div>
+        </div>
+
+        <div class="card-resumo fechados" id="card-fechados" onclick="trocarAba('fechados')">
+          <div class="numero">3</div>
+          <div class="texto">Fechados</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title" id="tituloLista">Casais para agendar consultoria</div>
+
+        <div id="listaCasais"></div>
+
+        <div class="empty" id="emptyState">
+          Nenhum casal nesta etapa.<br>
+          Ótimo sinal. ✨
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const dados = {
+      agendar: [
+        {
+          inicial: "A",
+          nome: "Amanda ❤️ Rafael",
+          status: "Atendido, ainda sem consultoria",
+          data: "12/09/2027",
+          convidados: "180 convidados",
+          contato: "Último contato: ontem",
+          sonhos: ["Pôr do sol", "Familiar", "Cerimônia externa"],
+          alerta: "Próxima ação: conduzir para agendamento."
+        },
+        {
+          inicial: "J",
+          nome: "Juliana ❤️ Pedro",
+          status: "Conversa iniciada",
+          data: "18/11/2027",
+          convidados: "120 convidados",
+          contato: "Último contato: 2 dias atrás",
+          sonhos: ["Intimista", "Natureza", "Elegante"],
+          alerta: "Próxima ação: apresentar horários disponíveis."
+        },
+        {
+          inicial: "F",
+          nome: "Fernanda ❤️ Lucas",
+          status: "Demonstrou interesse",
+          data: "05/10/2027",
+          convidados: "200 convidados",
+          contato: "Último contato: 3 dias atrás",
+          sonhos: ["Gastronomia", "Festa animada", "Família"],
+          alerta: "Próxima ação: retomar conversa com convite para conhecer o espaço."
+        }
+      ],
+
+      resgatar: [
+        {
+          inicial: "C",
+          nome: "Camila ❤️ Bruno",
+          status: "Visitou e não fechou",
+          data: "22/08/2027",
+          convidados: "160 convidados",
+          contato: "Sem retorno há 7 dias",
+          sonhos: ["Jardim", "Lago", "Gastronomia"],
+          alerta: "Atenção: casal visitou, gostou do espaço e ainda não decidiu."
+        },
+        {
+          inicial: "M",
+          nome: "Mariana ❤️ Thiago",
+          status: "Aguardando decisão",
+          data: "30/05/2027",
+          convidados: "140 convidados",
+          contato: "Sem retorno há 4 dias",
+          sonhos: ["Pôr do sol", "Atendimento", "Exclusividade"],
+          alerta: "Próxima ação: follow-up humano + conteúdo de encantamento."
+        }
+      ],
+
+      fechados: [
+        {
+          inicial: "B",
+          nome: "Bianca ❤️ Rodrigo",
+          status: "Contrato assinado",
+          data: "16/08/2027",
+          convidados: "180 convidados",
+          contato: "Fechado em 12/06",
+          sonhos: ["Cerimônia externa", "Familiar", "Elegante"],
+          dinheiro: "Contrato: R$ 38.000 • Comissão: R$ 760"
+        },
+        {
+          inicial: "L",
+          nome: "Larissa ❤️ André",
+          status: "Contrato assinado",
+          data: "21/09/2027",
+          convidados: "220 convidados",
+          contato: "Fechado em 10/06",
+          sonhos: ["Gastronomia", "Festa", "Estrutura"],
+          dinheiro: "Contrato: R$ 42.000 • Comissão: R$ 840"
+        }
+      ]
+    };
+
+    const titulos = {
+      agendar: "Casais para agendar consultoria",
+      resgatar: "Casais para resgatar",
+      fechados: "Contratos fechados"
+    };
+
+    function trocarAba(tipo) {
+      document.querySelectorAll(".card-resumo").forEach(card => {
+        card.classList.remove("active");
+      });
+
+      document.getElementById("card-" + tipo).classList.add("active");
+      document.getElementById("tituloLista").textContent = titulos[tipo];
+
+      renderizarLista(tipo);
+    }
+
+    function renderizarLista(tipo) {
+      const lista = document.getElementById("listaCasais");
+      const empty = document.getElementById("emptyState");
+
+      lista.innerHTML = "";
+
+      if (!dados[tipo] || dados[tipo].length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+
+      empty.style.display = "none";
+
+      dados[tipo].forEach(casal => {
+        const card = document.createElement("div");
+        card.className = "card-casal";
+        card.onclick = () => window.location.href = "atendimento.html";
+
+        const chips = casal.sonhos.map(sonho => {
+          return `<span class="chip">${sonho}</span>`;
+        }).join("");
+
+        const detalheFinal = casal.dinheiro
+          ? `<div class="money">${casal.dinheiro}</div>`
+          : `<div class="alerta">${casal.alerta}</div>`;
+
+        card.innerHTML = `
+          <div class="casal-top">
+            <div class="avatar">${casal.inicial}</div>
+
+            <div class="info-principal">
+              <div class="nome">${casal.nome}</div>
+              <div class="status">${casal.status}</div>
+            </div>
+
+            <div class="seta">›</div>
+          </div>
+
+          <div class="dados">
+            <div class="dado">
+              <strong>📅 Casamento</strong>
+              ${casal.data}
+            </div>
+
+            <div class="dado">
+              <strong>👥 Convidados</strong>
+              ${casal.convidados}
+            </div>
+
+            <div class="dado" style="grid-column: span 2;">
+              <strong>⏱ Acompanhamento</strong>
+              ${casal.contato}
+            </div>
+          </div>
+
+          <div class="chips">
+            ${chips}
+          </div>
+
+          ${detalheFinal}
+        `;
+
+        lista.appendChild(card);
+      });
+    }
+
+    renderizarLista("agendar");
+  </script>
+</body>
+</html>
