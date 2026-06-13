@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRM Espaço Margô - Minhas Oportunidades</title>
+  <title>CRM Espaço Margô - Oportunidades</title>
 
   <style>
     * {
@@ -24,7 +24,6 @@
       margin: 0 auto;
       min-height: 100vh;
       background: #ffffff;
-      position: relative;
       overflow: hidden;
     }
 
@@ -37,7 +36,7 @@
       display: grid;
       grid-template-columns: 42px 1fr 42px;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .back {
@@ -52,41 +51,33 @@
       cursor: pointer;
     }
 
-    .page-title {
+    .headline {
       text-align: center;
-      font-size: 21px;
+      font-size: 16px;
       font-weight: 900;
       color: #2f2423;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      text-align: center;
-      font-size: 12px;
-      color: #9a6b70;
-      font-weight: 800;
-      margin-top: 4px;
+      line-height: 1.2;
     }
 
     .cards-resumo {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 9px;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .card-resumo {
       background: #ffffff;
       border: 1px solid #eadada;
       border-radius: 14px;
-      min-height: 58px;
+      min-height: 50px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       text-align: center;
       box-shadow: 0 7px 16px rgba(0,0,0,0.05);
       cursor: pointer;
-      padding: 8px 4px;
+      padding: 7px 4px;
     }
 
     .card-resumo.active {
@@ -96,7 +87,7 @@
     }
 
     .numero {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 950;
       color: #dc6572;
       line-height: 1;
@@ -132,18 +123,18 @@
     }
 
     .section-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: #e15f70;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
     }
 
     .card-casal {
       background: #ffffff;
       border: 1px solid #eadada;
       border-radius: 18px;
-      padding: 15px;
-      margin-bottom: 13px;
+      padding: 13px;
+      margin-bottom: 11px;
       box-shadow: 0 8px 18px rgba(0,0,0,0.05);
       cursor: pointer;
     }
@@ -151,8 +142,8 @@
     .casal-top {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 11px;
+      margin-bottom: 9px;
     }
 
     .avatar {
@@ -189,71 +180,42 @@
 
     .seta {
       color: #b98286;
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 300;
     }
 
-    .dados {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .dado {
-      background: #fffaf9;
-      border: 1px solid #f0dddd;
-      border-radius: 13px;
-      padding: 9px;
-      font-size: 11px;
+    .linha-info {
+      font-size: 12px;
       color: #7d6461;
       font-weight: 800;
-      line-height: 1.25;
+      line-height: 1.45;
+      margin-left: 53px;
+      margin-bottom: 3px;
     }
 
-    .dado strong {
-      display: block;
-      font-size: 12px;
-      color: #2f2423;
-      margin-bottom: 2px;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .chip {
-      background: #f8e9ea;
+    .sonhos {
+      font-size: 11px;
       color: #a35d61;
-      border: 1px solid #efd2d5;
-      border-radius: 999px;
-      padding: 6px 9px;
-      font-size: 10px;
       font-weight: 900;
+      line-height: 1.35;
+      margin-left: 53px;
+      margin-top: 5px;
     }
 
     .alerta {
-      margin-top: 10px;
-      background: #fff3d9;
+      margin-left: 53px;
+      margin-top: 7px;
       color: #a66d16;
-      border: 1px solid #efd9a6;
-      border-radius: 13px;
-      padding: 9px;
       font-size: 11px;
       font-weight: 900;
       line-height: 1.35;
     }
 
     .money {
-      margin-top: 10px;
-      background: #eef7e9;
+      margin-left: 53px;
+      margin-top: 7px;
       color: #4f8f5a;
-      border: 1px solid #cfe7c9;
-      border-radius: 13px;
-      padding: 10px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       line-height: 1.35;
     }
@@ -288,10 +250,7 @@
       <header class="top">
         <button class="back" onclick="window.location.href='index.html'">‹</button>
 
-        <div>
-          <div class="page-title">Minhas Oportunidades</div>
-          <div class="subtitle">Onde ainda existe dinheiro na mesa</div>
-        </div>
+        <div class="headline">Onde ainda existe dinheiro na mesa</div>
 
         <div></div>
       </header>
@@ -370,7 +329,7 @@
           convidados: "160 convidados",
           contato: "Sem retorno há 7 dias",
           sonhos: ["Jardim", "Lago", "Gastronomia"],
-          alerta: "Atenção: casal visitou, gostou do espaço e ainda não decidiu."
+          alerta: "Atenção: visitou, gostou do espaço e ainda não decidiu."
         },
         {
           inicial: "M",
@@ -443,13 +402,11 @@
         card.className = "card-casal";
         card.onclick = () => window.location.href = "atendimento.html";
 
-        const chips = casal.sonhos.map(sonho => {
-          return `<span class="chip">${sonho}</span>`;
-        }).join("");
+        const sonhos = casal.sonhos.join(" • ");
 
         const detalheFinal = casal.dinheiro
-          ? `<div class="money">${casal.dinheiro}</div>`
-          : `<div class="alerta">${casal.alerta}</div>`;
+          ? `<div class="money">💰 ${casal.dinheiro}</div>`
+          : `<div class="alerta">⚠️ ${casal.alerta}</div>`;
 
         card.innerHTML = `
           <div class="casal-top">
@@ -463,26 +420,9 @@
             <div class="seta">›</div>
           </div>
 
-          <div class="dados">
-            <div class="dado">
-              <strong>📅 Casamento</strong>
-              ${casal.data}
-            </div>
-
-            <div class="dado">
-              <strong>👥 Convidados</strong>
-              ${casal.convidados}
-            </div>
-
-            <div class="dado" style="grid-column: span 2;">
-              <strong>⏱ Acompanhamento</strong>
-              ${casal.contato}
-            </div>
-          </div>
-
-          <div class="chips">
-            ${chips}
-          </div>
+          <div class="linha-info">📅 ${casal.data} &nbsp; | &nbsp; 👥 ${casal.convidados}</div>
+          <div class="linha-info">⏱ ${casal.contato}</div>
+          <div class="sonhos">✨ Sonhos: ${sonhos}</div>
 
           ${detalheFinal}
         `;
