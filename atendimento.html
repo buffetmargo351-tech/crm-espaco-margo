@@ -48,14 +48,7 @@
       display: grid;
       grid-template-columns: 40px 1fr 40px;
       align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .nav-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1px;
+      margin-bottom: 6px;
     }
 
     .nav-arrow {
@@ -68,13 +61,6 @@
       font-size: 22px;
       font-weight: 800;
       cursor: pointer;
-      line-height: 1;
-    }
-
-    .queue-small {
-      font-size: 9px;
-      color: #d85f6f;
-      font-weight: 900;
       line-height: 1;
     }
 
@@ -271,28 +257,19 @@
     <main class="app">
       <header class="header">
         <div class="top-nav">
-          <div class="nav-box">
-            <button class="nav-arrow" onclick="trocarCasal(-1)">‹</button>
-          </div>
+          <button class="nav-arrow" onclick="window.location.href='index.html'">‹</button>
 
-          <div class="couple-name" id="nomeCasal">Amanda ❤️ Rafael</div>
+          <div class="couple-name" id="nomeCasal">Carregando...</div>
 
-          <div class="nav-box">
-            <button class="nav-arrow" onclick="trocarCasal(1)">›</button>
-            <div class="queue-small" id="filaCasal">1/12</div>
-          </div>
+          <div></div>
         </div>
 
         <div class="info-row">
-          <div id="dataCasamento">📅 12/09/2027</div>
-          <div id="qtdConvidados">👥 180 convidados</div>
+          <div id="dataCasamento">📅 --/--/----</div>
+          <div id="qtdConvidados">👥 -- convidados</div>
         </div>
 
-        <div class="dreams" id="sonhosCasal">
-          <div class="dream-chip">✨ Pôr do sol</div>
-          <div class="dream-chip">✨ Familiar</div>
-          <div class="dream-chip">✨ Emocionante</div>
-        </div>
+        <div class="dreams" id="sonhosCasal"></div>
       </header>
 
       <section class="chat-area" id="chatArea">
@@ -305,29 +282,8 @@
 
         <div class="message-row sent">
           <div class="bubble">
-            <div class="text">Oi Amanda, tudo ótimo! Que alegria receber sua mensagem. ❤️</div>
+            <div class="text">Oi, tudo ótimo! Que alegria receber sua mensagem. ❤️</div>
             <div class="time">09:14</div>
-          </div>
-        </div>
-
-        <div class="message-row received">
-          <div class="bubble">
-            <div class="text">Estamos procurando um lugar para casar em 2027. Sonhamos com uma cerimônia ao ar livre.</div>
-            <div class="time">09:16</div>
-          </div>
-        </div>
-
-        <div class="message-row sent">
-          <div class="bubble">
-            <div class="text">Que lindo! A cerimônia ao pôr do sol é um dos momentos mais emocionantes por aqui.</div>
-            <div class="time">09:18</div>
-          </div>
-        </div>
-
-        <div class="message-row received">
-          <div class="bubble">
-            <div class="text">Gostaríamos muito de conhecer pessoalmente.</div>
-            <div class="time">09:20</div>
           </div>
         </div>
       </section>
@@ -345,7 +301,7 @@
         Início
       </div>
 
-      <div class="nav-item" onclick="window.location.href='consultoria.html'">
+      <div class="nav-item" onclick="abrirConsultoria()">
         <span>📅</span>
         Agendar Consultoria
       </div>
@@ -358,59 +314,117 @@
   </div>
 
   <script>
-    const casais = [
-      {
-        nome: "Amanda ❤️ Rafael",
-        fila: "1/12",
-        data: "📅 12/09/2027",
-        convidados: "👥 180 convidados",
-        sonhos: ["✨ Pôr do sol", "✨ Familiar", "✨ Emocionante"]
-      },
-      {
-        nome: "Juliana ❤️ Pedro",
-        fila: "2/12",
-        data: "📅 15/11/2027",
-        convidados: "👥 120 convidados",
-        sonhos: ["✨ Intimista", "✨ Elegante", "✨ Natureza"]
-      },
-      {
-        nome: "Fernanda ❤️ Lucas",
-        fila: "3/12",
-        data: "📅 05/10/2027",
-        convidados: "👥 200 convidados",
-        sonhos: ["✨ Gastronomia", "✨ Festa animada", "✨ Família"]
-      }
-    ];
+    const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
+    let casalAtualId = null;
 
-    let casalAtual = 0;
+    function pegarCasalIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("casal_id");
+    }
 
-    function trocarCasal(direcao) {
-      casalAtual += direcao;
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
 
-      if (casalAtual < 0) {
-        casalAtual = casais.length - 1;
+      if (noiva && noivo) {
+        return noiva + " ❤️ " + noivo;
       }
 
-      if (casalAtual >= casais.length) {
-        casalAtual = 0;
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    function formatarDataCasamento(data) {
+      if (!data) return "📅 Data não informada";
+      return "📅 " + data;
+    }
+
+    function formatarConvidados(qtd) {
+      if (!qtd) return "👥 Convidados não informados";
+      return "👥 " + qtd + " convidados";
+    }
+
+    function labelEncantamento(valor) {
+      const mapa = {
+        por_do_sol: "Pôr do sol",
+        lago: "Lago",
+        jardim: "Jardim",
+        cerimonia_externa: "Cerimônia externa",
+        gastronomia: "Gastronomia",
+        atendimento: "Atendimento",
+        estrutura: "Estrutura",
+        exclusividade: "Exclusividade",
+        familiar: "Familiar",
+        familia: "Família",
+        natureza: "Natureza",
+        festa_animada: "Festa animada",
+        intimista: "Intimista",
+        emocionante: "Emocionante"
+      };
+
+      return mapa[valor] || valor.replaceAll("_", " ");
+    }
+
+    function renderizarEncantamentos(texto) {
+      const container = document.getElementById("sonhosCasal");
+      container.innerHTML = "";
+
+      if (!texto) {
+        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        return;
       }
 
-      const casal = casais[casalAtual];
+      const itens = texto
+        .split("|")
+        .map(item => item.trim())
+        .filter(Boolean);
 
-      document.getElementById("nomeCasal").textContent = casal.nome;
-      document.getElementById("filaCasal").textContent = casal.fila;
-      document.getElementById("dataCasamento").textContent = casal.data;
-      document.getElementById("qtdConvidados").textContent = casal.convidados;
+      if (itens.length === 0) {
+        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        return;
+      }
 
-      const sonhos = document.getElementById("sonhosCasal");
-      sonhos.innerHTML = "";
-
-      casal.sonhos.forEach(sonho => {
+      itens.forEach(item => {
         const chip = document.createElement("div");
         chip.className = "dream-chip";
-        chip.textContent = sonho;
-        sonhos.appendChild(chip);
+        chip.textContent = "✨ " + labelEncantamento(item);
+        container.appendChild(chip);
       });
+    }
+
+    async function carregarCasal() {
+      casalAtualId = pegarCasalIdDaUrl();
+
+      if (!casalAtualId) {
+        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId));
+        const casal = await resposta.json();
+
+        if (casal.erro) {
+          document.getElementById("nomeCasal").textContent = "Casal não encontrado";
+          return;
+        }
+
+        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+        document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
+        document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
+        renderizarEncantamentos(casal.encantamentos_principais);
+
+      } catch (erro) {
+        console.error("Erro ao carregar casal:", erro);
+        document.getElementById("nomeCasal").textContent = "Erro ao carregar";
+      }
+    }
+
+    function abrirConsultoria() {
+      if (casalAtualId) {
+        window.location.href = "consultoria.html?casal_id=" + encodeURIComponent(casalAtualId);
+      } else {
+        window.location.href = "consultoria.html";
+      }
     }
 
     function enviarMensagem() {
@@ -446,6 +460,8 @@
       input.value = "";
       chat.scrollTop = chat.scrollHeight;
     }
+
+    carregarCasal();
   </script>
 </body>
 </html>
