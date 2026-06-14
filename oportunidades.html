@@ -61,8 +61,8 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 9px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
       margin-bottom: 16px;
     }
 
@@ -87,7 +87,7 @@
     }
 
     .numero {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 950;
       color: #dc6572;
       line-height: 1;
@@ -95,7 +95,7 @@
     }
 
     .texto {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 900;
       color: #cf6973;
       line-height: 1;
@@ -110,6 +110,16 @@
     .card-resumo.resgatar.active {
       background: #fff3d9;
       border-color: #e0ae56;
+    }
+
+    .card-resumo.agendados .numero,
+    .card-resumo.agendados .texto {
+      color: #4f8f5a;
+    }
+
+    .card-resumo.agendados.active {
+      background: #eef7e9;
+      border-color: #b9ddb5;
     }
 
     .section-title {
@@ -230,21 +240,24 @@
     <main class="app">
       <header class="top">
         <button class="back" onclick="window.location.href='index.html'">‹</button>
-
         <div class="headline">Onde ainda existe dinheiro na mesa</div>
-
         <div></div>
       </header>
 
       <section class="cards-resumo">
         <div class="card-resumo active" id="card-agendar" onclick="trocarAba('agendar')">
-          <div class="numero">10</div>
+          <div class="numero" id="totalAgendar">0</div>
           <div class="texto">Agendar</div>
         </div>
 
         <div class="card-resumo resgatar" id="card-resgatar" onclick="trocarAba('resgatar')">
-          <div class="numero">5</div>
+          <div class="numero" id="totalResgatar">0</div>
           <div class="texto">Resgatar</div>
+        </div>
+
+        <div class="card-resumo agendados" id="card-agendados" onclick="trocarAba('agendados')">
+          <div class="numero" id="totalAgendados">0</div>
+          <div class="texto">Agendados</div>
         </div>
       </section>
 
@@ -262,70 +275,83 @@
   </div>
 
   <script>
-    const dados = {
-      agendar: [
-        {
-          inicial: "A",
-          nome: "Amanda ❤️ Rafael",
-          status: "Atendido, ainda sem consultoria",
-          data: "12/09/2027",
-          convidados: "180 convidados",
-          contato: "Último contato: ontem",
-          sonhos: ["Pôr do sol", "Familiar", "Cerimônia externa"],
-          alerta: "Próxima ação: conduzir para agendamento."
-        },
-        {
-          inicial: "J",
-          nome: "Juliana ❤️ Pedro",
-          status: "Conversa iniciada",
-          data: "18/11/2027",
-          convidados: "120 convidados",
-          contato: "Último contato: 2 dias atrás",
-          sonhos: ["Intimista", "Natureza", "Elegante"],
-          alerta: "Próxima ação: apresentar horários disponíveis."
-        },
-        {
-          inicial: "F",
-          nome: "Fernanda ❤️ Lucas",
-          status: "Demonstrou interesse",
-          data: "05/10/2027",
-          convidados: "200 convidados",
-          contato: "Último contato: 3 dias atrás",
-          sonhos: ["Gastronomia", "Festa animada", "Família"],
-          alerta: "Próxima ação: retomar conversa com convite para conhecer o espaço."
-        }
-      ],
+    const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
 
-      resgatar: [
-        {
-          inicial: "C",
-          nome: "Camila ❤️ Bruno",
-          status: "Visitou e não fechou",
-          data: "22/08/2027",
-          convidados: "160 convidados",
-          contato: "Sem retorno há 7 dias",
-          sonhos: ["Jardim", "Lago", "Gastronomia"],
-          alerta: "Atenção: visitou, gostou do espaço e ainda não decidiu."
-        },
-        {
-          inicial: "M",
-          nome: "Mariana ❤️ Thiago",
-          status: "Aguardando decisão",
-          data: "30/05/2027",
-          convidados: "140 convidados",
-          contato: "Sem retorno há 4 dias",
-          sonhos: ["Pôr do sol", "Atendimento", "Exclusividade"],
-          alerta: "Próxima ação: follow-up humano + conteúdo de encantamento."
-        }
-      ]
+    let dados = {
+      agendar: [],
+      resgatar: [],
+      agendados: [],
+      totais: {
+        agendar: 0,
+        resgatar: 0,
+        agendados: 0
+      }
     };
+
+    let abaAtual = "agendar";
 
     const titulos = {
       agendar: "Casais para agendar consultoria",
-      resgatar: "Casais para resgatar"
+      resgatar: "Casais para resgatar",
+      agendados: "Consultorias agendadas"
     };
 
+    function primeiraLetra(nome) {
+      if (!nome) return "?";
+      return nome.trim().charAt(0).toUpperCase();
+    }
+
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
+
+      if (noiva && noivo) {
+        return noiva + " ❤️ " + noivo;
+      }
+
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    function labelEncantamento(valor) {
+      const mapa = {
+        por_do_sol: "Pôr do sol",
+        lago: "Lago",
+        jardim: "Jardim",
+        cerimonia_externa: "Cerimônia externa",
+        gastronomia: "Gastronomia",
+        atendimento: "Atendimento",
+        estrutura: "Estrutura",
+        exclusividade: "Exclusividade",
+        familiar: "Familiar",
+        familia: "Família",
+        natureza: "Natureza",
+        festa_animada: "Festa animada",
+        intimista: "Intimista",
+        emocionante: "Emocionante"
+      };
+
+      return mapa[valor] || valor.replaceAll("_", " ");
+    }
+
+    function formatarEncantamentos(texto) {
+      if (!texto) return "Não informado";
+
+      return texto
+        .split("|")
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(labelEncantamento)
+        .join(" • ");
+    }
+
+    function formatarContato(casal) {
+      if (!casal.ultimo_contato) return "Último contato não informado";
+      return "Último contato: " + casal.ultimo_contato;
+    }
+
     function trocarAba(tipo) {
+      abaAtual = tipo;
+
       document.querySelectorAll(".card-resumo").forEach(card => {
         card.classList.remove("active");
       });
@@ -352,33 +378,84 @@
       dados[tipo].forEach(casal => {
         const card = document.createElement("div");
         card.className = "card-casal";
-        card.onclick = () => window.location.href = "atendimento.html";
+        card.onclick = () => window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id);
 
-        const sonhos = casal.sonhos.join(" • ");
+        const nome = nomeCasal(casal);
+        const sonhos = formatarEncantamentos(casal.encantamentos_principais);
+
+        let statusTexto = "Oportunidade";
+        let alerta = "Próxima ação: conduzir para agendamento.";
+        let infoExtra = "";
+
+        if (tipo === "agendar") {
+          statusTexto = casal.status_casal === "NOVO" ? "Novo casal" : "Em atendimento";
+          alerta = "Próxima ação: conduzir para agendamento.";
+        }
+
+        if (tipo === "resgatar") {
+          statusTexto = "Visitou e não fechou";
+          alerta = "Atenção: retomar contato e tentar resgatar.";
+        }
+
+        if (tipo === "agendados") {
+          statusTexto = "Consultoria agendada";
+          alerta = "Preparar visita presencial.";
+          infoExtra = `
+            <div class="linha-info">📍 Localização enviada automaticamente</div>
+            <div class="linha-info">📝 Obs: ${casal.observacoes_gerais || "Sem observações"}</div>
+          `;
+        }
 
         card.innerHTML = `
           <div class="casal-top">
-            <div class="avatar">${casal.inicial}</div>
+            <div class="avatar">${primeiraLetra(casal.nome_noiva)}</div>
 
             <div class="info-principal">
-              <div class="nome">${casal.nome}</div>
-              <div class="status">${casal.status}</div>
+              <div class="nome">${nome}</div>
+              <div class="status">${statusTexto}</div>
             </div>
 
             <div class="seta">›</div>
           </div>
 
-          <div class="linha-info">📅 ${casal.data} &nbsp; | &nbsp; 👥 ${casal.convidados}</div>
-          <div class="linha-info">⏱ ${casal.contato}</div>
+          <div class="linha-info">📅 ${casal.data_casamento || "Data não informada"} &nbsp; | &nbsp; 👥 ${casal.quantidade_convidados || "--"} convidados</div>
+
+          ${tipo === "agendados"
+            ? `<div class="linha-info">🗓 Consultoria: ${casal.data_consultoria || "--"} às ${casal.hora_consultoria || "--"}</div>`
+            : `<div class="linha-info">⏱ ${formatarContato(casal)}</div>`
+          }
+
           <div class="sonhos">✨ Sonhos: ${sonhos}</div>
-          <div class="alerta">⚠️ ${casal.alerta}</div>
+          ${infoExtra}
+          <div class="alerta">⚠️ ${alerta}</div>
         `;
 
         lista.appendChild(card);
       });
     }
 
-    renderizarLista("agendar");
+    async function carregarOportunidades() {
+      try {
+        const resposta = await fetch(API_OPORTUNIDADES);
+        const retorno = await resposta.json();
+
+        dados = retorno;
+
+        document.getElementById("totalAgendar").textContent = dados.totais?.agendar || 0;
+        document.getElementById("totalResgatar").textContent = dados.totais?.resgatar || 0;
+        document.getElementById("totalAgendados").textContent = dados.totais?.agendados || 0;
+
+        renderizarLista(abaAtual);
+
+      } catch (erro) {
+        console.error("Erro ao carregar oportunidades:", erro);
+
+        document.getElementById("listaCasais").innerHTML =
+          '<div class="empty" style="display:block;">Erro ao carregar oportunidades.</div>';
+      }
+    }
+
+    carregarOportunidades();
   </script>
 </body>
 </html>
