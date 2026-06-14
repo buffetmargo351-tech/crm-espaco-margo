@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRM Espaço Margô - Agendar Consultoria</title>
+  <title>CRM Espaço Margô - Consultoria</title>
 
   <style>
     * {
@@ -29,20 +29,20 @@
     }
 
     .app {
-      padding: 22px 18px 26px;
+      padding: 18px 18px 22px;
       min-height: 100vh;
     }
 
-    .top {
-      display: flex;
+    .top-nav {
+      display: grid;
+      grid-template-columns: 40px 1fr 40px;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
-    .back {
-      width: 38px;
-      height: 38px;
+    .nav-arrow {
+      width: 36px;
+      height: 36px;
       border-radius: 14px;
       border: 1px solid #eadada;
       background: #ffffff;
@@ -50,35 +50,26 @@
       font-size: 22px;
       font-weight: 900;
       cursor: pointer;
+      line-height: 1;
     }
 
-    .title-area {
-      flex: 1;
-    }
-
-    .title {
-      font-size: 22px;
+    .couple-name {
+      text-align: center;
+      font-size: 21px;
       font-weight: 900;
       color: #2f2423;
       line-height: 1.1;
     }
 
-    .subtitle {
-      font-size: 12px;
-      color: #9a6b70;
-      font-weight: 800;
-      margin-top: 3px;
-    }
-
     .section {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .section-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: #e15f70;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -87,23 +78,23 @@
     .date-card {
       border: 1px solid #eadada;
       background: #fffaf9;
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+      border-radius: 16px;
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.04);
     }
 
     .date-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: #2f2423;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .slots {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
     }
 
     .slot {
@@ -111,7 +102,7 @@
       background: #ffffff;
       color: #a35d61;
       border-radius: 999px;
-      padding: 8px 13px;
+      padding: 6px 11px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
@@ -121,20 +112,20 @@
       background: #f8e9ea;
       border-color: #d85f6f;
       color: #d85f6f;
-      box-shadow: 0 6px 14px rgba(216,95,111,0.15);
+      box-shadow: 0 5px 12px rgba(216,95,111,0.13);
     }
 
     .missing-card {
       background: #ffffff;
       border: 1px solid #eadada;
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+      border-radius: 16px;
+      padding: 11px 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.04);
     }
 
     .field {
-      margin-bottom: 12px;
+      margin-bottom: 9px;
     }
 
     .field:last-child {
@@ -146,7 +137,7 @@
       font-size: 11px;
       color: #9a6b70;
       font-weight: 900;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     input,
@@ -154,8 +145,8 @@
       width: 100%;
       border: 1px solid #eadada;
       background: #fffaf9;
-      border-radius: 14px;
-      padding: 12px;
+      border-radius: 13px;
+      padding: 10px 11px;
       font-size: 14px;
       color: #2f2423;
       outline: none;
@@ -163,13 +154,13 @@
 
     textarea {
       resize: vertical;
-      min-height: 74px;
+      min-height: 58px;
     }
 
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
     }
 
     .chip {
@@ -177,7 +168,7 @@
       background: #ffffff;
       color: #a35d61;
       border-radius: 999px;
-      padding: 8px 12px;
+      padding: 6px 10px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
@@ -187,21 +178,21 @@
       background: #f8e9ea;
       color: #d85f6f;
       border-color: #d85f6f;
-      box-shadow: 0 6px 14px rgba(216,95,111,0.13);
+      box-shadow: 0 5px 12px rgba(216,95,111,0.12);
     }
 
     .actions {
       display: grid;
-      grid-template-columns: 0.8fr 1.4fr;
-      gap: 10px;
-      margin-top: 22px;
+      grid-template-columns: 0.75fr 1.45fr;
+      gap: 9px;
+      margin-top: 17px;
     }
 
     .btn-home,
     .btn-confirm {
-      height: 48px;
-      border-radius: 16px;
-      font-size: 13px;
+      height: 42px;
+      border-radius: 15px;
+      font-size: 12px;
       font-weight: 900;
       cursor: pointer;
     }
@@ -220,15 +211,15 @@
 
     .success {
       display: none;
-      margin-top: 14px;
+      margin-top: 12px;
       background: #eef7e9;
       border: 1px solid #cfe7c9;
       color: #4f8f5a;
-      border-radius: 16px;
-      padding: 14px;
+      border-radius: 15px;
+      padding: 12px;
       font-size: 13px;
       font-weight: 800;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
     .success.open {
@@ -236,9 +227,9 @@
     }
 
     .location-btn {
-      margin-top: 10px;
+      margin-top: 9px;
       width: 100%;
-      height: 42px;
+      height: 40px;
       border-radius: 14px;
       border: 1.5px solid #4f8f5a;
       background: #ffffff;
@@ -264,13 +255,10 @@
 <body>
   <div class="phone-frame">
     <main class="app">
-      <header class="top">
-        <button class="back" onclick="window.location.href='atendimento.html'">‹</button>
-
-        <div class="title-area">
-          <div class="title">Agendar Consultoria</div>
-          <div class="subtitle">Amanda ❤️ Rafael</div>
-        </div>
+      <header class="top-nav">
+        <button class="nav-arrow" onclick="window.location.href='atendimento.html'">‹</button>
+        <div class="couple-name">Amanda ❤️ Rafael</div>
+        <button class="nav-arrow" onclick="window.location.href='atendimento.html'">›</button>
       </header>
 
       <section class="section">
@@ -321,20 +309,20 @@
       </section>
 
       <section class="section">
-        <div class="section-title">🌎 Como conheceram o Margô?</div>
+        <div class="section-title">🌎 Como você conheceu o Margô?</div>
 
         <div class="chips">
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">Instagram</button>
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">Google</button>
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">Indicação</button>
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">TikTok</button>
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">Facebook</button>
-          <button class="chip" onclick="selecionarUnico(this, 'origem')">Outro</button>
+          <button class="chip" onclick="selecionarUnico(this)">Instagram</button>
+          <button class="chip" onclick="selecionarUnico(this)">Google</button>
+          <button class="chip" onclick="selecionarUnico(this)">Indicação</button>
+          <button class="chip" onclick="selecionarUnico(this)">TikTok</button>
+          <button class="chip" onclick="selecionarUnico(this)">Facebook</button>
+          <button class="chip" onclick="selecionarUnico(this)">Outro</button>
         </div>
       </section>
 
       <section class="section">
-        <div class="section-title">✨ O que encantou o casal?</div>
+        <div class="section-title">✨ O que mais te encantou pelas fotos e vídeos?</div>
 
         <div class="chips">
           <button class="chip" onclick="alternarChip(this)">Pôr do sol</button>
@@ -383,7 +371,7 @@
       botao.classList.toggle("selected");
     }
 
-    function selecionarUnico(botao, grupo) {
+    function selecionarUnico(botao) {
       const container = botao.parentElement;
 
       container.querySelectorAll(".chip").forEach(chip => {
