@@ -367,20 +367,102 @@
       botao.classList.add("selected");
     }
 
-    function confirmarConsultoria() {
-      const horarioSelecionado = document.querySelector(".slot.selected");
+    async function confirmarConsultoria() {
 
-      if (!horarioSelecionado) {
-        alert("Selecione uma vaga disponível antes de confirmar.");
-        return;
+  const horarioSelecionado =
+    document.querySelector(".slot.selected");
+
+  if (!horarioSelecionado) {
+
+    alert(
+      "Selecione uma vaga disponível antes de confirmar."
+    );
+
+    return;
+  }
+
+  const origemSelecionada =
+    document.querySelector(
+      ".section:nth-of-type(3) .chip.selected"
+    );
+
+  if (!origemSelecionada) {
+
+    alert(
+      "Selecione como o casal conheceu o Espaço Margô."
+    );
+
+    return;
+  }
+
+  const encantamentos = [];
+
+  document
+    .querySelectorAll(
+      ".section:nth-of-type(4) .chip.selected"
+    )
+    .forEach(chip => {
+
+      encantamentos.push(
+        chip.textContent
+          .trim()
+          .toLowerCase()
+          .replaceAll(" ", "_")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+      );
+
+    });
+
+  const payload = {
+
+    casal_id: "CASAL_001",
+
+    data_consultoria: "27/06/2026",
+
+    hora_consultoria:
+      horarioSelecionado.textContent
+        .replace("h","") + ":00",
+
+    como_conheceu_margo:
+      origemSelecionada.textContent.trim(),
+
+    encantamentos_principais:
+      encantamentos.join("|")
+  };
+
+  try {
+
+    await fetch(
+      "https://n8n.espacomargo.com.br/webhook/crm/consultoria",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
       }
+    );
 
-      document.getElementById("successBox").classList.add("open");
-      window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: "smooth"
-      });
-    }
+    document
+      .getElementById("successBox")
+      .classList.add("open");
+
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    });
+
+  } catch (erro) {
+
+    alert(
+      "Erro ao salvar consultoria."
+    );
+
+    console.error(erro);
+
+  }
+}
   </script>
 </body>
 </html>
