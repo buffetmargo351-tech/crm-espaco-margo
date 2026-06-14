@@ -201,6 +201,14 @@
       font-weight: 300;
     }
 
+    .empty {
+      font-size: 12px;
+      color: #8b6f6c;
+      text-align: center;
+      margin-top: 28px;
+      font-weight: 700;
+    }
+
     @media (min-width: 700px) {
       body {
         padding: 20px 0;
@@ -236,7 +244,7 @@
 
       <section class="cards-resumo">
         <div class="card-resumo" onclick="irParaSecao('novos')">
-          <div class="numero">3</div>
+          <div class="numero" id="totalNovos">0</div>
           <div class="texto">Novos</div>
         </div>
 
@@ -257,46 +265,16 @@
           <div class="linha"></div>
         </div>
 
-        <div class="casal-card" onclick="abrirAtendimento()">
-          <div class="linha-card">
-            <div class="avatar">A</div>
-            <div class="info">
-              <div class="nome">Amanda e Rafael</div>
-              <div class="sub">Entrou há 5 min · Instagram</div>
-            </div>
-            <div class="tag">Novo</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-
-        <div class="casal-card" onclick="abrirAtendimento()">
-          <div class="linha-card">
-            <div class="avatar">J</div>
-            <div class="info">
-              <div class="nome">Juliana e Pedro</div>
-              <div class="sub">Entrou há 12 min · Site</div>
-            </div>
-            <div class="tag">Novo</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-
-        <div class="casal-card" onclick="abrirAtendimento()">
-          <div class="linha-card">
-            <div class="avatar">F</div>
-            <div class="info">
-              <div class="nome">Fernanda e Lucas</div>
-              <div class="sub">Entrou há 40 min · Indicação</div>
-            </div>
-            <div class="tag">Novo</div>
-            <div class="seta">›</div>
-          </div>
+        <div id="listaCasais">
+          <div class="empty">Carregando novos casais...</div>
         </div>
       </section>
     </main>
   </div>
 
   <script>
+    const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
+
     const frases = [
       "Vamos encantar noivas hoje?",
       "Cada casal merece sentir que é único.",
@@ -310,8 +288,12 @@
     const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
     document.getElementById("fraseMotivacional").textContent = fraseEscolhida;
 
-    function abrirAtendimento() {
-      window.location.href = "atendimento.html";
+    function abrirAtendimento(casalId) {
+      if (casalId) {
+        window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casalId);
+      } else {
+        window.location.href = "atendimento.html";
+      }
     }
 
     function abrirOportunidades() {
@@ -324,6 +306,85 @@
         block: "start"
       });
     }
+
+    function primeiraLetra(nome) {
+      if (!nome) return "?";
+      return nome.trim().charAt(0).toUpperCase();
+    }
+
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
+
+      if (noiva && noivo) {
+        return noiva + " e " + noivo;
+      }
+
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    function formatarSubtitulo(casal) {
+      const origem = casal.origem || "Origem não informada";
+      const entrada = casal.data_entrada ? "Entrou em " + casal.data_entrada : "Entrada não informada";
+      return entrada + " · " + origem;
+    }
+
+    function renderizarCasais(casais) {
+      const lista = document.getElementById("listaCasais");
+      const totalNovos = document.getElementById("totalNovos");
+
+      lista.innerHTML = "";
+
+      if (!casais || casais.length === 0) {
+        totalNovos.textContent = "0";
+        lista.innerHTML = '<div class="empty">Nenhum novo casal no momento.</div>';
+        return;
+      }
+
+      totalNovos.textContent = casais.length;
+
+      casais.forEach(casal => {
+        const card = document.createElement("div");
+        card.className = "casal-card";
+        card.onclick = () => abrirAtendimento(casal.casal_id);
+
+        card.innerHTML = `
+          <div class="linha-card">
+            <div class="avatar">${primeiraLetra(casal.nome_noiva)}</div>
+
+            <div class="info">
+              <div class="nome">${nomeCasal(casal)}</div>
+              <div class="sub">${formatarSubtitulo(casal)}</div>
+            </div>
+
+            <div class="tag">Novo</div>
+            <div class="seta">›</div>
+          </div>
+        `;
+
+        lista.appendChild(card);
+      });
+    }
+
+    async function carregarCasais() {
+      try {
+        const resposta = await fetch(API_CASAIS);
+        const dados = await resposta.json();
+
+        const casais = Array.isArray(dados) ? dados : [dados];
+
+        renderizarCasais(casais);
+      } catch (erro) {
+        console.error("Erro ao carregar casais:", erro);
+
+        document.getElementById("listaCasais").innerHTML =
+          '<div class="empty">Não foi possível carregar os casais agora.</div>';
+
+        document.getElementById("totalNovos").textContent = "0";
+      }
+    }
+
+    carregarCasais();
   </script>
 </body>
 </html>
