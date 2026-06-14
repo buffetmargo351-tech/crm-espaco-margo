@@ -6,236 +6,101 @@
   <title>CRM Espaço Margô - Consultoria</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 
-    body {
-      background: #f4f0ef;
-      color: #2f2423;
-      min-height: 100vh;
-    }
+    body { background: #f4f0ef; color: #2f2423; min-height: 100vh; }
 
-    .phone-frame {
-      max-width: 430px;
-      margin: 0 auto;
-      min-height: 100vh;
-      background: #ffffff;
-      position: relative;
-      overflow: hidden;
-    }
+    .phone-frame { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; position: relative; overflow: hidden; }
 
-    .app {
-      padding: 18px 18px 22px;
-      min-height: 100vh;
-    }
+    .app { padding: 18px 18px 22px; min-height: 100vh; }
 
-    .top-nav {
-      display: grid;
-      grid-template-columns: 40px 1fr 40px;
-      align-items: center;
-      margin-bottom: 14px;
-    }
+    .top-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 14px; }
 
     .nav-arrow {
-      width: 36px;
-      height: 36px;
-      border-radius: 14px;
-      border: 1px solid #eadada;
-      background: #ffffff;
-      color: #d85f6f;
-      font-size: 22px;
-      font-weight: 900;
-      cursor: pointer;
-      line-height: 1;
+      width: 36px; height: 36px; border-radius: 14px; border: 1px solid #eadada;
+      background: #ffffff; color: #d85f6f; font-size: 22px; font-weight: 900;
+      cursor: pointer; line-height: 1;
     }
 
-    .couple-name {
-      text-align: center;
-      font-size: 21px;
-      font-weight: 900;
-      color: #2f2423;
-      line-height: 1.1;
-    }
+    .couple-name { text-align: center; font-size: 21px; font-weight: 900; color: #2f2423; line-height: 1.1; }
 
-    .section {
-      margin-bottom: 15px;
-    }
+    .section { margin-bottom: 15px; }
 
-    .section-title {
-      font-size: 13px;
-      font-weight: 900;
-      color: #e15f70;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .section-title { font-size: 13px; font-weight: 900; color: #e15f70; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
     .date-card {
-      border: 1px solid #eadada;
-      background: #fffaf9;
-      border-radius: 16px;
-      padding: 10px 12px;
-      margin-bottom: 9px;
-      box-shadow: 0 7px 16px rgba(0,0,0,0.04);
+      border: 1px solid #eadada; background: #fffaf9; border-radius: 16px;
+      padding: 10px 12px; margin-bottom: 9px; box-shadow: 0 7px 16px rgba(0,0,0,0.04);
     }
 
-    .date-title {
-      font-size: 13px;
-      font-weight: 900;
-      color: #2f2423;
-      margin-bottom: 8px;
-    }
+    .date-title { font-size: 13px; font-weight: 900; color: #2f2423; margin-bottom: 8px; }
 
-    .slots {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
+    .slots { display: flex; flex-wrap: wrap; gap: 7px; }
 
     .slot {
-      border: 1px solid #eadada;
-      background: #ffffff;
-      color: #a35d61;
-      border-radius: 999px;
-      padding: 6px 11px;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
+      border: 1px solid #eadada; background: #ffffff; color: #a35d61;
+      border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 900; cursor: pointer;
     }
 
     .slot.selected {
-      background: #f8e9ea;
-      border-color: #d85f6f;
-      color: #d85f6f;
+      background: #f8e9ea; border-color: #d85f6f; color: #d85f6f;
       box-shadow: 0 5px 12px rgba(216,95,111,0.13);
     }
 
     .missing-card {
-      background: #ffffff;
-      border: 1px solid #eadada;
-      border-radius: 16px;
-      padding: 11px 12px;
-      margin-bottom: 8px;
-      box-shadow: 0 7px 16px rgba(0,0,0,0.04);
+      background: #ffffff; border: 1px solid #eadada; border-radius: 16px;
+      padding: 11px 12px; margin-bottom: 8px; box-shadow: 0 7px 16px rgba(0,0,0,0.04);
     }
 
-    .field {
-      margin-bottom: 9px;
+    .field { margin-bottom: 9px; }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label { display: block; font-size: 11px; color: #9a6b70; font-weight: 900; margin-bottom: 5px; }
+
+    input, textarea {
+      width: 100%; border: 1px solid #eadada; background: #fffaf9;
+      border-radius: 13px; padding: 10px 11px; font-size: 14px; color: #2f2423; outline: none;
     }
 
-    .field:last-child {
-      margin-bottom: 0;
-    }
+    textarea { resize: vertical; min-height: 58px; }
 
-    label {
-      display: block;
-      font-size: 11px;
-      color: #9a6b70;
-      font-weight: 900;
-      margin-bottom: 5px;
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      border: 1px solid #eadada;
-      background: #fffaf9;
-      border-radius: 13px;
-      padding: 10px 11px;
-      font-size: 14px;
-      color: #2f2423;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 58px;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 
     .chip {
-      border: 1px solid #eadada;
-      background: #ffffff;
-      color: #a35d61;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
+      border: 1px solid #eadada; background: #ffffff; color: #a35d61;
+      border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 900; cursor: pointer;
     }
 
     .chip.selected {
-      background: #f8e9ea;
-      color: #d85f6f;
-      border-color: #d85f6f;
+      background: #f8e9ea; color: #d85f6f; border-color: #d85f6f;
       box-shadow: 0 5px 12px rgba(216,95,111,0.12);
     }
 
-    .actions {
-      display: grid;
-      grid-template-columns: 0.75fr 1.45fr;
-      gap: 9px;
-      margin-top: 17px;
+    .actions { display: grid; grid-template-columns: 0.75fr 1.45fr; gap: 9px; margin-top: 17px; }
+
+    .btn-home, .btn-confirm {
+      height: 42px; border-radius: 15px; font-size: 12px; font-weight: 900; cursor: pointer;
     }
 
-    .btn-home,
-    .btn-confirm {
-      height: 42px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
-    }
+    .btn-home { border: 1.5px solid #e15f70; background: #ffffff; color: #e15f70; }
 
-    .btn-home {
-      border: 1.5px solid #e15f70;
-      background: #ffffff;
-      color: #e15f70;
-    }
+    .btn-confirm { border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff; }
 
-    .btn-confirm {
-      border: none;
-      background: linear-gradient(135deg, #df6475, #d45167);
-      color: #ffffff;
-    }
+    .btn-confirm:disabled { opacity: 0.65; cursor: not-allowed; }
 
     .success {
-      display: none;
-      margin-top: 12px;
-      background: #eef7e9;
-      border: 1px solid #cfe7c9;
-      color: #4f8f5a;
-      border-radius: 15px;
-      padding: 12px;
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1.35;
+      display: none; margin-top: 12px; background: #eef7e9; border: 1px solid #cfe7c9;
+      color: #4f8f5a; border-radius: 15px; padding: 12px; font-size: 13px; font-weight: 800; line-height: 1.35;
     }
 
-    .success.open {
-      display: block;
-    }
-
-    
+    .success.open { display: block; }
 
     @media (min-width: 700px) {
-      body {
-        padding: 20px 0;
-      }
+      body { padding: 20px 0; }
 
       .phone-frame {
-        min-height: calc(100vh - 40px);
-        border-radius: 34px;
+        min-height: calc(100vh - 40px); border-radius: 34px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.12);
       }
     }
@@ -246,16 +111,15 @@
   <div class="phone-frame">
     <main class="app">
       <header class="top-nav">
-      <button class="nav-arrow" onclick="window.location.href='atendimento.html'">‹</button>
-      <div class="couple-name">Amanda ❤️ Rafael</div>
-      <div></div>
+        <button class="nav-arrow" onclick="voltarAtendimento()">‹</button>
+        <div class="couple-name" id="nomeCasal">Carregando...</div>
+        <div></div>
       </header>
-      
 
       <section class="section">
         <div class="section-title">✨ Próximas vagas disponíveis</div>
 
-        <div class="date-card">
+        <div class="date-card" data-date="27/06/2026">
           <div class="date-title">Sábado • 27/06</div>
           <div class="slots">
             <button class="slot" onclick="selecionarHorario(this)">11h</button>
@@ -264,7 +128,7 @@
           </div>
         </div>
 
-        <div class="date-card">
+        <div class="date-card" data-date="04/07/2026">
           <div class="date-title">Sábado • 04/07</div>
           <div class="slots">
             <button class="slot" onclick="selecionarHorario(this)">11h</button>
@@ -274,7 +138,7 @@
           </div>
         </div>
 
-        <div class="date-card">
+        <div class="date-card" data-date="05/07/2026">
           <div class="date-title">Domingo • 05/07</div>
           <div class="slots">
             <button class="slot" onclick="selecionarHorario(this)">11h</button>
@@ -289,17 +153,17 @@
         <div class="missing-card">
           <div class="field">
             <label>Nome do noivo</label>
-            <input type="text" placeholder="Digite o nome do noivo" />
+            <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
           </div>
 
           <div class="field">
             <label>Email da noiva</label>
-            <input type="email" placeholder="Digite o email da noiva" />
+            <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
           </div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="origemSection">
         <div class="section-title">🌎 Como você conheceu o Margô?</div>
 
         <div class="chips">
@@ -312,39 +176,132 @@
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="encantamentosSection">
         <div class="section-title">✨ O que mais te encantou pelas fotos e vídeos?</div>
 
         <div class="chips">
-          <button class="chip" onclick="alternarChip(this)">Pôr do sol</button>
-          <button class="chip" onclick="alternarChip(this)">Lago</button>
-          <button class="chip" onclick="alternarChip(this)">Jardim</button>
-          <button class="chip" onclick="alternarChip(this)">Cerimônia externa</button>
-          <button class="chip" onclick="alternarChip(this)">Gastronomia</button>
-          <button class="chip" onclick="alternarChip(this)">Atendimento</button>
-          <button class="chip" onclick="alternarChip(this)">Estrutura</button>
-          <button class="chip" onclick="alternarChip(this)">Exclusividade</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="jardim">Jardim</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="cerimonia_externa">Cerimônia externa</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="gastronomia">Gastronomia</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="exclusividade">Exclusividade</button>
         </div>
       </section>
 
       <section class="section">
         <div class="section-title">📝 Observações</div>
 
-        <textarea placeholder="Ex: mãe participa da decisão, casal valoriza área externa..."></textarea>
+        <textarea id="observacoesGerais" placeholder="Ex: mãe participa da decisão, casal valoriza área externa..."></textarea>
       </section>
 
       <div class="actions">
         <button class="btn-home" onclick="window.location.href='index.html'">🏠 Início</button>
-        <button class="btn-confirm" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
+        <button class="btn-confirm" id="btnConfirmar" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
       </div>
 
       <div class="success" id="successBox">
-      Consultoria agendada com sucesso. ❤️
+        Consultoria agendada com sucesso. ❤️
       </div>
-      </main>
+    </main>
   </div>
 
   <script>
+    const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
+    const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
+
+    let casalAtualId = null;
+
+    function pegarCasalIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("casal_id");
+    }
+
+    function voltarAtendimento() {
+      if (casalAtualId) {
+        window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casalAtualId);
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
+
+      if (noiva && noivo) return noiva + " ❤️ " + noivo;
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    async function carregarCasal() {
+      casalAtualId = pegarCasalIdDaUrl();
+
+      if (!casalAtualId) {
+        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId));
+        const casal = await resposta.json();
+
+        if (casal.erro) {
+          document.getElementById("nomeCasal").textContent = "Casal não encontrado";
+          return;
+        }
+
+        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+
+        if (casal.nome_noivo) {
+          document.getElementById("nomeNoivo").value = casal.nome_noivo;
+        }
+
+        if (casal.email) {
+          document.getElementById("emailNoiva").value = casal.email;
+        }
+
+        if (casal.origem) {
+          selecionarChipPorTexto("origemSection", casal.origem);
+        }
+
+        if (casal.encantamentos_principais) {
+          casal.encantamentos_principais.split("|").forEach(valor => {
+            selecionarChipPorValor("encantamentosSection", valor.trim());
+          });
+        }
+
+        if (casal.observacoes_gerais) {
+          document.getElementById("observacoesGerais").value = casal.observacoes_gerais;
+        }
+
+      } catch (erro) {
+        console.error("Erro ao carregar casal:", erro);
+        document.getElementById("nomeCasal").textContent = "Erro ao carregar";
+      }
+    }
+
+    function selecionarChipPorTexto(sectionId, texto) {
+      const chips = document.querySelectorAll("#" + sectionId + " .chip");
+
+      chips.forEach(chip => {
+        if (chip.textContent.trim().toLowerCase() === String(texto).trim().toLowerCase()) {
+          chip.classList.add("selected");
+        }
+      });
+    }
+
+    function selecionarChipPorValor(sectionId, valor) {
+      const chips = document.querySelectorAll("#" + sectionId + " .chip");
+
+      chips.forEach(chip => {
+        if (chip.dataset.value === valor) {
+          chip.classList.add("selected");
+        }
+      });
+    }
+
     function selecionarHorario(botao) {
       document.querySelectorAll(".slot").forEach(slot => {
         slot.classList.remove("selected");
@@ -367,106 +324,95 @@
       botao.classList.add("selected");
     }
 
+    function horaFormatada(texto) {
+      return texto.replace("h", "").padStart(2, "0") + ":00";
+    }
+
     async function confirmarConsultoria() {
+      const horarioSelecionado = document.querySelector(".slot.selected");
 
-  const horarioSelecionado =
-    document.querySelector(".slot.selected");
-
-  if (!horarioSelecionado) {
-
-    alert(
-      "Selecione uma vaga disponível antes de confirmar."
-    );
-
-    return;
-  }
-
-  const origemSelecionada =
-    document.querySelector(
-      ".section:nth-of-type(3) .chip.selected"
-    );
-
-  if (!origemSelecionada) {
-
-    alert(
-      "Selecione como o casal conheceu o Espaço Margô."
-    );
-
-    return;
-  }
-
-  const encantamentos = [];
-
-  document
-    .querySelectorAll(
-      ".section:nth-of-type(4) .chip.selected"
-    )
-    .forEach(chip => {
-
-      encantamentos.push(
-        chip.textContent
-          .trim()
-          .toLowerCase()
-          .replaceAll(" ", "_")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-      );
-
-    });
-
-  const payload = {
-
-    casal_id: "CASAL_001",
-
-    data_consultoria: "27/06/2026",
-
-    hora_consultoria:
-      horarioSelecionado.textContent
-        .replace("h","") + ":00",
-
-    como_conheceu_margo:
-      origemSelecionada.textContent.trim(),
-
-    observacoes_gerais:
-  document.querySelector("textarea").value.trim(),
-
-    encantamentos_principais:
-      encantamentos.join("|")
-    
-  };
-
-  try {
-
-    await fetch(
-      "https://n8n.espacomargo.com.br/webhook/crm/consultoria",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+      if (!horarioSelecionado) {
+        alert("Selecione uma vaga disponível antes de confirmar.");
+        return;
       }
-    );
 
-    document
-      .getElementById("successBox")
-      .classList.add("open");
+      if (!casalAtualId) {
+        alert("Casal não encontrado.");
+        return;
+      }
 
-    window.scrollTo({
-      top: document.body.scrollHeight,
-      behavior: "smooth"
-    });
+      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
 
-  } catch (erro) {
+      if (!nomeNoivo) {
+        alert("Informe o nome do noivo antes de confirmar.");
+        return;
+      }
 
-    alert(
-      "Erro ao salvar consultoria."
-    );
+      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
 
-    console.error(erro);
+      if (!origemSelecionada) {
+        alert("Selecione como o casal conheceu o Espaço Margô.");
+        return;
+      }
 
-  }
-}
+      const dataCard = horarioSelecionado.closest(".date-card");
+      const dataConsultoria = dataCard.dataset.date;
+
+      const encantamentos = [];
+
+      document.querySelectorAll("#encantamentosSection .chip.selected").forEach(chip => {
+        encantamentos.push(chip.dataset.value);
+      });
+
+      const payload = {
+        casal_id: casalAtualId,
+        nome_noivo: nomeNoivo,
+        email: document.getElementById("emailNoiva").value.trim(),
+        data_consultoria: dataConsultoria,
+        hora_consultoria: horaFormatada(horarioSelecionado.textContent.trim()),
+        como_conheceu_margo: origemSelecionada.textContent.trim(),
+        encantamentos_principais: encantamentos.join("|"),
+        observacoes_gerais: document.getElementById("observacoesGerais").value.trim()
+      };
+
+      const botao = document.getElementById("btnConfirmar");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      try {
+        const resposta = await fetch(API_CONSULTORIA, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao salvar consultoria");
+        }
+
+        document.getElementById("successBox").classList.add("open");
+
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "smooth"
+        });
+
+        setTimeout(() => {
+          window.location.href = "oportunidades.html";
+        }, 1400);
+
+      } catch (erro) {
+        console.error(erro);
+        alert("Erro ao confirmar consultoria.");
+
+        botao.disabled = false;
+        botao.textContent = "❤️ Confirmar Consultoria";
+      }
+    }
+
+    carregarCasal();
   </script>
 </body>
 </html>
