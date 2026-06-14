@@ -61,23 +61,23 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 9px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .card-resumo {
       background: #ffffff;
       border: 1px solid #eadada;
       border-radius: 14px;
-      min-height: 50px;
+      min-height: 48px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       text-align: center;
       box-shadow: 0 7px 16px rgba(0,0,0,0.05);
       cursor: pointer;
-      padding: 7px 4px;
+      padding: 6px 4px;
     }
 
     .card-resumo.active {
@@ -107,55 +107,45 @@
       color: #c98923;
     }
 
-    .card-resumo.fechados .numero,
-    .card-resumo.fechados .texto {
-      color: #4f9d5b;
-    }
-
     .card-resumo.resgatar.active {
       background: #fff3d9;
       border-color: #e0ae56;
-    }
-
-    .card-resumo.fechados.active {
-      background: #eef7e9;
-      border-color: #8fc98d;
     }
 
     .section-title {
       font-size: 13px;
       font-weight: 900;
       color: #e15f70;
-      margin-bottom: 11px;
+      margin-bottom: 9px;
     }
 
     .card-casal {
       background: #ffffff;
       border: 1px solid #eadada;
-      border-radius: 18px;
-      padding: 13px;
-      margin-bottom: 11px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      border-radius: 16px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 7px 16px rgba(0,0,0,0.045);
       cursor: pointer;
     }
 
     .casal-top {
       display: flex;
       align-items: center;
-      gap: 11px;
-      margin-bottom: 9px;
+      gap: 10px;
+      margin-bottom: 5px;
     }
 
     .avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 15px;
+      width: 39px;
+      height: 39px;
+      border-radius: 14px;
       background: #f8e9ea;
       color: #d85f6f;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 950;
       flex-shrink: 0;
     }
@@ -169,7 +159,7 @@
       font-size: 15px;
       font-weight: 950;
       color: #2f2423;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .status {
@@ -188,8 +178,8 @@
       font-size: 12px;
       color: #7d6461;
       font-weight: 800;
-      line-height: 1.45;
-      margin-left: 53px;
+      line-height: 1.2;
+      margin-left: 49px;
       margin-bottom: 3px;
     }
 
@@ -197,27 +187,18 @@
       font-size: 11px;
       color: #a35d61;
       font-weight: 900;
-      line-height: 1.35;
-      margin-left: 53px;
-      margin-top: 5px;
+      line-height: 1.25;
+      margin-left: 49px;
+      margin-top: 2px;
     }
 
     .alerta {
-      margin-left: 53px;
-      margin-top: 7px;
+      margin-left: 49px;
+      margin-top: 5px;
       color: #a66d16;
       font-size: 11px;
       font-weight: 900;
-      line-height: 1.35;
-    }
-
-    .money {
-      margin-left: 53px;
-      margin-top: 7px;
-      color: #4f8f5a;
-      font-size: 11px;
-      font-weight: 900;
-      line-height: 1.35;
+      line-height: 1.25;
     }
 
     .empty {
@@ -264,11 +245,6 @@
         <div class="card-resumo resgatar" id="card-resgatar" onclick="trocarAba('resgatar')">
           <div class="numero">5</div>
           <div class="texto">Resgatar</div>
-        </div>
-
-        <div class="card-resumo fechados" id="card-fechados" onclick="trocarAba('fechados')">
-          <div class="numero">3</div>
-          <div class="texto">Fechados</div>
         </div>
       </section>
 
@@ -341,36 +317,12 @@
           sonhos: ["Pôr do sol", "Atendimento", "Exclusividade"],
           alerta: "Próxima ação: follow-up humano + conteúdo de encantamento."
         }
-      ],
-
-      fechados: [
-        {
-          inicial: "B",
-          nome: "Bianca ❤️ Rodrigo",
-          status: "Contrato assinado",
-          data: "16/08/2027",
-          convidados: "180 convidados",
-          contato: "Fechado em 12/06",
-          sonhos: ["Cerimônia externa", "Familiar", "Elegante"],
-          dinheiro: "Contrato: R$ 38.000 • Comissão: R$ 760"
-        },
-        {
-          inicial: "L",
-          nome: "Larissa ❤️ André",
-          status: "Contrato assinado",
-          data: "21/09/2027",
-          convidados: "220 convidados",
-          contato: "Fechado em 10/06",
-          sonhos: ["Gastronomia", "Festa", "Estrutura"],
-          dinheiro: "Contrato: R$ 42.000 • Comissão: R$ 840"
-        }
       ]
     };
 
     const titulos = {
       agendar: "Casais para agendar consultoria",
-      resgatar: "Casais para resgatar",
-      fechados: "Contratos fechados"
+      resgatar: "Casais para resgatar"
     };
 
     function trocarAba(tipo) {
@@ -404,10 +356,6 @@
 
         const sonhos = casal.sonhos.join(" • ");
 
-        const detalheFinal = casal.dinheiro
-          ? `<div class="money">💰 ${casal.dinheiro}</div>`
-          : `<div class="alerta">⚠️ ${casal.alerta}</div>`;
-
         card.innerHTML = `
           <div class="casal-top">
             <div class="avatar">${casal.inicial}</div>
@@ -423,8 +371,7 @@
           <div class="linha-info">📅 ${casal.data} &nbsp; | &nbsp; 👥 ${casal.convidados}</div>
           <div class="linha-info">⏱ ${casal.contato}</div>
           <div class="sonhos">✨ Sonhos: ${sonhos}</div>
-
-          ${detalheFinal}
+          <div class="alerta">⚠️ ${casal.alerta}</div>
         `;
 
         lista.appendChild(card);
