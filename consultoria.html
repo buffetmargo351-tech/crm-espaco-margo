@@ -226,17 +226,7 @@
       display: block;
     }
 
-    .location-btn {
-      margin-top: 9px;
-      width: 100%;
-      height: 40px;
-      border-radius: 14px;
-      border: 1.5px solid #4f8f5a;
-      background: #ffffff;
-      color: #4f8f5a;
-      font-weight: 900;
-      cursor: pointer;
-    }
+    
 
     @media (min-width: 700px) {
       body {
@@ -256,10 +246,11 @@
   <div class="phone-frame">
     <main class="app">
       <header class="top-nav">
-        <button class="nav-arrow" onclick="window.location.href='atendimento.html'">‹</button>
-        <div class="couple-name">Amanda ❤️ Rafael</div>
-        <button class="nav-arrow" onclick="window.location.href='atendimento.html'">›</button>
+      <button class="nav-arrow" onclick="window.location.href='atendimento.html'">‹</button>
+      <div class="couple-name">Amanda ❤️ Rafael</div>
+      <div></div>
       </header>
+      
 
       <section class="section">
         <div class="section-title">✨ Próximas vagas disponíveis</div>
@@ -348,14 +339,9 @@
       </div>
 
       <div class="success" id="successBox">
-        Consultoria agendada com sucesso. ❤️<br>
-        Deseja enviar a localização agora?
-
-        <button class="location-btn" onclick="alert('Localização enviada para a conversa.')">
-          📍 Enviar localização
-        </button>
+      Consultoria agendada com sucesso. ❤️
       </div>
-    </main>
+      </main>
   </div>
 
   <script>
