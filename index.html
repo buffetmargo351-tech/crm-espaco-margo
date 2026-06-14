@@ -29,20 +29,21 @@
     }
 
     .app {
-      padding: 24px 22px 92px;
+      padding: 24px 22px 28px;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .menu-icon,
     .bell-icon {
       font-size: 25px;
       color: #4a2f2d;
+      cursor: pointer;
     }
 
     .logo {
@@ -64,9 +65,10 @@
     }
 
     .saudacao {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 3px;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 4px;
     }
 
     .frase {
@@ -134,16 +136,7 @@
       background: #eadada;
     }
 
-    .ver-todos {
-      font-size: 11px;
-      color: #9a6b70;
-      font-weight: 800;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .casal-card,
-    .tarefa-card {
+    .casal-card {
       background: #ffffff;
       border: 1px solid #eadada;
       border-radius: 16px;
@@ -208,61 +201,6 @@
       font-weight: 300;
     }
 
-    .tarefa-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 13px;
-      background: #fff3d9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #c98923;
-      font-size: 17px;
-      flex-shrink: 0;
-    }
-
-    .oportunidade .avatar {
-      background: #eef7e9;
-      color: #4f9d5b;
-    }
-
-    .oportunidade .tag {
-      background: #eef7e9;
-      color: #4f9d5b;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 430px;
-      background: #ffffff;
-      border-top: 1px solid #eadada;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      padding: 9px 0 10px;
-    }
-
-    .nav-item {
-      text-align: center;
-      color: #8a8585;
-      font-size: 10px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .nav-item span {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 2px;
-    }
-
-    .nav-item.active {
-      color: #e15f70;
-    }
-
     @media (min-width: 700px) {
       body {
         padding: 20px 0;
@@ -273,10 +211,6 @@
         border-radius: 34px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.12);
       }
-
-      .bottom-nav {
-        border-radius: 0 0 34px 34px;
-      }
     }
   </style>
 </head>
@@ -286,7 +220,7 @@
     <main class="app">
       <header>
         <div class="top-bar">
-          <div class="menu-icon">☰</div>
+          <div class="menu-icon" onclick="alert('Perfil e sair do app ficarão aqui.')">☰</div>
 
           <div class="logo">
             <div class="logo-small">ESPAÇO</div>
@@ -306,14 +240,14 @@
           <div class="texto">Novos</div>
         </div>
 
-        <div class="card-resumo" onclick="irParaSecao('prioridades')">
-          <div class="numero">5</div>
-          <div class="texto">Prioridades</div>
+        <div class="card-resumo" onclick="abrirOportunidades()">
+          <div class="numero">15</div>
+          <div class="texto">Oportunidades</div>
         </div>
 
-        <div class="card-resumo" onclick="abrirOportunidades()">
-          <div class="numero">18</div>
-          <div class="texto">Oportunidades</div>
+        <div class="card-resumo" onclick="alert('Tela Resultados será ativada em breve.')">
+          <div class="numero">3</div>
+          <div class="texto">Resultados</div>
         </div>
       </section>
 
@@ -321,7 +255,6 @@
         <div class="secao-titulo">
           <h2>📥 NOVOS CASAIS</h2>
           <div class="linha"></div>
-          <div class="ver-todos">Ver todos</div>
         </div>
 
         <div class="casal-card" onclick="abrirAtendimento()">
@@ -360,93 +293,7 @@
           </div>
         </div>
       </section>
-
-      <section id="prioridades">
-        <div class="secao-titulo">
-          <h2>⚠️ PRIORIDADES HOJE</h2>
-          <div class="linha"></div>
-          <div class="ver-todos">Ver todos</div>
-        </div>
-
-        <div class="tarefa-card" onclick="abrirAtendimento()">
-          <div class="linha-card">
-            <div class="tarefa-icon">⏰</div>
-            <div class="info">
-              <div class="nome">Amanda e Rafael</div>
-              <div class="sub">Acompanhar pós-visita</div>
-            </div>
-            <div class="sub">Hoje 10:00</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-
-        <div class="tarefa-card" onclick="abrirAtendimento()">
-          <div class="linha-card">
-            <div class="tarefa-icon">⏰</div>
-            <div class="info">
-              <div class="nome">Juliana e Pedro</div>
-              <div class="sub">Confirmar visita</div>
-            </div>
-            <div class="sub">Hoje 14:00</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-      </section>
-
-      <section id="oportunidades">
-        <div class="secao-titulo">
-          <h2>🎯 OPORTUNIDADES</h2>
-          <div class="linha"></div>
-          <div class="ver-todos" onclick="abrirOportunidades()">Abrir</div>
-        </div>
-
-        <div class="casal-card oportunidade" onclick="abrirOportunidades()">
-          <div class="linha-card">
-            <div class="avatar">C</div>
-            <div class="info">
-              <div class="nome">Camila e Bruno</div>
-              <div class="sub">Visitaram · 7 dias sem retorno</div>
-            </div>
-            <div class="tag">Resgatar</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-
-        <div class="casal-card oportunidade" onclick="abrirOportunidades()">
-          <div class="linha-card">
-            <div class="avatar">M</div>
-            <div class="info">
-              <div class="nome">Mariana e Thiago</div>
-              <div class="sub">Follow-up pendente</div>
-            </div>
-            <div class="tag">Oportunidade</div>
-            <div class="seta">›</div>
-          </div>
-        </div>
-      </section>
     </main>
-
-    <nav class="bottom-nav">
-      <div class="nav-item active" onclick="irParaTopo()">
-        <span>🏠</span>
-        Início
-      </div>
-
-      <div class="nav-item" onclick="irParaSecao('novos')">
-        <span>📥</span>
-        Novos
-      </div>
-
-      <div class="nav-item" onclick="irParaSecao('prioridades')">
-        <span>📋</span>
-        Prioridades
-      </div>
-
-      <div class="nav-item" onclick="abrirOportunidades()">
-        <span>🎯</span>
-        Oportunidades
-      </div>
-    </nav>
   </div>
 
   <script>
@@ -475,13 +322,6 @@
       document.getElementById(id).scrollIntoView({
         behavior: "smooth",
         block: "start"
-      });
-    }
-
-    function irParaTopo() {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
       });
     }
   </script>
