@@ -276,6 +276,7 @@
   <script>
     const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
     const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+    const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
 
     let usuarioAtualId = pegarUsuarioIdDaUrl();
@@ -405,16 +406,26 @@
       });
     }
 
-    function contarOportunidadesDaCHO(casais) {
-      return casais.filter(casal => {
+    function contarOportunidadesDaCHO(retornoOportunidades) {
+      const agendar = retornoOportunidades.agendar || [];
+      const resgatar = retornoOportunidades.resgatar || [];
+      const todos = [...agendar, ...resgatar];
+
+      const mapa = new Map();
+
+      todos.forEach(casal => {
+        if (casal && casal.casal_id && pertenceAoUsuario(casal)) {
+          mapa.set(casal.casal_id, casal);
+        }
+      });
+
+      return Array.from(mapa.values()).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        const ehOportunidade =
+        return (
           status === "NOVO" ||
           status === "EM_ATENDIMENTO" ||
-          status === "CONSULTORIA_AGENDADA" ||
-          status === "VISITOU_NAO_FECHOU";
-
-        return ehOportunidade && pertenceAoUsuario(casal);
+          status === "VISITOU_NAO_FECHOU"
+        );
       }).length;
     }
 
@@ -486,18 +497,23 @@
 
     async function carregarCasais() {
       try {
-        const resposta = await fetch(API_CASAIS + "?t=" + Date.now());
-        const dados = await resposta.json();
+        const [respostaCasais, respostaOportunidades] = await Promise.all([
+          fetch(API_CASAIS + "?t=" + Date.now()),
+          fetch(API_OPORTUNIDADES + "?t=" + Date.now())
+        ]);
 
-        const casais = Array.isArray(dados) ? dados : [dados];
+        const dadosCasais = await respostaCasais.json();
+        const dadosOportunidades = await respostaOportunidades.json();
+
+        const casais = Array.isArray(dadosCasais) ? dadosCasais : [dadosCasais];
 
         const casaisNovos = filtrarCasaisDaCHO(casais);
-        const totalOportunidades = contarOportunidadesDaCHO(casais);
+        const totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
 
         renderizarCasais(casaisNovos, totalOportunidades);
 
       } catch (erro) {
-        console.error("Erro ao carregar casais:", erro);
+        console.error("Erro ao carregar casais e oportunidades:", erro);
 
         document.getElementById("listaCasais").innerHTML =
           '<div class="empty">Não foi possível carregar os casais agora.</div>';
