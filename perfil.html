@@ -299,7 +299,7 @@
   <div class="phone-frame">
     <main class="app">
       <header class="top">
-        <button class="back" onclick="window.location.href='index.html'">‹</button>
+        <button class="back" onclick="voltarHome()">‹</button>
 
         <div class="page-title">Meu Perfil</div>
 
@@ -310,16 +310,16 @@
       </header>
 
       <section class="profile">
-        <div class="photo">
-          M
+        <div class="photo" id="fotoPerfil">
+          ?
         </div>
 
-        <div class="name">Maria Oliveira</div>
-        <div class="role">Consultora Executiva</div>
+        <div class="name" id="nomePerfil">Carregando...</div>
+        <div class="role" id="tipoPerfil">Consultora</div>
 
-        <div class="contact">
-          📱 (11) 99999-9999<br>
-          ✉️ maria@margo.com
+        <div class="contact" id="contatoPerfil">
+          📱 --<br>
+          ✉️ --
         </div>
       </section>
 
@@ -328,13 +328,13 @@
       <section class="result-grid">
         <div class="result-card">
           <div class="card-icon">🏆</div>
-          <div class="card-title">Setembro 2026</div>
+          <div class="card-title">Mês atual</div>
 
-          <div class="big-number">6</div>
+          <div class="big-number">0</div>
           <div class="caption">contratos fechados</div>
 
           <div class="money">
-            R$ 4.720,00
+            R$ 0,00
             <small>em comissão</small>
           </div>
         </div>
@@ -343,27 +343,134 @@
           <div class="card-icon">🔥</div>
           <div class="card-title">Em aberto</div>
 
-          <div class="big-number">6</div>
+          <div class="big-number">0</div>
           <div class="caption">casais para resgatar</div>
 
           <div class="money">
-            R$ 8.400,00
+            R$ 0,00
             <small>potencial de comissão</small>
           </div>
         </div>
       </section>
 
-      <button class="resgate-btn" onclick="window.location.href='oportunidades.html#resgatar'">
+      <button class="resgate-btn" onclick="abrirResgates()">
         ❤️ IR PARA RESGATES
       </button>
     </main>
 
     <nav class="bottom-nav">
-      <div class="nav-item" onclick="window.location.href='index.html'">
+      <div class="nav-item" onclick="voltarHome()">
         <span>🏠</span>
         Início
       </div>
     </nav>
   </div>
+
+  <script>
+    const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+
+    let usuarioAtualId = pegarUsuarioIdDaUrl();
+
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id") || "";
+    }
+
+    function montarQueryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function voltarHome() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "index.html?" + query : "index.html";
+    }
+
+    function abrirResgates() {
+      let url = "oportunidades.html?aba=resgatar";
+
+      if (usuarioAtualId) {
+        url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+      }
+
+      window.location.href = url;
+    }
+
+    function primeiraLetra(nome) {
+      if (!nome) return "?";
+      return String(nome).trim().charAt(0).toUpperCase();
+    }
+
+    function labelTipoUsuario(tipo) {
+      const valor = String(tipo || "").trim().toUpperCase();
+
+      if (valor === "CHO") return "Consultora Home Office";
+      if (valor === "CP") return "Consultora Presencial";
+      if (valor === "ADMIN") return "Administrador";
+
+      return "Usuário";
+    }
+
+    function renderizarFoto(usuario) {
+      const foto = document.getElementById("fotoPerfil");
+      foto.innerHTML = "";
+
+      if (usuario.foto_url) {
+        const img = document.createElement("img");
+        img.src = usuario.foto_url;
+        img.alt = usuario.nome || "Foto da consultora";
+        img.onerror = function () {
+          foto.innerHTML = primeiraLetra(usuario.nome);
+        };
+        foto.appendChild(img);
+      } else {
+        foto.textContent = primeiraLetra(usuario.nome);
+      }
+    }
+
+    function renderizarUsuario(usuario) {
+      renderizarFoto(usuario);
+
+      document.getElementById("nomePerfil").textContent = usuario.nome || "Usuário sem nome";
+      document.getElementById("tipoPerfil").textContent = labelTipoUsuario(usuario.tipo_usuario);
+
+      document.getElementById("contatoPerfil").innerHTML = `
+        📱 ${usuario.telefone || "--"}<br>
+        ✉️ ${usuario.email || "--"}
+      `;
+    }
+
+    async function carregarUsuario() {
+      if (!usuarioAtualId) {
+        document.getElementById("nomePerfil").textContent = "Usuário não informado";
+        document.getElementById("tipoPerfil").textContent = "Acesse pelo link da consultora";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(API_USUARIOS + "?t=" + Date.now());
+        const dados = await resposta.json();
+
+        const usuarios = dados.usuarios || [];
+        const usuario = usuarios.find(item => {
+          return String(item.usuario_id || "").trim() === String(usuarioAtualId).trim();
+        });
+
+        if (!usuario) {
+          document.getElementById("nomePerfil").textContent = "Usuário não encontrado";
+          document.getElementById("tipoPerfil").textContent = usuarioAtualId;
+          return;
+        }
+
+        renderizarUsuario(usuario);
+
+      } catch (erro) {
+        console.error("Erro ao carregar perfil:", erro);
+        document.getElementById("nomePerfil").textContent = "Erro ao carregar perfil";
+      }
+    }
+
+    carregarUsuario();
+  </script>
 </body>
 </html>
