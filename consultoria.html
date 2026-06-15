@@ -200,7 +200,7 @@
       </section>
 
       <div class="actions">
-        <button class="btn-home" onclick="window.location.href='index.html'">🏠 Início</button>
+        <button class="btn-home" onclick="voltarHome()">🏠 Início</button>
         <button class="btn-confirm" id="btnConfirmar" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
       </div>
 
@@ -215,18 +215,44 @@
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
 
     let casalAtualId = null;
+    let usuarioAtualId = null;
 
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get("casal_id");
     }
 
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id");
+    }
+
+    function montarQueryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function voltarHome() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "index.html?" + query : "index.html";
+    }
+
     function voltarAtendimento() {
+      let url = "atendimento.html";
+
       if (casalAtualId) {
-        window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casalAtualId);
+        url += "?casal_id=" + encodeURIComponent(casalAtualId);
+
+        if (usuarioAtualId) {
+          url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+        }
+      } else if (usuarioAtualId) {
+        url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
       } else {
-        window.location.href = "index.html";
+        url = "index.html";
       }
+
+      window.location.href = url;
     }
 
     function nomeCasal(casal) {
@@ -266,6 +292,7 @@
 
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
+      usuarioAtualId = pegarUsuarioIdDaUrl();
 
       if (!casalAtualId) {
         document.getElementById("nomeCasal").textContent = "Casal não informado";
@@ -433,7 +460,13 @@
         });
 
         setTimeout(() => {
-          window.location.href = "oportunidades.html?aba=agendados&t=" + Date.now();
+          let url = "oportunidades.html?aba=agendados&t=" + Date.now();
+
+          if (usuarioAtualId) {
+            url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+          }
+
+          window.location.href = url;
         }, 2200);
 
       } catch (erro) {
