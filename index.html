@@ -207,6 +207,7 @@
       text-align: center;
       margin-top: 28px;
       font-weight: 700;
+      line-height: 1.35;
     }
 
     @media (min-width: 700px) {
@@ -228,7 +229,7 @@
     <main class="app">
       <header>
         <div class="top-bar">
-          <div class="menu-icon" onclick="window.location.href='perfil.html'">☰</div>
+          <div class="menu-icon" onclick="abrirPerfil()">☰</div>
 
           <div class="logo">
             <div class="logo-small">ESPAÇO</div>
@@ -238,7 +239,7 @@
           <div class="bell-icon">🔔</div>
         </div>
 
-        <div class="saudacao">Bom dia, Maria ☀️</div>
+        <div class="saudacao" id="saudacao">Bom dia ☀️</div>
         <div class="frase" id="fraseMotivacional">Vamos encantar noivas hoje?</div>
       </header>
 
@@ -249,12 +250,12 @@
         </div>
 
         <div class="card-resumo" onclick="abrirOportunidades()">
-          <div class="numero">15</div>
+          <div class="numero" id="totalOportunidades">0</div>
           <div class="texto">Oportunidades</div>
         </div>
 
         <div class="card-resumo" onclick="alert('Tela Resultados será ativada em breve.')">
-          <div class="numero">3</div>
+          <div class="numero">0</div>
           <div class="texto">Resultados</div>
         </div>
       </section>
@@ -274,6 +275,10 @@
 
   <script>
     const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
+    const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+
+    let usuarioAtualId = pegarUsuarioIdDaUrl();
+    let usuarioAtual = null;
 
     const frases = [
       "Vamos encantar noivas hoje?",
@@ -288,16 +293,39 @@
     const fraseEscolhida = frases[Math.floor(Math.random() * frases.length)];
     document.getElementById("fraseMotivacional").textContent = fraseEscolhida;
 
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id") || "";
+    }
+
+    function queryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function abrirPerfil() {
+      const query = queryUsuario();
+      window.location.href = query ? "perfil.html?" + query : "perfil.html";
+    }
+
     function abrirAtendimento(casalId) {
+      let url = "atendimento.html";
+
       if (casalId) {
-        window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casalId);
-      } else {
-        window.location.href = "atendimento.html";
+        url += "?casal_id=" + encodeURIComponent(casalId);
+        if (usuarioAtualId) {
+          url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+        }
+      } else if (usuarioAtualId) {
+        url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
       }
+
+      window.location.href = url;
     }
 
     function abrirOportunidades() {
-      window.location.href = "oportunidades.html";
+      const query = queryUsuario();
+      window.location.href = query ? "oportunidades.html?" + query : "oportunidades.html";
     }
 
     function irParaSecao(id) {
@@ -329,21 +357,52 @@
       return entrada + " · " + origem;
     }
 
-    function renderizarCasais(casais) {
+    function normalizarStatus(status) {
+      return String(status || "").trim().toUpperCase();
+    }
+
+    function pertenceAoUsuario(casal) {
+      if (!usuarioAtualId) return true;
+      return String(casal.consultora_responsavel || "").trim() === String(usuarioAtualId).trim();
+    }
+
+    function filtrarCasaisDaCHO(casais) {
+      return casais.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        return status === "NOVO" && pertenceAoUsuario(casal);
+      });
+    }
+
+    function contarOportunidadesDaCHO(casais) {
+      return casais.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        const ehOportunidade =
+          status === "NOVO" ||
+          status === "EM_ATENDIMENTO" ||
+          status === "CONSULTORIA_AGENDADA" ||
+          status === "VISITOU_NAO_FECHOU";
+
+        return ehOportunidade && pertenceAoUsuario(casal);
+      }).length;
+    }
+
+    function renderizarCasais(casaisNovos, totalOportunidades) {
       const lista = document.getElementById("listaCasais");
       const totalNovos = document.getElementById("totalNovos");
+      const totalOportunidadesEl = document.getElementById("totalOportunidades");
 
       lista.innerHTML = "";
+      totalOportunidadesEl.textContent = totalOportunidades;
 
-      if (!casais || casais.length === 0) {
+      if (!casaisNovos || casaisNovos.length === 0) {
         totalNovos.textContent = "0";
-        lista.innerHTML = '<div class="empty">Nenhum novo casal no momento.</div>';
+        lista.innerHTML = '<div class="empty">Nenhum novo casal para esta consultora no momento.</div>';
         return;
       }
 
-      totalNovos.textContent = casais.length;
+      totalNovos.textContent = casaisNovos.length;
 
-      casais.forEach(casal => {
+      casaisNovos.forEach(casal => {
         const card = document.createElement("div");
         card.className = "casal-card";
         card.onclick = () => abrirAtendimento(casal.casal_id);
@@ -366,14 +425,45 @@
       });
     }
 
+    async function carregarUsuario() {
+      if (!usuarioAtualId) {
+        document.getElementById("saudacao").textContent = "Bom dia ☀️";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(API_USUARIOS + "?t=" + Date.now());
+        const dados = await resposta.json();
+
+        const usuarios = dados.usuarios || [];
+        usuarioAtual = usuarios.find(usuario => {
+          return String(usuario.usuario_id || "").trim() === String(usuarioAtualId).trim();
+        });
+
+        if (usuarioAtual && usuarioAtual.nome) {
+          document.getElementById("saudacao").textContent = "Bom dia, " + usuarioAtual.nome + " ☀️";
+        } else {
+          document.getElementById("saudacao").textContent = "Bom dia, consultora ☀️";
+        }
+
+      } catch (erro) {
+        console.error("Erro ao carregar usuário:", erro);
+        document.getElementById("saudacao").textContent = "Bom dia, consultora ☀️";
+      }
+    }
+
     async function carregarCasais() {
       try {
-        const resposta = await fetch(API_CASAIS);
+        const resposta = await fetch(API_CASAIS + "?t=" + Date.now());
         const dados = await resposta.json();
 
         const casais = Array.isArray(dados) ? dados : [dados];
 
-        renderizarCasais(casais);
+        const casaisNovos = filtrarCasaisDaCHO(casais);
+        const totalOportunidades = contarOportunidadesDaCHO(casais);
+
+        renderizarCasais(casaisNovos, totalOportunidades);
+
       } catch (erro) {
         console.error("Erro ao carregar casais:", erro);
 
@@ -381,10 +471,16 @@
           '<div class="empty">Não foi possível carregar os casais agora.</div>';
 
         document.getElementById("totalNovos").textContent = "0";
+        document.getElementById("totalOportunidades").textContent = "0";
       }
     }
 
-    carregarCasais();
+    async function iniciarHome() {
+      await carregarUsuario();
+      await carregarCasais();
+    }
+
+    iniciarHome();
   </script>
 </body>
 </html>
