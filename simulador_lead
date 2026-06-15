@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de Lead | Espaço Margô</title>
+  <style>
+    :root {
+      --bg: #f7f1ea;
+      --card: #fffaf5;
+      --text: #2f2621;
+      --muted: #7b6a5f;
+      --primary: #8b5e3c;
+      --primary-dark: #6f472b;
+      --border: #eadfd4;
+      --success: #2e7d32;
+      --danger: #b3261e;
+      --shadow: 0 18px 45px rgba(72, 45, 27, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #fbf6ef 0%, #f2e7dc 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 22px 16px 50px;
+    }
+
+    .header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 15px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 19px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: -4px 0 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 12px 0 6px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 13px 14px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12);
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: vertical;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button, a.button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+    }
+
+    button:hover, a.button:hover {
+      background: var(--primary-dark);
+    }
+
+    button.secondary, a.button.secondary {
+      background: #efe4d9;
+      color: var(--primary-dark);
+    }
+
+    button.secondary:hover, a.button.secondary:hover {
+      background: #e5d3c2;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 14px;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.45;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .status.success {
+      display: block;
+      background: #e9f5ea;
+      color: var(--success);
+      border: 1px solid #c7e5ca;
+    }
+
+    .status.error {
+      display: block;
+      background: #fdebea;
+      color: var(--danger);
+      border: 1px solid #f5c7c3;
+    }
+
+    .result-box {
+      display: none;
+      background: #ffffff;
+      border: 1px dashed var(--primary);
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 14px;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .result-box strong {
+      color: var(--primary-dark);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      button, a.button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="header">
+      <div class="brand">Espaço Margô</div>
+      <h1>Simulador de Lead</h1>
+      <p class="subtitle">Use esta tela para se passar por uma noiva e treinar a consultora no CRM sem mexer manualmente na planilha.</p>
+    </section>
+
+    <section class="card">
+      <h2>1. Criar lead de teste</h2>
+      <p class="hint">Este formulário envia o lead pelo mesmo fluxo aprovado do CRM: cria/atualiza casal, distribui para CHO e registra a primeira mensagem.</p>
+
+      <div class="grid">
+        <div>
+          <label for="nome_noiva">Nome da noiva</label>
+          <input id="nome_noiva" value="Noiva Treinamento" />
+        </div>
+        <div>
+          <label for="nome_noivo">Nome do noivo</label>
+          <input id="nome_noivo" value="Noivo Treinamento" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="telefone">Telefone do lead</label>
+          <input id="telefone" value="11988887777" />
+        </div>
+        <div>
+          <label for="email">E-mail</label>
+          <input id="email" value="treinamento@email.com" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="data_casamento">Data pretendida</label>
+          <input id="data_casamento" value="20/12/2026" />
+        </div>
+        <div>
+          <label for="quantidade_convidados">Quantidade de convidados</label>
+          <input id="quantidade_convidados" value="150" />
+        </div>
+      </div>
+
+      <label for="origem">Origem</label>
+      <select id="origem">
+        <option value="Instagram">Instagram</option>
+        <option value="Landing Page">Landing Page</option>
+        <option value="Indicação">Indicação</option>
+        <option value="WhatsApp">WhatsApp</option>
+      </select>
+
+      <label for="mensagem_inicial">Mensagem inicial da noiva</label>
+      <textarea id="mensagem_inicial">Olá, vi o Espaço Margô no Instagram e queria saber mais sobre casamento aí.</textarea>
+
+      <div class="actions">
+        <button id="btnCriarLead" onclick="criarLead()">Criar lead de teste</button>
+        <a class="button secondary" href="/index.html?usuario_id=CHO_01" target="_blank">Abrir Home CHO_01</a>
+      </div>
+
+      <div id="statusCriar" class="status"></div>
+      <div id="resultadoLead" class="result-box"></div>
+    </section>
+
+    <section class="card">
+      <h2>2. Enviar nova mensagem como lead</h2>
+      <p class="hint">Use depois que o lead já existir. A mensagem entra no histórico como se a noiva tivesse enviado pelo WhatsApp.</p>
+
+      <div class="grid">
+        <div>
+          <label for="casal_id_msg">Casal ID</label>
+          <input id="casal_id_msg" placeholder="Ex: CASAL_..." />
+        </div>
+        <div>
+          <label for="telefone_msg">Telefone</label>
+          <input id="telefone_msg" placeholder="Ex: 11988887777" />
+        </div>
+      </div>
+
+      <label for="consultora_msg">Consultora responsável</label>
+      <input id="consultora_msg" value="CHO_01" />
+
+      <label for="mensagem_lead">Mensagem da noiva</label>
+      <textarea id="mensagem_lead">Gostei bastante do espaço. Vocês têm disponibilidade para a minha data?</textarea>
+
+      <div class="actions">
+        <button id="btnEnviarMsg" onclick="enviarMensagemLead()">Enviar como lead</button>
+        <a id="abrirAtendimento" class="button secondary" href="#" target="_blank">Abrir atendimento</a>
+      </div>
+
+      <div id="statusMensagem" class="status"></div>
+    </section>
+
+    <section class="card">
+      <h2>Roteiros rápidos para treinamento</h2>
+      <p class="hint">Copie uma dessas mensagens no campo acima para simular situações reais.</p>
+
+      <div class="actions">
+        <button class="secondary" onclick="usarMensagem('Vocês passam orçamento pelo WhatsApp? Estou pesquisando alguns espaços.')">Pergunta preço</button>
+        <button class="secondary" onclick="usarMensagem('Amei o espaço, mas meu noivo acha que pode ficar longe para os convidados. Como funciona o acesso?')">Objeção localização</button>
+        <button class="secondary" onclick="usarMensagem('Vocês têm fotos ou vídeos de casamento à noite?')">Pedir fotos/vídeos</button>
+        <button class="secondary" onclick="usarMensagem('Ainda não decidimos a data, mas queremos algo entre outubro e dezembro.')">Sem data definida</button>
+      </div>
+    </section>
+
+    <p class="footer-note">Simulador interno do CRM Comercial V1 — usar apenas para treinamento.</p>
+  </main>
+
+  <script>
+    const API_ENTRADA_LEAD = "https://n8n.espacomargo.com.br/webhook/crm/entrada-lead";
+    const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
+
+    function setStatus(elementId, type, message) {
+      const el = document.getElementById(elementId);
+      el.className = "status " + type;
+      el.textContent = message;
+    }
+
+    function limparStatus(elementId) {
+      const el = document.getElementById(elementId);
+      el.className = "status";
+      el.textContent = "";
+    }
+
+    function valor(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function atualizarLinkAtendimento(casalId) {
+      const link = document.getElementById("abrirAtendimento");
+      if (!casalId) {
+        link.href = "#";
+        return;
+      }
+      link.href = "/atendimento.html?casal_id=" + encodeURIComponent(casalId) + "&usuario_id=CHO_01";
+    }
+
+    async function criarLead() {
+      limparStatus("statusCriar");
+      const btn = document.getElementById("btnCriarLead");
+      const resultado = document.getElementById("resultadoLead");
+
+      const payload = {
+        nome_noiva: valor("nome_noiva"),
+        nome_noivo: valor("nome_noivo"),
+        telefone: valor("telefone"),
+        email: valor("email"),
+        origem: valor("origem"),
+        data_casamento: valor("data_casamento"),
+        quantidade_convidados: valor("quantidade_convidados"),
+        mensagem_inicial: valor("mensagem_inicial")
+      };
+
+      if (!payload.telefone || !payload.mensagem_inicial) {
+        setStatus("statusCriar", "error", "Preencha pelo menos telefone e mensagem inicial.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Criando...";
+
+      try {
+        const response = await fetch(API_ENTRADA_LEAD, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.sucesso === false) {
+          throw new Error(data.mensagem || "Erro ao criar lead de teste.");
+        }
+
+        const casalId = data.casal_id || "";
+
+        document.getElementById("casal_id_msg").value = casalId;
+        document.getElementById("telefone_msg").value = payload.telefone;
+        atualizarLinkAtendimento(casalId);
+
+        resultado.style.display = "block";
+        resultado.innerHTML = "<strong>Lead criado/atualizado com sucesso.</strong><br>Casal ID: " + casalId + "<br>Status: " + (data.status || "NOVO") + "<br>Agora abra a Home da CHO_01 e clique em Atender.";
+
+        setStatus("statusCriar", "success", "Lead enviado para o CRM com sucesso.");
+      } catch (error) {
+        setStatus("statusCriar", "error", "Erro: " + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Criar lead de teste";
+      }
+    }
+
+    async function enviarMensagemLead() {
+      limparStatus("statusMensagem");
+      const btn = document.getElementById("btnEnviarMsg");
+
+      const payload = {
+        casal_id: valor("casal_id_msg"),
+        telefone: valor("telefone_msg"),
+        consultora_responsavel: valor("consultora_msg") || "CHO_01",
+        direcao: "ENTRADA",
+        tipo_mensagem: "TEXTO",
+        mensagem: valor("mensagem_lead"),
+        audio_url: "",
+        transcricao_audio: "",
+        enviado_por: "LEAD",
+        origem_mensagem: "WHATSAPP",
+        status_registro: "REGISTRADO"
+      };
+
+      if (!payload.casal_id || !payload.telefone || !payload.mensagem) {
+        setStatus("statusMensagem", "error", "Preencha casal_id, telefone e mensagem.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+
+      try {
+        const response = await fetch(API_CONVERSAS, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.mensagem || "Erro ao registrar mensagem.");
+        }
+
+        atualizarLinkAtendimento(payload.casal_id);
+        setStatus("statusMensagem", "success", "Mensagem registrada como ENTRADA / LEAD / WHATSAPP. A consultora já pode atualizar o atendimento.");
+      } catch (error) {
+        setStatus("statusMensagem", "error", "Erro: " + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Enviar como lead";
+      }
+    }
+
+    function usarMensagem(texto) {
+      document.getElementById("mensagem_lead").value = texto;
+    }
+
+    atualizarLinkAtendimento("");
+  </script>
+</body>
+</html>
