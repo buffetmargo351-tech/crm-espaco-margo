@@ -260,7 +260,7 @@
   <div class="phone-frame" id="phoneFrame">
     <header class="header">
       <div class="top-nav">
-        <button class="nav-arrow" onclick="window.location.href='index.html'">‹</button>
+        <button class="nav-arrow" onclick="voltarHome()">‹</button>
         <div class="couple-name" id="nomeCasal">Carregando...</div>
         <div></div>
       </div>
@@ -286,7 +286,7 @@
     </div>
 
     <nav class="bottom-nav">
-      <div class="nav-item active" onclick="window.location.href='index.html'">
+      <div class="nav-item active" onclick="voltarHome()">
         <span>🏠</span>
         Início
       </div>
@@ -307,6 +307,7 @@
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
     let casalAtualId = null;
+    let usuarioAtualId = null;
     let casalAtual = {};
 
     function travarAlturaDaTela() {
@@ -336,6 +337,21 @@
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get("casal_id");
+    }
+
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id");
+    }
+
+    function montarQueryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function voltarHome() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "index.html?" + query : "index.html";
     }
 
     function nomeCasal(casal) {
@@ -409,6 +425,7 @@
 
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
+      usuarioAtualId = pegarUsuarioIdDaUrl();
 
       if (!casalAtualId) {
         document.getElementById("nomeCasal").textContent = "Casal não informado";
@@ -441,11 +458,19 @@
     }
 
     function abrirConsultoria() {
+      let url = "consultoria.html";
+
       if (casalAtualId) {
-        window.location.href = "consultoria.html?casal_id=" + encodeURIComponent(casalAtualId);
-      } else {
-        window.location.href = "consultoria.html";
+        url += "?casal_id=" + encodeURIComponent(casalAtualId);
+
+        if (usuarioAtualId) {
+          url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+        }
+      } else if (usuarioAtualId) {
+        url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
       }
+
+      window.location.href = url;
     }
 
     function esconderMensagemVazia() {
@@ -549,7 +574,7 @@
       const payload = {
         casal_id: casalAtualId || "",
         telefone: casalAtual.telefone || "",
-        consultora_responsavel: casalAtual.consultora_responsavel || "",
+        consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
         direcao: "SAIDA",
         tipo_mensagem: "TEXTO",
         mensagem: texto,
