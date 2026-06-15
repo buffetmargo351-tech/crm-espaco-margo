@@ -520,6 +520,11 @@
     }
 
     carregarOportunidades();
+
+    if (abaAtual === "agendados") {
+      setTimeout(carregarOportunidades, 900);
+      setTimeout(carregarOportunidades, 1800);
+    }
   </script>
 </body>
 </html>
