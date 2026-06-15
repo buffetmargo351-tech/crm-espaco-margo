@@ -288,13 +288,72 @@
       }
     };
 
-    let abaAtual = "agendar";
+    let abaAtual = pegarAbaInicial();
 
     const titulos = {
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
       agendados: "Consultorias agendadas"
     };
+
+    function pegarAbaInicial() {
+      const params = new URLSearchParams(window.location.search);
+      const aba = params.get("aba");
+
+      if (aba === "resgatar" || aba === "agendados" || aba === "agendar") {
+        return aba;
+      }
+
+      return "agendar";
+    }
+
+    function normalizarStatus(status) {
+      return String(status || "").trim().toUpperCase();
+    }
+
+    function organizarDadosPorStatus(retorno) {
+      const todos = [
+        ...(retorno.agendar || []),
+        ...(retorno.resgatar || []),
+        ...(retorno.agendados || [])
+      ];
+
+      const mapa = new Map();
+
+      todos.forEach(casal => {
+        if (casal && casal.casal_id) {
+          mapa.set(casal.casal_id, casal);
+        }
+      });
+
+      const unicos = Array.from(mapa.values());
+
+      const agendar = unicos.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        return status === "NOVO" || status === "EM_ATENDIMENTO";
+      });
+
+      const resgatar = unicos.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        return status === "VISITOU_NAO_FECHOU";
+      });
+
+      const agendados = unicos.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        return status === "CONSULTORIA_AGENDADA";
+      });
+
+      return {
+        agendar,
+        resgatar,
+        agendados,
+        totais: {
+          agendar: agendar.length,
+          resgatar: resgatar.length,
+          agendados: agendados.length
+        }
+      };
+    }
 
     function primeiraLetra(nome) {
       if (!nome) return "?";
@@ -330,13 +389,13 @@
         emocionante: "Emocionante"
       };
 
-      return mapa[valor] || valor.replaceAll("_", " ");
+      return mapa[valor] || String(valor).replaceAll("_", " ");
     }
 
     function formatarEncantamentos(texto) {
       if (!texto) return "Não informado";
 
-      return texto
+      return String(texto)
         .split("|")
         .map(item => item.trim())
         .filter(Boolean)
@@ -378,7 +437,12 @@
       dados[tipo].forEach(casal => {
         const card = document.createElement("div");
         card.className = "card-casal";
-        card.onclick = () => window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id);
+
+        if (tipo === "agendados") {
+          card.onclick = () => window.location.href = "consultoria.html?casal_id=" + encodeURIComponent(casal.casal_id);
+        } else {
+          card.onclick = () => window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id);
+        }
 
         const nome = nomeCasal(casal);
         const sonhos = formatarEncantamentos(casal.encantamentos_principais);
@@ -436,16 +500,16 @@
 
     async function carregarOportunidades() {
       try {
-        const resposta = await fetch(API_OPORTUNIDADES);
+        const resposta = await fetch(API_OPORTUNIDADES + "?t=" + Date.now());
         const retorno = await resposta.json();
 
-        dados = retorno;
+        dados = organizarDadosPorStatus(retorno);
 
-        document.getElementById("totalAgendar").textContent = dados.totais?.agendar || 0;
-        document.getElementById("totalResgatar").textContent = dados.totais?.resgatar || 0;
-        document.getElementById("totalAgendados").textContent = dados.totais?.agendados || 0;
+        document.getElementById("totalAgendar").textContent = dados.totais.agendar;
+        document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
+        document.getElementById("totalAgendados").textContent = dados.totais.agendados;
 
-        renderizarLista(abaAtual);
+        trocarAba(abaAtual);
 
       } catch (erro) {
         console.error("Erro ao carregar oportunidades:", erro);
