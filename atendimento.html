@@ -430,6 +430,7 @@
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
         renderizarEncantamentos(casal.encantamentos_principais);
+        await carregarHistoricoConversas();
 
         travarAlturaDaTela();
 
@@ -451,6 +452,66 @@
       const emptyChat = document.getElementById("emptyChat");
       if (emptyChat) {
         emptyChat.remove();
+      }
+    }
+
+    function limparChat() {
+      const chat = document.getElementById("chatArea");
+      chat.innerHTML = '<div class="empty-chat" id="emptyChat">Nenhuma mensagem registrada nesta conversa.</div>';
+    }
+
+    function adicionarMensagemHistorico(conversa) {
+      esconderMensagemVazia();
+
+      const chat = document.getElementById("chatArea");
+
+      const row = document.createElement("div");
+      row.className = conversa.direcao === "ENTRADA" ? "message-row received" : "message-row sent";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      const text = document.createElement("div");
+      text.className = "text";
+
+      if (conversa.tipo_mensagem === "AUDIO") {
+        text.textContent = conversa.transcricao_audio || "🎤 Áudio recebido";
+      } else {
+        text.textContent = conversa.mensagem || "";
+      }
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = conversa.data_hora || "";
+
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chat.appendChild(row);
+    }
+
+    async function carregarHistoricoConversas() {
+      if (!casalAtualId) return;
+
+      try {
+        limparChat();
+
+        const resposta = await fetch(API_CONVERSAS + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now());
+        const retorno = await resposta.json();
+
+        if (!retorno.conversas || retorno.conversas.length === 0) {
+          return;
+        }
+
+        retorno.conversas.forEach(conversa => {
+          adicionarMensagemHistorico(conversa);
+        });
+
+        const chat = document.getElementById("chatArea");
+        chat.scrollTop = chat.scrollHeight;
+
+      } catch (erro) {
+        console.error("Erro ao carregar histórico de conversas:", erro);
       }
     }
 
