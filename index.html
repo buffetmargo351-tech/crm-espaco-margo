@@ -276,6 +276,7 @@
   <script>
     const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
     const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+    const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
 
     let usuarioAtualId = pegarUsuarioIdDaUrl();
     let usuarioAtual = null;
@@ -308,7 +309,7 @@
       window.location.href = query ? "perfil.html?" + query : "perfil.html";
     }
 
-    function abrirAtendimento(casalId) {
+    function montarUrlAtendimento(casalId) {
       let url = "atendimento.html";
 
       if (casalId) {
@@ -320,7 +321,38 @@
         url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
       }
 
-      window.location.href = url;
+      return url;
+    }
+
+    async function abrirAtendimento(casalId) {
+      if (!casalId) {
+        window.location.href = montarUrlAtendimento(casalId);
+        return;
+      }
+
+      if (!usuarioAtualId) {
+        alert("Usuário da consultora não identificado. Abra a Home com ?usuario_id=CHO_01 ou ?usuario_id=CHO_02.");
+        window.location.href = montarUrlAtendimento(casalId);
+        return;
+      }
+
+      try {
+        await fetch(API_INICIAR_ATENDIMENTO, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalId,
+            usuario_id: usuarioAtualId
+          })
+        });
+      } catch (erro) {
+        console.error("Erro ao iniciar atendimento:", erro);
+        alert("O atendimento será aberto, mas não foi possível atualizar o status automaticamente agora.");
+      }
+
+      window.location.href = montarUrlAtendimento(casalId);
     }
 
     function abrirOportunidades() {
