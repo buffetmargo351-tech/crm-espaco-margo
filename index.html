@@ -478,7 +478,20 @@
     async function iniciarHome() {
       await carregarUsuario();
       await carregarCasais();
+
+      setTimeout(carregarCasais, 900);
+      setTimeout(carregarCasais, 1800);
     }
+
+    window.addEventListener("pageshow", function () {
+      carregarCasais();
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) {
+        carregarCasais();
+      }
+    });
 
     iniciarHome();
   </script>
