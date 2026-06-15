@@ -239,7 +239,7 @@
   <div class="phone-frame">
     <main class="app">
       <header class="top">
-        <button class="back" onclick="window.location.href='index.html'">‹</button>
+        <button class="back" onclick="voltarHome()">‹</button>
         <div class="headline">Onde ainda existe dinheiro na mesa</div>
         <div></div>
       </header>
@@ -289,6 +289,7 @@
     };
 
     let abaAtual = pegarAbaInicial();
+    let usuarioAtualId = pegarUsuarioIdDaUrl();
 
     const titulos = {
       agendar: "Casais para agendar consultoria",
@@ -305,6 +306,33 @@
       }
 
       return "agendar";
+    }
+
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id") || "";
+    }
+
+    function montarQueryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function voltarHome() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "index.html?" + query : "index.html";
+    }
+
+    function pertenceAoUsuario(casal) {
+      if (!usuarioAtualId) return true;
+      return String(casal.consultora_responsavel || "").trim() === String(usuarioAtualId).trim();
+    }
+
+    function urlComUsuario(baseUrl) {
+      if (!usuarioAtualId) return baseUrl;
+
+      const separador = baseUrl.includes("?") ? "&" : "?";
+      return baseUrl + separador + "usuario_id=" + encodeURIComponent(usuarioAtualId);
     }
 
     function normalizarStatus(status) {
@@ -326,7 +354,7 @@
         }
       });
 
-      const unicos = Array.from(mapa.values());
+      const unicos = Array.from(mapa.values()).filter(pertenceAoUsuario);
 
       const agendar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
@@ -439,9 +467,9 @@
         card.className = "card-casal";
 
         if (tipo === "agendados") {
-          card.onclick = () => window.location.href = "consultoria.html?casal_id=" + encodeURIComponent(casal.casal_id);
+          card.onclick = () => window.location.href = urlComUsuario("consultoria.html?casal_id=" + encodeURIComponent(casal.casal_id));
         } else {
-          card.onclick = () => window.location.href = "atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id);
+          card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id));
         }
 
         const nome = nomeCasal(casal);
