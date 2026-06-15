@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>CRM Espaço Margô - Atendimento</title>
 
   <style>
@@ -13,36 +13,44 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    html,
     body {
+      width: 100%;
       height: 100%;
       overflow: hidden;
       background: #f4f0ef;
       color: #2f2423;
-      min-height: 100vh;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
     }
 
     .phone-frame {
       max-width: 430px;
-      margin: 0 auto;
       height: 100dvh;
+      margin: 0 auto;
       background: #ffffff;
-      position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
 
     .app {
-      min-height: 100vh;
-      padding-bottom: 122px;
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .header {
+      flex: 0 0 auto;
       padding: 14px 18px 9px;
       border-bottom: 1px solid #f1dddd;
       background: #ffffff;
-      position: sticky;
-      top: 0;
       z-index: 10;
     }
 
@@ -105,11 +113,27 @@
 
     .chat-area {
       flex: 1;
+      min-height: 0;
       padding: 12px 14px 14px;
       background:
         radial-gradient(circle at top left, rgba(248, 233, 234, .45), transparent 30%),
         #fffaf9;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    .empty-chat {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #9f8a87;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+      padding: 20px;
     }
 
     .message-row {
@@ -159,12 +183,8 @@
     }
 
     .composer {
-      position: absolute;
-      bottom: 63px;
-      left: 50%;
-      transform: translateX(-50%);
+      flex: 0 0 auto;
       width: 100%;
-      max-width: 430px;
       background: #ffffff;
       border-top: 1px solid #f1dddd;
       padding: 8px 10px;
@@ -180,7 +200,6 @@
       padding: 12px 14px;
       outline: none;
       font-size: 16px;
-      font-size: 14px;
       color: #2f2423;
       background: #fffaf9;
     }
@@ -204,12 +223,8 @@
     }
 
     .bottom-nav {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      flex: 0 0 auto;
       width: 100%;
-      max-width: 430px;
       background: #ffffff;
       border-top: 1px solid #eadada;
       display: grid;
@@ -239,15 +254,16 @@
     @media (min-width: 700px) {
       body {
         padding: 20px 0;
+        position: static;
+        overflow: hidden;
       }
 
       .phone-frame {
-        min-height: calc(100vh - 40px);
+        height: calc(100dvh - 40px);
         border-radius: 34px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.12);
       }
 
-      .composer,
       .bottom-nav {
         border-radius: 0 0 34px 34px;
       }
@@ -276,24 +292,14 @@
       </header>
 
       <section class="chat-area" id="chatArea">
-        <div class="message-row received">
-          <div class="bubble">
-            <div class="text">Oi Maria, tudo bem? Vi o Espaço Margô no Instagram e achei lindo.</div>
-            <div class="time">09:12</div>
-          </div>
-        </div>
-
-        <div class="message-row sent">
-          <div class="bubble">
-            <div class="text">Oi, tudo ótimo! Que alegria receber sua mensagem. ❤️</div>
-            <div class="time">09:14</div>
-          </div>
+        <div class="empty-chat" id="emptyChat">
+          Nenhuma mensagem registrada nesta conversa.
         </div>
       </section>
     </main>
 
     <div class="composer">
-      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." />
+      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
       <button class="send-btn" onclick="enviarMensagem()">➤</button>
     </div>
@@ -364,7 +370,7 @@
         emocionante: "Emocionante"
       };
 
-      return mapa[valor] || valor.replaceAll("_", " ");
+      return mapa[valor] || String(valor).replaceAll("_", " ");
     }
 
     function renderizarEncantamentos(texto) {
@@ -376,7 +382,7 @@
         return;
       }
 
-      const itens = texto
+      const itens = String(texto)
         .split("|")
         .map(item => item.trim())
         .filter(Boolean);
@@ -430,11 +436,20 @@
       }
     }
 
+    function esconderMensagemVazia() {
+      const emptyChat = document.getElementById("emptyChat");
+      if (emptyChat) {
+        emptyChat.remove();
+      }
+    }
+
     function enviarMensagem() {
       const input = document.getElementById("messageInput");
       const texto = input.value.trim();
 
       if (!texto) return;
+
+      esconderMensagemVazia();
 
       const chat = document.getElementById("chatArea");
 
@@ -460,22 +475,22 @@
       row.appendChild(bubble);
       chat.appendChild(row);
 
-          input.value = "";
-
-      // Linha desativada para evitar scroll automático
-      // chat.scrollTop = chat.scrollHeight;
+      input.value = "";
     }
 
-    const messageInput = document.getElementById("messageInput");
+    document.getElementById("messageInput").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        enviarMensagem();
+      }
+    });
 
-    messageInput.addEventListener("focus", function () {
-      const chat = document.getElementById("chatArea");
-      const posicaoAtual = chat.scrollTop;
+    document.getElementById("messageInput").addEventListener("focus", function () {
+      window.scrollTo(0, 0);
+    });
 
-      setTimeout(function () {
-        chat.scrollTop = posicaoAtual;
-        window.scrollTo(0, 0);
-      }, 100);
+    window.addEventListener("resize", function () {
+      window.scrollTo(0, 0);
     });
 
     carregarCasal();
