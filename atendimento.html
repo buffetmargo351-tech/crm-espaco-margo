@@ -460,9 +460,23 @@
       row.appendChild(bubble);
       chat.appendChild(row);
 
-      input.value = "";
-     // chat.scrollTop = chat.scrollHeight;
+          input.value = "";
+
+      // Linha desativada para evitar scroll automático
+      // chat.scrollTop = chat.scrollHeight;
     }
+
+    const messageInput = document.getElementById("messageInput");
+
+    messageInput.addEventListener("focus", function () {
+      const chat = document.getElementById("chatArea");
+      const posicaoAtual = chat.scrollTop;
+
+      setTimeout(function () {
+        chat.scrollTop = posicaoAtual;
+        window.scrollTo(0, 0);
+      }, 100);
+    });
 
     carregarCasal();
   </script>
