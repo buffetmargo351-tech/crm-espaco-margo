@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
   <title>CRM Espaço Margô - Atendimento</title>
 
   <style>
@@ -13,32 +13,38 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    html,
     body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background: #f4f0ef;
       color: #2f2423;
-      min-height: 100vh;
+      overscroll-behavior: none;
+      position: fixed;
+      inset: 0;
     }
 
     .phone-frame {
+      width: 100%;
       max-width: 430px;
+      height: var(--app-height, 100dvh);
       margin: 0 auto;
-      min-height: 100vh;
       background: #ffffff;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      position: fixed;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
     }
 
     .header {
       padding: 14px 18px 9px;
       border-bottom: 1px solid #f1dddd;
       background: #ffffff;
+      z-index: 10;
     }
 
     .top-nav {
@@ -77,7 +83,6 @@
       color: #7d6461;
       font-size: 12px;
       font-weight: 800;
-      flex-wrap: wrap;
     }
 
     .dreams {
@@ -99,61 +104,123 @@
       white-space: nowrap;
     }
 
-    .content {
-      flex: 1;
-      padding: 18px 16px;
+    .chat-area {
+      min-height: 0;
+      padding: 12px 14px 14px;
       background:
         radial-gradient(circle at top left, rgba(248, 233, 234, .45), transparent 30%),
         #fffaf9;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
-    .card {
+    .empty-chat {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #9f8a87;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+      padding: 20px;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .message-row.received {
+      justify-content: flex-start;
+    }
+
+    .message-row.sent {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 78%;
+      border-radius: 15px;
+      padding: 7px 10px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.04);
+    }
+
+    .received .bubble {
       background: #ffffff;
       border: 1px solid #eadada;
-      border-radius: 22px;
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.05);
-      margin-bottom: 14px;
+      border-bottom-left-radius: 5px;
     }
 
-    .card-title {
-      font-size: 15px;
-      font-weight: 900;
+    .sent .bubble {
+      background: #f5dfe2;
+      border: 1px solid #efc9ce;
+      border-bottom-right-radius: 5px;
+    }
+
+    .text {
+      font-size: 14px;
+      line-height: 1.25;
       color: #2f2423;
-      margin-bottom: 8px;
     }
 
-    .card-text {
-      font-size: 13px;
-      line-height: 1.4;
-      color: #7d6461;
+    .time {
+      text-align: right;
+      font-size: 9px;
+      color: #9f8a87;
+      margin-top: 3px;
       font-weight: 700;
     }
 
-    .info-list {
+    .composer {
+      width: 100%;
+      background: #ffffff;
+      border-top: 1px solid #f1dddd;
+      padding: 8px 10px;
       display: grid;
-      gap: 8px;
-      margin-top: 10px;
+      grid-template-columns: 1fr 40px 40px;
+      gap: 7px;
+      z-index: 20;
     }
 
-    .info-item {
-      background: #fffaf9;
-      border: 1px solid #f1dddd;
-      border-radius: 14px;
-      padding: 10px;
-      font-size: 13px;
+    .composer input {
+      border: 1px solid #eadada;
+      border-radius: 18px;
+      padding: 12px 14px;
+      outline: none;
+      font-size: 16px;
       color: #2f2423;
-      font-weight: 800;
+      background: #fffaf9;
+    }
+
+    .audio-btn,
+    .send-btn {
+      border: none;
+      border-radius: 15px;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .audio-btn {
+      background: #b98286;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #df6475, #d45167);
     }
 
     .bottom-nav {
       width: 100%;
-      max-width: 430px;
       background: #ffffff;
       border-top: 1px solid #eadada;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       padding: 9px 0 10px;
+      z-index: 20;
     }
 
     .nav-item {
@@ -175,60 +242,48 @@
     }
 
     @media (min-width: 700px) {
-      body {
-        padding: 20px 0;
-      }
-
       .phone-frame {
-        min-height: calc(100vh - 40px);
+        top: 20px;
+        height: calc(var(--app-height, 100dvh) - 40px);
         border-radius: 34px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-        overflow: hidden;
+      }
+
+      .bottom-nav {
+        border-radius: 0 0 34px 34px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="phone-frame">
-    <main class="app">
-      <header class="header">
-        <div class="top-nav">
-          <button class="nav-arrow" onclick="window.location.href='index.html'">‹</button>
-          <div class="couple-name" id="nomeCasal">Carregando...</div>
-          <div></div>
-        </div>
+  <div class="phone-frame" id="phoneFrame">
+    <header class="header">
+      <div class="top-nav">
+        <button class="nav-arrow" onclick="window.location.href='index.html'">‹</button>
+        <div class="couple-name" id="nomeCasal">Carregando...</div>
+        <div></div>
+      </div>
 
-        <div class="info-row">
-          <div id="dataCasamento">📅 --/--/----</div>
-          <div id="qtdConvidados">👥 -- convidados</div>
-        </div>
+      <div class="info-row">
+        <div id="dataCasamento">📅 --/--/----</div>
+        <div id="qtdConvidados">👥 -- convidados</div>
+      </div>
 
-        <div class="dreams" id="sonhosCasal"></div>
-      </header>
+      <div class="dreams" id="sonhosCasal"></div>
+    </header>
 
-      <section class="content">
-        <div class="card">
-          <div class="card-title">Atendimento do casal</div>
-          <div class="card-text">
-            Esta tela agora fica limpa, sem conversa fixa e sem campo de digitação para evitar o problema de rolagem.
-          </div>
+    <section class="chat-area" id="chatArea">
+      <div class="empty-chat" id="emptyChat">
+        Nenhuma mensagem registrada nesta conversa.
+      </div>
+    </section>
 
-          <div class="info-list">
-            <div class="info-item" id="telefoneCasal">📱 Telefone: carregando...</div>
-            <div class="info-item" id="emailCasal">✉️ Email: carregando...</div>
-            <div class="info-item" id="origemCasal">📍 Origem: carregando...</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Próxima ação</div>
-          <div class="card-text">
-            Use o botão abaixo para seguir para o agendamento da consultoria.
-          </div>
-        </div>
-      </section>
-    </main>
+    <div class="composer">
+      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
+      <button class="send-btn" onclick="enviarMensagem()">➤</button>
+    </div>
 
     <nav class="bottom-nav">
       <div class="nav-item active" onclick="window.location.href='index.html'">
@@ -251,6 +306,30 @@
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     let casalAtualId = null;
+
+    function travarAlturaDaTela() {
+      const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty("--app-height", altura + "px");
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    travarAlturaDaTela();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", travarAlturaDaTela);
+      window.visualViewport.addEventListener("scroll", travarAlturaDaTela);
+    }
+
+    window.addEventListener("resize", travarAlturaDaTela);
+    window.addEventListener("scroll", travarAlturaDaTela);
+
+    document.addEventListener("touchmove", function (event) {
+      if (!event.target.closest("#chatArea")) {
+        event.preventDefault();
+      }
+    }, { passive: false });
 
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -276,10 +355,6 @@
     function formatarConvidados(qtd) {
       if (!qtd) return "👥 Convidados não informados";
       return "👥 " + qtd + " convidados";
-    }
-
-    function textoOuPadrao(valor, padrao) {
-      return valor && String(valor).trim() ? valor : padrao;
     }
 
     function labelEncantamento(valor) {
@@ -350,10 +425,9 @@
         document.getElementById("nomeCasal").textContent = nomeCasal(casal);
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
-        document.getElementById("telefoneCasal").textContent = "📱 Telefone: " + textoOuPadrao(casal.telefone, "não informado");
-        document.getElementById("emailCasal").textContent = "✉️ Email: " + textoOuPadrao(casal.email, "não informado");
-        document.getElementById("origemCasal").textContent = "📍 Origem: " + textoOuPadrao(casal.origem, "não informada");
         renderizarEncantamentos(casal.encantamentos_principais);
+
+        travarAlturaDaTela();
 
       } catch (erro) {
         console.error("Erro ao carregar casal:", erro);
@@ -368,6 +442,62 @@
         window.location.href = "consultoria.html";
       }
     }
+
+    function esconderMensagemVazia() {
+      const emptyChat = document.getElementById("emptyChat");
+      if (emptyChat) {
+        emptyChat.remove();
+      }
+    }
+
+    function enviarMensagem() {
+      const input = document.getElementById("messageInput");
+      const texto = input.value.trim();
+
+      if (!texto) return;
+
+      esconderMensagemVazia();
+
+      const chat = document.getElementById("chatArea");
+
+      const row = document.createElement("div");
+      row.className = "message-row sent";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      const text = document.createElement("div");
+      text.className = "text";
+      text.textContent = texto;
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chat.appendChild(row);
+
+      input.value = "";
+      travarAlturaDaTela();
+    }
+
+    document.getElementById("messageInput").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        enviarMensagem();
+      }
+    });
+
+    document.getElementById("messageInput").addEventListener("focus", function () {
+      setTimeout(travarAlturaDaTela, 50);
+      setTimeout(travarAlturaDaTela, 250);
+      setTimeout(travarAlturaDaTela, 500);
+    });
 
     carregarCasal();
   </script>
