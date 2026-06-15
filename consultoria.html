@@ -56,6 +56,8 @@
 
     .field:last-child { margin-bottom: 0; }
 
+    .hidden { display: none !important; }
+
     label { display: block; font-size: 11px; color: #9a6b70; font-weight: 900; margin-bottom: 5px; }
 
     input, textarea {
@@ -115,8 +117,8 @@
         <div class="couple-name" id="nomeCasal">Carregando...</div>
         <div></div>
       </header>
-      <section class="section" id="informacoesFaltantesSection">
-      
+
+      <section class="section">
         <div class="section-title">✨ Próximas vagas disponíveis</div>
 
         <div class="date-card" data-date="27/06/2026">
@@ -147,16 +149,16 @@
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="informacoesFaltantesSection">
         <div class="section-title">📌 Informações faltantes</div>
 
         <div class="missing-card">
-          <div class="field">
+          <div class="field" id="campoNomeNoivo">
             <label>Nome do noivo</label>
             <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
           </div>
 
-          <div class="field">
+          <div class="field" id="campoEmailNoiva">
             <label>Email da noiva</label>
             <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
           </div>
@@ -235,6 +237,33 @@
       return noiva || noivo || "Casal sem nome";
     }
 
+    function atualizarBlocoInformacoesFaltantes() {
+      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
+      const emailNoiva = document.getElementById("emailNoiva").value.trim();
+
+      const section = document.getElementById("informacoesFaltantesSection");
+      const campoNomeNoivo = document.getElementById("campoNomeNoivo");
+      const campoEmailNoiva = document.getElementById("campoEmailNoiva");
+
+      if (nomeNoivo) {
+        campoNomeNoivo.classList.add("hidden");
+      } else {
+        campoNomeNoivo.classList.remove("hidden");
+      }
+
+      if (emailNoiva) {
+        campoEmailNoiva.classList.add("hidden");
+      } else {
+        campoEmailNoiva.classList.remove("hidden");
+      }
+
+      if (nomeNoivo && emailNoiva) {
+        section.classList.add("hidden");
+      } else {
+        section.classList.remove("hidden");
+      }
+    }
+
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
 
@@ -261,6 +290,8 @@
         if (casal.email) {
           document.getElementById("emailNoiva").value = casal.email;
         }
+
+        atualizarBlocoInformacoesFaltantes();
 
         if (casal.origem) {
           selecionarChipPorTexto("origemSection", casal.origem);
@@ -329,6 +360,8 @@
     }
 
     async function confirmarConsultoria() {
+      atualizarBlocoInformacoesFaltantes();
+
       const horarioSelecionado = document.querySelector(".slot.selected");
 
       if (!horarioSelecionado) {
@@ -411,6 +444,9 @@
         botao.textContent = "❤️ Confirmar Consultoria";
       }
     }
+
+    document.getElementById("nomeNoivo").addEventListener("input", atualizarBlocoInformacoesFaltantes);
+    document.getElementById("emailNoiva").addEventListener("input", atualizarBlocoInformacoesFaltantes);
 
     carregarCasal();
   </script>
