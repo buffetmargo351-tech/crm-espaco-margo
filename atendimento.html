@@ -305,7 +305,9 @@
 
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
+    const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
     let casalAtualId = null;
+    let casalAtual = {};
 
     function travarAlturaDaTela() {
       const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -422,6 +424,8 @@
           return;
         }
 
+        casalAtual = casal;
+
         document.getElementById("nomeCasal").textContent = nomeCasal(casal);
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
@@ -450,12 +454,7 @@
       }
     }
 
-    function enviarMensagem() {
-      const input = document.getElementById("messageInput");
-      const texto = input.value.trim();
-
-      if (!texto) return;
-
+    function adicionarMensagemNaTela(texto) {
       esconderMensagemVazia();
 
       const chat = document.getElementById("chatArea");
@@ -482,7 +481,55 @@
       row.appendChild(bubble);
       chat.appendChild(row);
 
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function registrarMensagem(texto) {
+      const payload = {
+        casal_id: casalAtualId || "",
+        telefone: casalAtual.telefone || "",
+        consultora_responsavel: casalAtual.consultora_responsavel || "",
+        direcao: "SAIDA",
+        tipo_mensagem: "TEXTO",
+        mensagem: texto,
+        audio_url: "",
+        transcricao_audio: "",
+        enviado_por: "CHO",
+        origem_mensagem: "APP_CRM",
+        status_registro: "REGISTRADO"
+      };
+
+      const resposta = await fetch(API_CONVERSAS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao registrar conversa");
+      }
+
+      return await resposta.json();
+    }
+
+    async function enviarMensagem() {
+      const input = document.getElementById("messageInput");
+      const texto = input.value.trim();
+
+      if (!texto) return;
+
       input.value = "";
+      adicionarMensagemNaTela(texto);
+
+      try {
+        await registrarMensagem(texto);
+      } catch (erro) {
+        console.error("Erro ao registrar mensagem:", erro);
+        alert("A mensagem apareceu na tela, mas não foi registrada na planilha.");
+      }
+
       travarAlturaDaTela();
     }
 
