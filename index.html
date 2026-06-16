@@ -1,1539 +1,468 @@
-:root {
-  --color-green: #364236;
-  --color-green-dark: #2d382f;
-  --color-off-white: #f7f3ee;
-  --color-white: #ffffff;
-  --color-champagne: #d9c7a3;
-  --color-coffee: #5b4636;
-  --color-bronze: #8b5e34;
-  --color-line: #e8ded2;
-  --color-muted: #75695f;
-
-  --font-title: "Playfair Display", Georgia, serif;
-  --font-body: "Inter", Arial, sans-serif;
-
-  --container: 1180px;
-  --radius-lg: 24px;
-  --radius-md: 18px;
-  --radius-sm: 14px;
-
-  --shadow-soft: 0 18px 50px rgba(54, 66, 54, 0.1);
-  --shadow-photo: 0 20px 60px rgba(0, 0, 0, 0.18);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-body);
-  color: var(--color-green);
-  background: var(--color-off-white);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-.container {
-  width: min(100% - 48px, var(--container));
-  margin: 0 auto;
-}
-
-.site-header {
-  position: fixed;
-  z-index: 50;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 24px 7vw;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--color-green);
-  pointer-events: none;
-}
-
-.brand,
-.menu-button {
-  pointer-events: auto;
-}
-
-.brand {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1;
-}
-
-.brand-mark {
-  color: var(--color-bronze);
-  font-size: 18px;
-  line-height: 1;
-}
-
-.brand-text {
-  font-family: var(--font-title);
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-.menu-button {
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(54, 66, 54, 0.18);
-  border-radius: 999px;
-  background: rgba(247, 243, 238, 0.76);
-  backdrop-filter: blur(14px);
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
-.menu-button span {
-  width: 20px;
-  height: 2px;
-  border-radius: 99px;
-  background: var(--color-green);
-}
-
-.section {
-  padding: 88px 0;
-}
-
-.section-dark {
-  position: relative;
-  color: var(--color-white);
-  overflow: hidden;
-}
-
-.hero-section {
-  min-height: 760px;
-  display: flex;
-  align-items: center;
-  padding: 150px 0 96px;
-}
-
-.hero-media,
-.final-cta-media {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero-media img,
-.final-cta-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(247, 243, 238, 0.92) 0%, rgba(247, 243, 238, 0.74) 35%, rgba(247, 243, 238, 0.16) 69%, rgba(247, 243, 238, 0) 100%),
-    linear-gradient(180deg, rgba(247, 243, 238, 0.82) 0%, rgba(247, 243, 238, 0) 34%, rgba(247, 243, 238, 0.2) 100%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 600px;
-  margin-left: 7vw;
-  color: var(--color-green);
-}
-
-.eyebrow {
-  margin: 0 0 18px;
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-bronze);
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--font-title);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  color: var(--color-green);
-}
-
-h1 {
-  margin-bottom: 22px;
-  font-size: clamp(46px, 6vw, 78px);
-  line-height: 0.98;
-  max-width: 590px;
-}
-
-h2 {
-  margin-bottom: 16px;
-  font-size: clamp(34px, 4vw, 50px);
-  line-height: 1.05;
-}
-
-h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
-  line-height: 1.25;
-  font-weight: 700;
-  color: var(--color-green);
-}
-
-p {
-  font-size: 17px;
-  line-height: 1.65;
-}
-
-.hero-text {
-  max-width: 470px;
-  margin-bottom: 30px;
-  color: var(--color-green-dark);
-}
-
-.button-group {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  min-height: 56px;
-  padding: 0 28px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 15px;
-  line-height: 1;
-  font-weight: 700;
-  text-align: center;
-  transition:
-    transform 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-.btn:focus-visible,
-.menu-button:focus-visible,
-.gallery-tab:focus-visible,
-.dot:focus-visible,
-.carousel-arrow:focus-visible,
-.video-card:focus-visible,
-.testimonial-media:focus-visible,
-.video-modal-close:focus-visible {
-  outline: 3px solid rgba(139, 94, 52, 0.42);
-  outline-offset: 3px;
-}
-
-.btn-primary {
-  background: var(--color-green);
-  color: var(--color-white);
-  box-shadow: 0 14px 30px rgba(54, 66, 54, 0.18);
-}
-
-.btn-primary:hover {
-  background: var(--color-green-dark);
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(54, 66, 54, 0.64);
-  color: var(--color-green);
-}
-
-.btn-secondary:hover {
-  background: var(--color-white);
-  border-color: var(--color-green);
-}
-
-.btn-outline-light {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.74);
-  color: var(--color-white);
-}
-
-.btn-outline-light:hover {
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.btn-inline {
-  margin-top: 12px;
-}
-
-.btn-whatsapp {
-  width: 100%;
-  min-height: 50px;
-  padding: 0 18px;
-  background: var(--color-green);
-  color: var(--color-white);
-}
-
-.btn-whatsapp::before {
-  content: "☘";
-  font-size: 15px;
-}
-
-.microcopy {
-  margin: 20px 0 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--color-muted);
-}
-
-.hero-microcopy {
-  max-width: 430px;
-  color: var(--color-green-dark);
-}
-
-.split-layout {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  align-items: center;
-  gap: 64px;
-}
-
-.section-copy p {
-  max-width: 470px;
-  color: var(--color-coffee);
-}
-
-.video-card {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  min-height: 420px;
-  border: 0;
-  border-radius: var(--radius-lg);
-  padding: 0;
-  background: var(--color-green);
-  box-shadow: var(--shadow-photo);
-}
-
-.video-card img {
-  width: 100%;
-  height: 100%;
-  min-height: 420px;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.video-card::after,
-.testimonial-media::after,
-.gallery-slide::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.video-card::after,
-.testimonial-media::after {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.32));
-}
-
-.gallery-slide::after {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.38));
-}
-
-.video-card:hover img {
-  transform: scale(1.03);
-}
-
-.play-button,
-.small-play-button {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  top: 50%;
-  width: 86px;
-  height: 86px;
-  border: 2px solid rgba(255, 255, 255, 0.92);
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-white);
-  background: rgba(0, 0, 0, 0.14);
-  backdrop-filter: blur(8px);
-  font-size: 28px;
-  padding-left: 5px;
-}
-
-.section-heading {
-  max-width: 760px;
-  margin-bottom: 42px;
-}
-
-.section-heading.centered {
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-
-.section-heading p {
-  margin-bottom: 0;
-  color: var(--color-coffee);
-}
-
-.centered-text {
-  text-align: center;
-}
-
-.pillars-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-}
-
-.pillar-card {
-  min-height: 260px;
-  padding: 34px 30px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.54);
-  box-shadow: 0 16px 40px rgba(91, 70, 54, 0.04);
-  text-align: center;
-}
-
-.pillar-icon {
-  height: 70px;
-  margin-bottom: 20px;
-  display: grid;
-  place-items: center;
-  color: var(--color-bronze);
-  font-size: 54px;
-  line-height: 1;
-}
-
-.pillar-card p {
-  margin-bottom: 0;
-  color: var(--color-coffee);
-}
-
-.section-gallery {
-  padding-top: 64px;
-}
-
-.gallery-tabs {
-  max-width: 990px;
-  margin: -18px auto 18px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  overflow-x: auto;
-  padding: 4px 0 10px;
-  scrollbar-width: none;
-}
-
-.gallery-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.gallery-tab {
-  flex: 0 0 auto;
-  min-height: 38px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: var(--color-coffee);
-  font-size: 14px;
-  font-weight: 700;
-  padding: 0 8px;
-}
-
-.gallery-tab.active {
-  color: var(--color-green);
-  border-color: var(--color-green);
-}
-
-.gallery-carousel {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-}
-
-.gallery-track {
-  position: relative;
-  min-height: 390px;
-}
-
-.gallery-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.35s ease;
-  background: var(--color-white);
-}
-
-.gallery-slide.active {
-  opacity: 1;
-  visibility: visible;
-  position: relative;
-}
-
-.gallery-slide img {
-  width: 100%;
-  height: 430px;
-  object-fit: cover;
-}
-
-.gallery-caption {
-  position: absolute;
-  z-index: 2;
-  left: 32px;
-  bottom: 28px;
-  max-width: 420px;
-  color: var(--color-white);
-}
-
-.gallery-caption h3 {
-  color: var(--color-white);
-  font-family: var(--font-title);
-  font-size: 34px;
-  line-height: 1;
-}
-
-.gallery-caption p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.carousel-arrow {
-  position: absolute;
-  z-index: 4;
-  top: 50%;
-  width: 52px;
-  height: 52px;
-  border: 0;
-  border-radius: 999px;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--color-green);
-  font-size: 34px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
-}
-
-.carousel-prev {
-  left: 20px;
-}
-
-.carousel-next {
-  right: 20px;
-}
-
-.gallery-dots {
-  margin: 22px 0 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(54, 66, 54, 0.2);
-}
-
-.dot.active {
-  width: 24px;
-  background: var(--color-green);
-}
-
-.gallery-button {
-  width: min(100%, 420px);
-  margin: 0 auto;
-  display: flex;
-}
-
-.testimonial-card {
-  display: grid;
-  grid-template-columns: 0.72fr 1.28fr;
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: var(--shadow-soft);
-}
-
-.testimonial-media {
-  position: relative;
-  border: 0;
-  padding: 0;
-  background: var(--color-green);
-}
-
-.testimonial-media img {
-  width: 100%;
-  height: 100%;
-  min-height: 330px;
-  object-fit: cover;
-}
-
-.small-play-button {
-  width: 56px;
-  height: 56px;
-  font-size: 18px;
-  padding-left: 3px;
-}
-
-.testimonial-copy {
-  padding: 44px;
-}
-
-.testimonial-copy blockquote {
-  margin: 0 0 22px;
-  font-family: var(--font-title);
-  font-size: clamp(28px, 3vw, 42px);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  color: var(--color-green);
-}
-
-.testimonial-copy p {
-  margin-bottom: 24px;
-  color: var(--color-coffee);
-}
-
-.testimonial-copy cite {
-  font-style: normal;
-  font-weight: 700;
-  color: var(--color-bronze);
-}
-
-.section-steps {
-  padding-top: 62px;
-}
-
-.steps-list {
-  max-width: 850px;
-  margin: 0 auto;
-}
-
-.step-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 22px;
-  padding: 0 0 28px;
-}
-
-.step-item:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 34px;
-  top: 58px;
-  bottom: 0;
-  width: 1px;
-  background: var(--color-line);
-}
-
-.step-number {
-  position: relative;
-  z-index: 2;
-  width: 70px;
-  height: 70px;
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  background: var(--color-off-white);
-  display: grid;
-  place-items: center;
-  font-family: var(--font-title);
-  font-size: 30px;
-  color: var(--color-bronze);
-}
-
-.step-item h3 {
-  margin: 7px 0 4px;
-}
-
-.step-item p {
-  margin: 0;
-  color: var(--color-coffee);
-}
-
-.paths-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-}
-
-.path-card {
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: var(--shadow-soft);
-}
-
-.path-card img {
-  width: 100%;
-  height: 270px;
-  object-fit: cover;
-}
-
-.path-content {
-  padding: 30px;
-}
-
-.path-content h3 {
-  font-family: var(--font-title);
-  font-size: 32px;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-
-.path-content p {
-  color: var(--color-coffee);
-}
-
-.section-final-cta {
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-  padding: 96px 0;
-}
-
-.final-cta-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.76) 0%, rgba(0, 0, 0, 0.46) 46%, rgba(0, 0, 0, 0.18) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.46));
-}
-
-.final-cta-content {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  align-items: center;
-  gap: 50px;
-}
-
-.final-cta-content h2 {
-  color: var(--color-white);
-  max-width: 660px;
-}
-
-.final-cta-content p {
-  max-width: 520px;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.final-buttons {
-  justify-content: flex-end;
-}
-
-.site-footer {
-  padding: 52px 0 26px;
-  background: var(--color-off-white);
-  border-top: 1px solid var(--color-line);
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1.3fr repeat(3, 1fr);
-  gap: 28px;
-  align-items: start;
-}
-
-.footer-brand .brand-text {
-  font-size: 30px;
-}
-
-.footer-brand p {
-  margin: 12px 0 0;
-  font-size: 15px;
-  color: var(--color-coffee);
-}
-
-.footer-link {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding-top: 10px;
-}
-
-.footer-link strong {
-  font-size: 16px;
-  color: var(--color-green);
-}
-
-.footer-link span {
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--color-coffee);
-}
-
-.copyright {
-  margin-top: 32px;
-  text-align: center;
-}
-
-.copyright p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-muted);
-}
-
-.video-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: none;
-}
-
-.video-modal.is-open {
-  display: block;
-}
-
-.video-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(20, 22, 18, 0.76);
-  backdrop-filter: blur(8px);
-}
-
-.video-modal-content {
-  position: absolute;
-  inset: 50% auto auto 50%;
-  width: min(92vw, 460px);
-  aspect-ratio: 9 / 16;
-  transform: translate(-50%, -50%);
-  border-radius: 24px;
-  overflow: hidden;
-  background: var(--color-green);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
-}
-
-.video-modal-close {
-  position: absolute;
-  z-index: 3;
-  top: 14px;
-  right: 14px;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-green);
-  font-size: 30px;
-  line-height: 1;
-}
-
-.video-placeholder {
-  width: 100%;
-  height: 100%;
-  padding: 34px;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  color: var(--color-white);
-  background:
-    linear-gradient(180deg, rgba(54, 66, 54, 0.1), rgba(54, 66, 54, 0.88)),
-    url("assets/video-poster.jpg") center / cover;
-}
-
-.video-placeholder p {
-  margin-bottom: 8px;
-  font-family: var(--font-title);
-  font-size: 34px;
-  line-height: 1.05;
-  color: var(--color-white);
-}
-
-.video-placeholder span {
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-/* ----------------------------- */
-/* TABLET E MOBILE */
-/* ----------------------------- */
-
-@media (max-width: 900px) {
-  .container {
-    width: min(100% - 40px, var(--container));
-  }
-
-  .site-header {
-    padding: 20px 24px;
-  }
-
-  .brand-text {
-    font-size: 26px;
-  }
-
-  .section {
-    padding: 52px 0;
-  }
-
-  .hero-section {
-    min-height: 820px;
-    align-items: flex-end;
-    padding: 124px 0 42px;
-  }
-
-  .hero-overlay {
-    background:
-      linear-gradient(180deg, rgba(247, 243, 238, 0.52) 0%, rgba(247, 243, 238, 0.08) 28%, rgba(247, 243, 238, 0.88) 73%, rgba(247, 243, 238, 0.98) 100%),
-      linear-gradient(90deg, rgba(247, 243, 238, 0.88) 0%, rgba(247, 243, 238, 0.16) 66%, rgba(247, 243, 238, 0) 100%);
-  }
-
-  .hero-media img {
-    object-position: 63% center;
-  }
-
-  .hero-content {
-    margin-left: auto;
-    max-width: none;
-  }
-
-  h1 {
-    font-size: 44px;
-    line-height: 1.02;
-    max-width: 360px;
-  }
-
-  h2 {
-    font-size: 34px;
-  }
-
-  p {
-    font-size: 16px;
-    line-height: 1.58;
-  }
-
-  .button-group {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .btn {
-    width: 100%;
-    min-height: 54px;
-  }
-
-  .split-layout,
-  .testimonial-card,
-  .paths-grid,
-  .final-cta-content,
-  .footer-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .split-layout {
-    gap: 28px;
-  }
-
-  .section-video .section-copy {
-    order: 1;
-  }
-
-  .video-card {
-    order: 2;
-    min-height: 300px;
-  }
-
-  .video-card img {
-    min-height: 300px;
-  }
-
-  .pillars-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .pillar-card {
-    min-height: auto;
-    padding: 24px 22px;
-  }
-
-  .gallery-tabs {
-    justify-content: flex-start;
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-bottom: 14px;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .gallery-slide img {
-    height: 300px;
-  }
-
-  .gallery-caption {
-    position: relative;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    max-width: none;
-    padding: 20px 20px 22px;
-    color: var(--color-green);
-    background: var(--color-white);
-  }
-
-  .gallery-slide::after {
-    display: none;
-  }
-
-  .gallery-caption h3 {
-    margin-bottom: 8px;
-    color: var(--color-green);
-    font-size: 28px;
-    line-height: 1.08;
-  }
-
-  .gallery-caption p {
-    margin: 0;
-    color: var(--color-coffee);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .gallery-track {
-    min-height: 0;
-  }
-
-  .carousel-arrow {
-    top: 150px;
-    width: 44px;
-    height: 44px;
-    font-size: 28px;
-  }
-
-  .carousel-prev {
-    left: 12px;
-  }
-
-  .carousel-next {
-    right: 12px;
-  }
-
-  .gallery-dots {
-    margin: 16px 0 18px;
-  }
-
-  .testimonial-copy {
-    padding: 28px 22px;
-  }
-
-  .testimonial-media img {
-    min-height: 260px;
-  }
-
-  .testimonial-copy blockquote {
-    font-size: 30px;
-  }
-
-  .step-item {
-    grid-template-columns: 56px 1fr;
-    gap: 16px;
-    padding-bottom: 22px;
-  }
-
-  .step-item:not(:last-child)::after {
-    left: 28px;
-  }
-
-  .step-number {
-    width: 56px;
-    height: 56px;
-    font-size: 25px;
-  }
-
-  .path-card img {
-    height: 230px;
-  }
-
-  .path-content {
-    padding: 24px;
-  }
-
-  .path-content h3 {
-    font-size: 28px;
-  }
-
-  .section-final-cta {
-    min-height: 600px;
-    padding: 70px 0;
-  }
-
-  .final-cta-media img {
-    object-position: center;
-  }
-
-  .final-cta-overlay {
-    background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.76) 58%, rgba(0, 0, 0, 0.82) 100%);
-  }
-
-  .final-buttons {
-    justify-content: stretch;
-  }
-
-  .site-footer {
-    padding-bottom: 28px;
-  }
-
-  .footer-grid {
-    gap: 20px;
-  }
-
-  .footer-link {
-    padding: 18px 0 0;
-    border-top: 1px solid var(--color-line);
-  }
-}
-
-/* ----------------------------- */
-/* SMARTPHONE */
-/* ----------------------------- */
-
-@media (max-width: 520px) {
-  .container {
-    width: min(100% - 32px, var(--container));
-  }
-
-  .site-header {
-    padding: 16px 18px;
-  }
-
-  .brand-text {
-    font-size: 23px;
-  }
-
-  .brand-mark {
-    font-size: 15px;
-  }
-
-  .menu-button {
-    width: 44px;
-    height: 44px;
-  }
-
-  .section {
-    padding: 40px 0;
-  }
-
-  .hero-section {
-    min-height: 760px;
-    padding-bottom: 34px;
-  }
-
-  .hero-media img {
-    object-position: 64% center;
-  }
-
-  .eyebrow {
-    margin-bottom: 12px;
-    font-size: 11px;
-  }
-
-  h1 {
-    margin-bottom: 16px;
-    font-size: 38px;
-    line-height: 1.02;
-    max-width: 340px;
-  }
-
-  h2 {
-    margin-bottom: 12px;
-    font-size: 29px;
-    line-height: 1.08;
-  }
-
-  h3 {
-    font-size: 18px;
-  }
-
-  p {
-    font-size: 15px;
-    line-height: 1.52;
-  }
-
-  .hero-text {
-    margin-bottom: 22px;
-    font-size: 15px;
-  }
-
-  .btn {
-    min-height: 52px;
-    padding: 0 20px;
-    font-size: 14px;
-  }
-
-  .microcopy {
-    margin-top: 14px;
-  }
-
-  .section-heading {
-    margin-bottom: 24px;
-  }
-
-  .section-video {
-    padding-top: 36px;
-  }
-
-  .split-layout {
-    gap: 22px;
-  }
-
-  .section-copy p {
-    margin-bottom: 14px;
-  }
-
-  .video-card {
-    min-height: 245px;
-    border-radius: 18px;
-  }
-
-  .video-card img {
-    min-height: 245px;
-  }
-
-  .play-button {
-    width: 70px;
-    height: 70px;
-    font-size: 23px;
-  }
-
-  .section-pillars {
-    padding-top: 36px;
-    padding-bottom: 34px;
-  }
-
-  .pillars-grid {
-    gap: 12px;
-  }
-
-  .pillar-card {
-    padding: 22px 18px;
-    border-radius: 16px;
-  }
-
-  .pillar-icon {
-    height: 46px;
-    margin-bottom: 10px;
-    font-size: 38px;
-  }
-
-  .pillar-card h3 {
-    margin-bottom: 6px;
-  }
-
-  .pillar-card p {
-    font-size: 14.5px;
-  }
-
-  .section-gallery {
-    padding-top: 34px;
-    padding-bottom: 34px;
-  }
-
-  .gallery-tabs {
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .gallery-tab {
-    min-height: 34px;
-    font-size: 13px;
-    padding: 0 4px;
-    white-space: nowrap;
-  }
-
-  .gallery-carousel {
-    border-radius: 18px;
-  }
-
-  .gallery-slide img {
-    height: 245px;
-  }
-
-  .gallery-caption {
-    padding: 17px 18px 19px;
-  }
-
-  .gallery-caption h3 {
-    font-size: 25px;
-    line-height: 1.1;
-  }
-
-  .gallery-caption p {
-    font-size: 14.5px;
-    line-height: 1.45;
-  }
-
-  .carousel-arrow {
-    top: 122px;
-    width: 40px;
-    height: 40px;
-    font-size: 26px;
-  }
-
-  .carousel-prev {
-    left: 10px;
-  }
-
-  .carousel-next {
-    right: 10px;
-  }
-
-  .gallery-dots {
-    margin: 14px 0 16px;
-  }
-
-  .gallery-button {
-    min-height: 50px;
-  }
-
-  .centered-text {
-    margin-top: 12px;
-  }
-
-  .section-testimonial {
-    padding-top: 36px;
-    padding-bottom: 34px;
-  }
-
-  .testimonial-card {
-    border-radius: 18px;
-  }
-
-  .testimonial-media img {
-    min-height: 225px;
-  }
-
-  .small-play-button {
-    width: 52px;
-    height: 52px;
-  }
-
-  .testimonial-copy {
-    padding: 22px 18px;
-  }
-
-  .testimonial-copy blockquote {
-    margin-bottom: 14px;
-    font-size: 25px;
-    line-height: 1.13;
-  }
-
-  .testimonial-copy p {
-    margin-bottom: 16px;
-    font-size: 14.5px;
-  }
-
-  .section-steps {
-    padding-top: 34px;
-    padding-bottom: 34px;
-  }
-
-  .steps-list {
-    margin-top: 4px;
-  }
-
-  .step-item {
-    grid-template-columns: 48px 1fr;
-    gap: 14px;
-    padding-bottom: 18px;
-  }
-
-  .step-item:not(:last-child)::after {
-    left: 24px;
-    top: 48px;
-  }
-
-  .step-number {
-    width: 48px;
-    height: 48px;
-    font-size: 22px;
-  }
-
-  .step-item h3 {
-    margin-top: 2px;
-    margin-bottom: 4px;
-    font-size: 16px;
-  }
-
-  .step-item p {
-    font-size: 14px;
-    line-height: 1.42;
-  }
-
-  .section-paths {
-    padding-top: 34px;
-    padding-bottom: 34px;
-  }
-
-  .paths-grid {
-    gap: 16px;
-  }
-
-  .path-card {
-    border-radius: 18px;
-  }
-
-  .path-card img {
-    height: 205px;
-  }
-
-  .path-content {
-    padding: 20px 18px 18px;
-  }
-
-  .path-content h3 {
-    margin-bottom: 8px;
-    font-size: 25px;
-    line-height: 1.08;
-  }
-
-  .path-content p {
-    margin-bottom: 16px;
-    font-size: 14.5px;
-  }
-
-  .btn-whatsapp {
-    min-height: 50px;
-    font-size: 13px;
-  }
-
-  .section-final-cta {
-    min-height: 550px;
-    padding: 60px 0;
-  }
-
-  .final-cta-content {
-    gap: 22px;
-  }
-
-  .final-cta-content h2 {
-    font-size: 32px;
-    line-height: 1.08;
-  }
-
-  .final-cta-content p {
-    margin-bottom: 0;
-    font-size: 15px;
-  }
-
-  .site-footer {
-    padding-top: 36px;
-  }
-
-  .footer-brand .brand-text {
-    font-size: 26px;
-  }
-
-  .footer-brand p,
-  .footer-link span {
-    font-size: 13px;
-  }
-
-  .copyright {
-    margin-top: 24px;
-  }
-}
-
-/* ----------------------------- */
-/* TELAS MUITO PEQUENAS */
-/* ----------------------------- */
-
-@media (max-width: 380px) {
-  h1 {
-    font-size: 35px;
-  }
-
-  h2 {
-    font-size: 27px;
-  }
-
-  .hero-section {
-    min-height: 735px;
-  }
-
-  .gallery-slide img {
-    height: 225px;
-  }
-
-  .carousel-arrow {
-    top: 112px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Espaço Margô | Casamentos em meio à natureza</title>
+
+  <meta
+    name="description"
+    content="Conheça o Espaço Margô, um espaço para casamentos em meio à natureza, criado para transformar presença, conexão e emoção em memórias inesquecíveis."
+  />
+
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#364236" />
+
+  <meta property="og:title" content="Espaço Margô | Casamentos em meio à natureza" />
+  <meta
+    property="og:description"
+    content="O cenário onde a sua história começa a ser vivida. Agende uma visita e conheça o Espaço Margô."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://casamento.espacomargo.com.br" />
+  <meta property="og:image" content="https://casamento.espacomargo.com.br/assets/og-image.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header" aria-label="Topo da página">
+    <a class="brand" href="#inicio" aria-label="Espaço Margô">
+      <span class="brand-mark">✦</span>
+      <span class="brand-text">Espaço Margô</span>
+    </a>
+
+    <button class="menu-button" type="button" aria-label="Abrir menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero-section section-dark">
+      <div class="hero-media" aria-hidden="true">
+        <img src="assets/hero.jpg" alt="" />
+      </div>
+
+      <div class="hero-overlay"></div>
+
+      <div class="container hero-content">
+        <p class="eyebrow">Casamentos em meio à natureza</p>
+
+        <h1>O cenário onde a sua história começa a ser vivida</h1>
+
+        <p class="hero-text">
+          Um espaço para casamentos em meio à natureza, criado para transformar presença,
+          conexão e emoção em memórias inesquecíveis.
+        </p>
+
+        <div class="button-group">
+          <a
+            class="btn btn-primary"
+            href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20agendar%20uma%20visita%20para%20conhecer%20o%20espa%C3%A7o."
+            target="_blank"
+            rel="noopener noreferrer"
+            data-event="cta_agendar_visita_hero"
+          >
+            Agendar uma visita
+          </a>
+
+          <a class="btn btn-secondary" href="#video" data-event="cta_ver_espaco_hero">
+            Ver o espaço antes
+          </a>
+        </div>
+
+        <p class="microcopy hero-microcopy">
+          Conheça o Espaço Margô pessoalmente e imagine o seu casamento acontecendo aqui.
+        </p>
+      </div>
+    </section>
+
+    <section id="video" class="section section-video">
+      <div class="container split-layout">
+        <div class="section-copy">
+          <p class="eyebrow">Antes da decisão</p>
+
+          <h2>Antes de escolher um espaço, imagine o momento</h2>
+
+          <p>
+            O casamento não começa apenas no altar. Ele começa quando vocês conseguem
+            se enxergar vivendo esse dia.
+          </p>
+
+          <a
+            class="btn btn-primary btn-inline"
+            href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20viver%20essa%20experi%C3%AAncia%20e%20conhecer%20o%20espa%C3%A7o."
+            target="_blank"
+            rel="noopener noreferrer"
+            data-event="cta_viver_experiencia"
+          >
+            Quero viver essa experiência
+          </a>
+        </div>
+
+        <button class="video-card" type="button" aria-label="Assistir vídeo do Espaço Margô">
+          <img src="assets/video-poster.jpg" alt="Casal em momento emocionante durante o casamento" />
+          <span class="play-button" aria-hidden="true">▶</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="pilares" class="section section-pillars">
+      <div class="container">
+        <div class="section-heading centered">
+          <h2>Mais do que um espaço bonito</h2>
+          <p>O Espaço Margô foi pensado para criar momentos que ficam.</p>
+        </div>
+
+        <div class="pillars-grid">
+          <article class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">♡</div>
+            <h3>Conexão</h3>
+            <p>Olhares, abraços e encontros que fazem o casamento ser sentido por todos.</p>
+          </article>
+
+          <article class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">✧</div>
+            <h3>Encantamento</h3>
+            <p>Cada detalhe preparado para surpreender vocês e seus convidados.</p>
+          </article>
+
+          <article class="pillar-card">
+            <div class="pillar-icon" aria-hidden="true">❦</div>
+            <h3>Memória</h3>
+            <p>Um cenário onde cada instante se transforma em lembrança para a vida inteira.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="galeria" class="section section-gallery">
+      <div class="container">
+        <div class="section-heading centered">
+          <h2>Veja o seu casamento acontecendo aqui</h2>
+        </div>
+
+        <div class="gallery-tabs" aria-label="Categorias da galeria">
+          <button class="gallery-tab active" type="button" data-slide="0">Cerimônia ao ar livre</button>
+          <button class="gallery-tab" type="button" data-slide="1">Recepção</button>
+          <button class="gallery-tab" type="button" data-slide="2">Pôr do sol</button>
+          <button class="gallery-tab" type="button" data-slide="3">Família</button>
+          <button class="gallery-tab" type="button" data-slide="4">Festa</button>
+          <button class="gallery-tab" type="button" data-slide="5">Detalhes do espaço</button>
+        </div>
+
+        <div class="gallery-carousel" aria-label="Galeria do Espaço Margô">
+          <button class="carousel-arrow carousel-prev" type="button" aria-label="Imagem anterior">‹</button>
+
+          <div class="gallery-track">
+            <article class="gallery-slide active">
+              <img src="assets/galeria-cerimonia.jpg" alt="Cerimônia ao ar livre no Espaço Margô" />
+              <div class="gallery-caption">
+                <h3>Cerimônia ao ar livre</h3>
+                <p>Luz natural, paisagem e emoção no momento do sim.</p>
+              </div>
+            </article>
+
+            <article class="gallery-slide">
+              <img src="assets/galeria-recepcao.jpg" alt="Recepção de casamento em ambiente elegante" />
+              <div class="gallery-caption">
+                <h3>Recepção</h3>
+                <p>Ambientes preparados para acolher e encantar seus convidados.</p>
+              </div>
+            </article>
+
+            <article class="gallery-slide">
+              <img src="assets/galeria-por-do-sol.jpg" alt="Casal fotografado ao pôr do sol" />
+              <div class="gallery-caption">
+                <h3>Pôr do sol</h3>
+                <p>Um cenário cinematográfico para viver e registrar a sua história.</p>
+              </div>
+            </article>
+
+            <article class="gallery-slide">
+              <img src="assets/galeria-familia.jpg" alt="Família e padrinhos reunidos em casamento" />
+              <div class="gallery-caption">
+                <h3>Família</h3>
+                <p>O encontro das pessoas que fazem parte da história de vocês.</p>
+              </div>
+            </article>
+
+            <article class="gallery-slide">
+              <img src="assets/galeria-festa.jpg" alt="Festa de casamento com convidados celebrando" />
+              <div class="gallery-caption">
+                <h3>Festa</h3>
+                <p>Depois da emoção, a celebração continua com presença e alegria.</p>
+              </div>
+            </article>
+
+            <article class="gallery-slide">
+              <img src="assets/galeria-detalhes.jpg" alt="Detalhes decorativos de casamento" />
+              <div class="gallery-caption">
+                <h3>Detalhes do espaço</h3>
+                <p>Cada ambiente contribui para a experiência do grande dia.</p>
+              </div>
+            </article>
+          </div>
+
+          <button class="carousel-arrow carousel-next" type="button" aria-label="Próxima imagem">›</button>
+        </div>
+
+        <div class="gallery-dots" aria-label="Indicadores da galeria">
+          <button class="dot active" type="button" data-slide="0" aria-label="Ver cerimônia ao ar livre"></button>
+          <button class="dot" type="button" data-slide="1" aria-label="Ver recepção"></button>
+          <button class="dot" type="button" data-slide="2" aria-label="Ver pôr do sol"></button>
+          <button class="dot" type="button" data-slide="3" aria-label="Ver família"></button>
+          <button class="dot" type="button" data-slide="4" aria-label="Ver festa"></button>
+          <button class="dot" type="button" data-slide="5" aria-label="Ver detalhes do espaço"></button>
+        </div>
+
+        <a class="btn btn-secondary gallery-button" href="#caminhos" data-event="cta_ver_mais_momentos">
+          Ver mais momentos
+        </a>
+
+        <p class="microcopy centered-text">Arraste para conhecer os ambientes.</p>
+      </div>
+    </section>
+
+    <section id="depoimento" class="section section-testimonial">
+      <div class="container">
+        <div class="section-heading centered">
+          <h2>Quem vive, lembra para sempre</h2>
+        </div>
+
+        <article class="testimonial-card">
+          <button class="testimonial-media" type="button" aria-label="Assistir depoimento do casal">
+            <img src="assets/depoimento.jpg" alt="Casal sorrindo no Espaço Margô" />
+            <span class="small-play-button" aria-hidden="true">▶</span>
+          </button>
+
+          <div class="testimonial-copy">
+            <blockquote>
+              “Quando chegamos ao Espaço Margô, conseguimos imaginar o nosso casamento acontecendo ali.”
+            </blockquote>
+
+            <p>
+              A visita é o momento em que o espaço deixa de ser uma possibilidade
+              e começa a fazer parte da história de vocês.
+            </p>
+
+            <cite>Juliana &amp; Rafael</cite>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="section section-steps">
+      <div class="container">
+        <div class="section-heading centered">
+          <h2>O caminho até a sua data</h2>
+        </div>
+
+        <div class="steps-list">
+          <article class="step-item">
+            <span class="step-number">1</span>
+            <div>
+              <h3>Agende sua visita</h3>
+              <p>Escolha um horário para conhecer o Espaço Margô pessoalmente.</p>
+            </div>
+          </article>
+
+          <article class="step-item">
+            <span class="step-number">2</span>
+            <div>
+              <h3>Viva a experiência</h3>
+              <p>Veja os ambientes, sinta a atmosfera e imagine o seu casamento em cada detalhe.</p>
+            </div>
+          </article>
+
+          <article class="step-item">
+            <span class="step-number">3</span>
+            <div>
+              <h3>Receba uma proposta personalizada</h3>
+              <p>Depois da visita, nossa equipe prepara uma proposta alinhada ao seu sonho.</p>
+            </div>
+          </article>
+
+          <article class="step-item">
+            <span class="step-number">4</span>
+            <div>
+              <h3>Reserve sua data</h3>
+              <p>Com tudo definido, vocês garantem o dia em que essa história será celebrada.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="caminhos" class="section section-paths">
+      <div class="container">
+        <div class="section-heading centered">
+          <h2>Em qual momento vocês estão?</h2>
+        </div>
+
+        <div class="paths-grid">
+          <article class="path-card">
+            <img src="assets/caminho-visita.jpg" alt="Casal caminhando pelo Espaço Margô" />
+
+            <div class="path-content">
+              <h3>Já queremos conhecer o espaço</h3>
+
+              <p>
+                Ideal para casais que já estão buscando data ou já estão prontos para dar o próximo passo.
+              </p>
+
+              <a
+                class="btn btn-whatsapp"
+                href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20agendar%20uma%20visita%20para%20conhecer%20o%20espa%C3%A7o."
+                target="_blank"
+                rel="noopener noreferrer"
+                data-event="cta_agendar_visita_caminhos"
+              >
+                Agendar visita pelo WhatsApp
+              </a>
+            </div>
+          </article>
+
+          <article class="path-card">
+            <img src="assets/caminho-inspiracoes.jpg" alt="Detalhes delicados de casamento e papelaria" />
+
+            <div class="path-content">
+              <h3>Ainda estamos buscando inspirações</h3>
+
+              <p>
+                Receba referências e ideias para imaginar melhor o casamento de vocês.
+              </p>
+
+              <a
+                class="btn btn-whatsapp"
+                href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20receber%20inspira%C3%A7%C3%B5es%20para%20imaginar%20melhor%20meu%20casamento."
+                target="_blank"
+                rel="noopener noreferrer"
+                data-event="cta_receber_inspiracoes_caminhos"
+              >
+                Receber inspirações no WhatsApp
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta-final" class="section-final-cta section-dark">
+      <div class="final-cta-media" aria-hidden="true">
+        <img src="assets/cta-noite.jpg" alt="" />
+      </div>
+
+      <div class="final-cta-overlay"></div>
+
+      <div class="container final-cta-content">
+        <div>
+          <h2>Seu casamento merece ser sentido antes mesmo do grande dia</h2>
+
+          <p>
+            Conheça o Espaço Margô e descubra se este é o cenário onde a história
+            de vocês vai começar uma nova fase.
+          </p>
+        </div>
+
+        <div class="button-group final-buttons">
+          <a
+            class="btn btn-primary"
+            href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20agendar%20minha%20visita."
+            target="_blank"
+            rel="noopener noreferrer"
+            data-event="cta_agendar_visita_final"
+          >
+            Agendar minha visita
+          </a>
+
+          <a
+            class="btn btn-outline-light"
+            href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pelo%20Instagram%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20receber%20inspira%C3%A7%C3%B5es%20para%20meu%20casamento."
+            target="_blank"
+            rel="noopener noreferrer"
+            data-event="cta_receber_inspiracoes_final"
+          >
+            Quero receber inspirações
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-text">Espaço Margô</span>
+        <p>Casamentos em meio à natureza</p>
+      </div>
+
+      <a
+        class="footer-link"
+        href="https://www.instagram.com/buffetmargo"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-event="footer_instagram"
+      >
+        <strong>Instagram</strong>
+        <span>Acompanhe nossos momentos</span>
+      </a>
+
+      <a
+        class="footer-link"
+        href="https://wa.me/5511991451564?text=Ol%C3%A1%21%20Vim%20pela%20landing%20page%20do%20Espa%C3%A7o%20Marg%C3%B4%20e%20gostaria%20de%20falar%20com%20voc%C3%AAs."
+        target="_blank"
+        rel="noopener noreferrer"
+        data-event="footer_whatsapp"
+      >
+        <strong>WhatsApp</strong>
+        <span>Fale conosco</span>
+      </a>
+
+      <a
+        class="footer-link"
+        href="https://www.google.com/maps/search/?api=1&query=Av.%20Las%20Vegas%20351%20%C3%81gua%20Azul%20Guarulhos%20SP"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-event="footer_localizacao"
+      >
+        <strong>Localização</strong>
+        <span>Conheça o espaço</span>
+      </a>
+    </div>
+
+    <div class="container copyright">
+      <p>© 2026 Espaço Margô. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <div class="video-modal" id="videoModal" aria-hidden="true">
+    <div class="video-modal-backdrop" data-close-video></div>
+
+    <div class="video-modal-content" role="dialog" aria-modal="true" aria-label="Vídeo do Espaço Margô">
+      <button class="video-modal-close" type="button" aria-label="Fechar vídeo" data-close-video>
+        ×
+      </button>
+
+      <div class="video-placeholder">
+        <p>Vídeo do Espaço Margô</p>
+        <span>Substituiremos este espaço pelo vídeo final da landing.</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
