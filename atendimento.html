@@ -592,6 +592,9 @@
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
+    let atualizacaoConversasTimer = null;
+    let carregandoHistoricoConversas = false;
+    let assinaturaUltimoHistorico = "";
 
     function travarAlturaDaTela() {
       const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -730,7 +733,8 @@
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
         renderizarEncantamentos(casal.encantamentos_principais);
-        await carregarHistoricoConversas();
+        await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        iniciarAtualizacaoAutomaticaConversas();
 
         travarAlturaDaTela();
 
@@ -798,30 +802,89 @@
       chat.appendChild(row);
     }
 
-    async function carregarHistoricoConversas() {
-      if (!casalAtualId) return;
+    function usuarioEstaNoFinalDoChat() {
+      const chat = document.getElementById("chatArea");
+      if (!chat) return true;
+      return chat.scrollHeight - chat.scrollTop - chat.clientHeight < 80;
+    }
+
+    function criarAssinaturaHistorico(conversas) {
+      return conversas
+        .map(conversa => [
+          conversa.conversa_id || "",
+          conversa.data_hora || "",
+          conversa.direcao || "",
+          conversa.tipo_mensagem || "",
+          conversa.mensagem || "",
+          conversa.transcricao_audio || ""
+        ].join("::"))
+        .join("||");
+    }
+
+    async function carregarHistoricoConversas(opcoes = {}) {
+      if (!casalAtualId || carregandoHistoricoConversas) return;
+
+      carregandoHistoricoConversas = true;
 
       try {
-        limparChat();
+        const chat = document.getElementById("chatArea");
+        const deveManterNoFinal = opcoes.forcarScroll || usuarioEstaNoFinalDoChat();
 
-        const resposta = await fetch(API_CONVERSAS + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now());
+        const resposta = await fetch(API_CONVERSAS + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now(), {
+          cache: "no-store"
+        });
+
         const retorno = await resposta.json();
+        const conversas = Array.isArray(retorno.conversas) ? retorno.conversas : [];
+        const novaAssinatura = criarAssinaturaHistorico(conversas);
 
-        if (!retorno.conversas || retorno.conversas.length === 0) {
+        if (!opcoes.forcar && novaAssinatura === assinaturaUltimoHistorico) {
           return;
         }
 
-        retorno.conversas.forEach(conversa => {
+        assinaturaUltimoHistorico = novaAssinatura;
+        limparChat();
+
+        if (conversas.length === 0) {
+          return;
+        }
+
+        conversas.forEach(conversa => {
           adicionarMensagemHistorico(conversa);
         });
 
-        const chat = document.getElementById("chatArea");
-        chat.scrollTop = chat.scrollHeight;
+        if (deveManterNoFinal && chat) {
+          chat.scrollTop = chat.scrollHeight;
+        }
 
       } catch (erro) {
         console.error("Erro ao carregar histórico de conversas:", erro);
+      } finally {
+        carregandoHistoricoConversas = false;
       }
     }
+
+    function iniciarAtualizacaoAutomaticaConversas() {
+      if (atualizacaoConversasTimer) {
+        clearInterval(atualizacaoConversasTimer);
+      }
+
+      atualizacaoConversasTimer = setInterval(() => {
+        carregarHistoricoConversas();
+      }, 5000);
+    }
+
+    window.addEventListener("beforeunload", function () {
+      if (atualizacaoConversasTimer) {
+        clearInterval(atualizacaoConversasTimer);
+      }
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) {
+        carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+      }
+    });
 
     function adicionarMensagemNaTela(texto) {
       esconderMensagemVazia();
@@ -894,6 +957,7 @@
 
       try {
         await registrarMensagem(texto);
+        await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
       } catch (erro) {
         console.error("Erro ao registrar mensagem:", erro);
         alert("A mensagem apareceu na tela, mas não foi registrada na planilha.");
