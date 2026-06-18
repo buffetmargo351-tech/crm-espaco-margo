@@ -329,7 +329,8 @@
       gap: 9px;
     }
 
-    .availability-date {
+    .availability-date,
+    .availability-guests {
       width: 100%;
       border: 1px solid #eadada;
       border-radius: 16px;
@@ -542,6 +543,11 @@
           <input class="availability-date" id="availabilityDate" type="date" />
         </div>
 
+        <label class="availability-label" for="availabilityGuests" style="margin-top: 10px;">Quantidade estimada de convidados</label>
+        <div class="availability-input-row">
+          <input class="availability-guests" id="availabilityGuests" type="number" min="1" inputmode="numeric" placeholder="Ex.: 150" />
+        </div>
+
         <button class="availability-primary" id="availabilityCheckBtn" onclick="verificarDisponibilidade()">
           Verificar disponibilidade
         </button>
@@ -563,10 +569,10 @@
         </div>
 
         <div class="availability-actions" id="availabilityActions">
-          <button class="availability-secondary" onclick="preencherMensagemDisponibilidade()">
+          <button class="availability-secondary" id="availabilityWhatsappBtn" onclick="usarRespostaDisponibilidade()">
             Usar resposta no WhatsApp
           </button>
-          <button class="availability-secondary" onclick="fecharDisponibilidade()">
+          <button class="availability-secondary" id="availabilityContinueBtn" onclick="seguirAtendimentoDisponibilidade()">
             Seguir atendimento
           </button>
         </div>
@@ -582,6 +588,7 @@
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
     const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
+    const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -899,6 +906,7 @@
     function abrirDisponibilidade() {
       const overlay = document.getElementById("availabilityOverlay");
       const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
       const result = document.getElementById("availabilityResult");
       const actions = document.getElementById("availabilityActions");
 
@@ -910,6 +918,10 @@
         if (valorConvertido) {
           inputData.value = valorConvertido;
         }
+      }
+
+      if (casalAtual && casalAtual.quantidade_convidados) {
+        inputConvidados.value = casalAtual.quantidade_convidados;
       }
 
       overlay.classList.add("open");
@@ -962,11 +974,19 @@
 
     async function verificarDisponibilidade() {
       const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
       const botao = document.getElementById("availabilityCheckBtn");
       const dataEvento = converterDataParaBR(inputData.value);
+      const quantidadeConvidados = String(inputConvidados.value || "").trim();
 
       if (!dataEvento) {
         alert("Selecione a data pretendida do casamento.");
+        return;
+      }
+
+      if (!quantidadeConvidados) {
+        alert("Informe a quantidade estimada de convidados.");
+        inputConvidados.focus();
         return;
       }
 
@@ -1002,6 +1022,7 @@
 
         window.ultimaDisponibilidadeConsultada = {
           data_evento: dataEvento,
+          quantidade_convidados: quantidadeConvidados,
           resumo: retorno.resumo || "",
           manha_status: retorno.manha_status || "",
           tarde_status: retorno.tarde_status || ""
@@ -1016,7 +1037,75 @@
       }
     }
 
-    function preencherMensagemDisponibilidade() {
+    function montarMensagemDisponibilidade(consulta) {
+      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível nos períodos da manhã e da tarde. Podemos seguir com carinho para entender melhor o casamento de vocês.";
+      }
+
+      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status !== "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível no período da manhã. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      }
+
+      if (consulta.manha_status !== "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível no período da tarde. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      }
+
+      return "Verifiquei aqui e essa data não aparece disponível nos nossos períodos de evento. Posso te ajudar a olhar uma alternativa próxima com carinho.";
+    }
+
+    async function salvarDadosEventoConsultados() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de seguir.");
+        return false;
+      }
+
+      if (!casalAtualId) {
+        alert("Casal não identificado para salvar os dados.");
+        return false;
+      }
+
+      if (!consulta.quantidade_convidados) {
+        alert("Informe a quantidade estimada de convidados.");
+        document.getElementById("availabilityGuests").focus();
+        return false;
+      }
+
+      try {
+        const resposta = await fetch(API_ATUALIZAR_DADOS_EVENTO, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            data_casamento: consulta.data_evento,
+            quantidade_convidados: consulta.quantidade_convidados,
+            status_disponibilidade_data: consulta.resumo
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao salvar dados do evento");
+        }
+
+        casalAtual.data_casamento = consulta.data_evento;
+        casalAtual.quantidade_convidados = consulta.quantidade_convidados;
+        casalAtual.status_disponibilidade_data = consulta.resumo;
+
+        document.getElementById("dataCasamento").textContent = formatarDataCasamento(casalAtual.data_casamento);
+        document.getElementById("qtdConvidados").textContent = formatarConvidados(casalAtual.quantidade_convidados);
+
+        return true;
+      } catch (erro) {
+        console.error("Erro ao salvar dados do evento:", erro);
+        alert("A disponibilidade foi consultada, mas não foi possível salvar data e convidados no casal. Confira o workflow v17.");
+        return false;
+      }
+    }
+
+    async function usarRespostaDisponibilidade() {
       const consulta = window.ultimaDisponibilidadeConsultada;
 
       if (!consulta) {
@@ -1024,19 +1113,41 @@
         return;
       }
 
-      let mensagem = "";
+      const botao = document.getElementById("availabilityWhatsappBtn");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
 
-      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
-        mensagem = "Verifiquei aqui e essa data aparece disponível nos períodos da manhã e da tarde. Podemos seguir com carinho para entender melhor o casamento de vocês.";
-      } else if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status !== "DISPONIVEL") {
-        mensagem = "Verifiquei aqui e essa data aparece disponível no período da manhã. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
-      } else if (consulta.manha_status !== "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
-        mensagem = "Verifiquei aqui e essa data aparece disponível no período da tarde. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
-      } else {
-        mensagem = "Verifiquei aqui e essa data não aparece disponível nos nossos períodos de evento. Posso te ajudar a olhar uma alternativa próxima com carinho.";
+      const salvou = await salvarDadosEventoConsultados();
+
+      botao.disabled = false;
+      botao.textContent = "Usar resposta no WhatsApp";
+
+      if (!salvou) return;
+
+      document.getElementById("messageInput").value = montarMensagemDisponibilidade(consulta);
+      fecharDisponibilidade();
+      document.getElementById("messageInput").focus();
+    }
+
+    async function seguirAtendimentoDisponibilidade() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de seguir.");
+        return;
       }
 
-      document.getElementById("messageInput").value = mensagem;
+      const botao = document.getElementById("availabilityContinueBtn");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      const salvou = await salvarDadosEventoConsultados();
+
+      botao.disabled = false;
+      botao.textContent = "Seguir atendimento";
+
+      if (!salvou) return;
+
       fecharDisponibilidade();
       document.getElementById("messageInput").focus();
     }
