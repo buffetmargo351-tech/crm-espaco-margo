@@ -3,32 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CRM Espaço Margô - CP</title>
+  <title>CRM Espaço Margô - Consultora Presencial</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { background: #f4f0ef; color: #2f2423; min-height: 100vh; }
     .phone-frame { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; position: relative; overflow: hidden; }
-    .app { padding: 18px 18px 24px; min-height: 100vh; }
-    .top-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 14px; }
+    .app { padding: 16px 16px 24px; min-height: 100vh; }
+    .top-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 10px; }
     .nav-arrow { width: 36px; height: 36px; border-radius: 14px; border: 1px solid #eadada; background: #ffffff; color: #d85f6f; font-size: 22px; font-weight: 900; cursor: pointer; line-height: 1; }
-    .couple-name { text-align: center; font-size: 21px; font-weight: 900; color: #2f2423; line-height: 1.1; }
-    .badge { margin: 0 auto 12px; width: fit-content; padding: 6px 10px; border-radius: 999px; background: #f8e9ea; border: 1px solid #efd2d5; color: #a35d61; font-size: 11px; font-weight: 900; }
-    .section { margin-bottom: 15px; }
-    .section-title { font-size: 13px; font-weight: 900; color: #e15f70; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .card { border: 1px solid #eadada; background: #fffaf9; border-radius: 18px; padding: 12px; box-shadow: 0 7px 16px rgba(0,0,0,0.04); }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .info-item { background: #ffffff; border: 1px solid #f1dddd; border-radius: 15px; padding: 10px; min-height: 62px; }
-    .info-label { font-size: 10px; font-weight: 900; color: #a07673; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .2px; }
-    .info-value { font-size: 13px; font-weight: 900; color: #2f2423; line-height: 1.25; word-break: break-word; }
+    .couple-name { text-align: center; font-size: 20px; font-weight: 900; color: #2f2423; line-height: 1.1; }
+    .section { margin-bottom: 13px; }
+    .section-title { font-size: 13px; font-weight: 900; color: #e15f70; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+    .card { border: 1px solid #eadada; background: #fffaf9; border-radius: 18px; padding: 10px; box-shadow: 0 7px 16px rgba(0,0,0,0.04); }
+    .visit-select { width: 100%; border: 1px solid #eadada; border-radius: 15px; padding: 12px; outline: none; font-size: 14px; color: #2f2423; background: #ffffff; font-weight: 800; }
+    .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .compact-item { background: #ffffff; border: 1px solid #f1dddd; border-radius: 13px; padding: 8px; min-height: 48px; }
+    .compact-label { font-size: 9px; font-weight: 900; color: #a07673; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .2px; }
+    .compact-value { font-size: 12px; font-weight: 900; color: #2f2423; line-height: 1.2; word-break: break-word; }
     .full { grid-column: 1 / -1; }
     .field { margin-bottom: 10px; }
     .field.hidden, .hidden { display: none !important; }
     label { display: block; font-size: 12px; font-weight: 900; color: #5b4644; margin-bottom: 6px; }
     input, textarea { width: 100%; border: 1px solid #eadada; border-radius: 14px; padding: 12px; outline: none; font-size: 15px; color: #2f2423; background: #fffaf9; }
-    textarea { min-height: 96px; resize: vertical; line-height: 1.35; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { border: 1px solid #eadada; background: #fffaf9; color: #7b625f; border-radius: 999px; padding: 9px 11px; font-size: 12px; font-weight: 900; cursor: pointer; }
+    textarea { min-height: 88px; resize: vertical; line-height: 1.35; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip { border: 1px solid #eadada; background: #fffaf9; color: #7b625f; border-radius: 999px; padding: 8px 10px; font-size: 12px; font-weight: 900; cursor: pointer; }
     .chip.selected { background: #f5dfe2; border-color: #df6475; color: #b64354; }
+    .single-options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .single-option { display: flex; align-items: center; gap: 10px; border: 1px solid #eadada; background: #fffaf9; border-radius: 14px; padding: 10px 12px; color: #2f2423; font-size: 13px; font-weight: 900; cursor: pointer; }
+    .single-option input { width: 18px; height: 18px; accent-color: #df6475; }
+    .money-input { font-size: 18px; font-weight: 900; }
     .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
     .btn-home, .btn-confirm { border-radius: 16px; padding: 14px 12px; font-size: 13px; font-weight: 900; cursor: pointer; }
     .btn-home { border: 1px solid #eadada; background: #ffffff; color: #8a6f6c; }
@@ -51,18 +55,26 @@
         <div></div>
       </header>
 
-      <div class="badge">Modo CP • Visita Presencial</div>
+      <section class="section">
+        <div class="section-title">📅 Visitas agendadas</div>
+        <div class="card">
+          <select class="visit-select" id="visitasSelect" onchange="trocarVisitaSelecionada()">
+            <option value="">Carregando visitas...</option>
+          </select>
+          <div class="hint">Lista em ordem crescente, com a visita mais próxima primeiro.</div>
+        </div>
+      </section>
 
       <section class="section">
         <div class="section-title">📌 Resumo para receber o casal</div>
-        <div class="card info-grid">
-          <div class="info-item"><div class="info-label">Visita</div><div class="info-value" id="infoVisita">--</div></div>
-          <div class="info-item"><div class="info-label">Data desejada</div><div class="info-value" id="infoDataEvento">--</div></div>
-          <div class="info-item"><div class="info-label">Convidados</div><div class="info-value" id="infoConvidados">--</div></div>
-          <div class="info-item"><div class="info-label">Disponibilidade</div><div class="info-value" id="infoDisponibilidade">--</div></div>
-          <div class="info-item"><div class="info-label">Origem</div><div class="info-value" id="infoOrigem">--</div></div>
-          <div class="info-item"><div class="info-label">CHO</div><div class="info-value" id="infoCHO">--</div></div>
-          <div class="info-item full"><div class="info-label">Observações já registradas</div><div class="info-value" id="infoObservacoes">--</div></div>
+        <div class="card compact-grid">
+          <div class="compact-item"><div class="compact-label">Visita</div><div class="compact-value" id="infoVisita">--</div></div>
+          <div class="compact-item"><div class="compact-label">Evento</div><div class="compact-value" id="infoDataEvento">--</div></div>
+          <div class="compact-item"><div class="compact-label">Convidados</div><div class="compact-value" id="infoConvidados">--</div></div>
+          <div class="compact-item"><div class="compact-label">Disponibilidade</div><div class="compact-value" id="infoDisponibilidade">--</div></div>
+          <div class="compact-item"><div class="compact-label">Origem</div><div class="compact-value" id="infoOrigem">--</div></div>
+          <div class="compact-item"><div class="compact-label">Consultora Home Office</div><div class="compact-value" id="infoCHO">--</div></div>
+          <div class="compact-item full"><div class="compact-label">Observações já registradas</div><div class="compact-value" id="infoObservacoes">--</div></div>
         </div>
       </section>
 
@@ -112,7 +124,13 @@
           <button class="chip" onclick="alternarChip(this)" data-value="cerimonia_externa">Cerimônia externa</button>
           <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
           <button class="chip" onclick="alternarChip(this)" data-value="jardim">Jardim</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="bosque">Bosque</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="camarins">Camarins</button>
           <button class="chip" onclick="alternarChip(this)" data-value="salao">Salão</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="mesa_do_bolo">Mesa do bolo</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="mesa_do_buffet">Mesa do buffet</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="churrasco">Churrasco</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="cerimonial">Cerimonial</button>
           <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
           <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
           <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
@@ -121,7 +139,29 @@
       </section>
 
       <section class="section">
-        <div class="section-title">📝 Observações da CP</div>
+        <div class="section-title">⚠️ Objeções</div>
+        <textarea id="objecoesCasal" placeholder="Ex: valor, data, distância, quantidade de convidados, comparação com outro espaço..."></textarea>
+      </section>
+
+      <section class="section">
+        <div class="section-title">📍 Resultado</div>
+        <div class="card single-options">
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="FECHOU" /> Fechou</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NEGOCIACAO" /> Negociação</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_FECHOU" /> Não fechou</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_COMPARECEU" /> Não compareceu</label>
+        </div>
+        <div class="hint">Campo visual para apoiar a reunião. Nesta versão, ainda não grava resultado em aba própria.</div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">💰 Valor do Evento Completo</div>
+        <input class="money-input" id="valorEventoCompleto" type="text" inputmode="decimal" placeholder="Ex.: R$ 45.000,00" />
+        <div class="hint">Campo visual para a Consultora Presencial informar durante a visita. Nesta versão, não grava na planilha.</div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">📝 Observações da Consultora Presencial</div>
         <textarea id="observacoesCP" placeholder="Ex: casal gostou mais da cerimônia externa; mãe participa da decisão; objeção sobre data, valor ou quantidade..."></textarea>
         <div class="hint">Esse registro será salvo nas observações gerais do casal para continuidade comercial.</div>
       </section>
@@ -133,13 +173,14 @@
         <button class="btn-confirm" id="btnSalvar" onclick="salvarRegistroCP()">❤️ Salvar Registro</button>
       </div>
 
-      <div class="success" id="successBox">Registro da CP salvo com sucesso. ❤️</div>
+      <div class="success" id="successBox">Registro da Consultora Presencial salvo com sucesso. ❤️</div>
     </main>
   </div>
 
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
+    const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
@@ -172,6 +213,62 @@
     function textoOuPadrao(valor, padrao) {
       const texto = String(valor || "").trim();
       return texto || padrao;
+    }
+
+    function chaveDataOrdenacao(casal) {
+      const data = String(casal.data_consultoria || "").trim();
+      const hora = String(casal.hora_consultoria || "00:00").trim();
+      const partes = data.split("/");
+      if (partes.length !== 3) return "9999-99-99T99:99";
+      return partes[2] + "-" + partes[1].padStart(2, "0") + "-" + partes[0].padStart(2, "0") + "T" + hora;
+    }
+
+    function labelVisita(casal) {
+      const visita = textoOuPadrao((casal.data_consultoria || "") + (casal.hora_consultoria ? " às " + casal.hora_consultoria : ""), "Sem horário");
+      return visita + " — " + nomeCasal(casal);
+    }
+
+    async function carregarVisitasAgendadas() {
+      const select = document.getElementById("visitasSelect");
+      try {
+        const resposta = await fetch(API_OPORTUNIDADES + "?t=" + Date.now(), { cache: "no-store" });
+        const dados = await resposta.json();
+        const agendados = Array.isArray(dados.agendados) ? dados.agendados : [];
+        const visitas = agendados
+          .filter(casal => String(casal.status_casal || "").toUpperCase() === "CONSULTORIA_AGENDADA" || casal.data_consultoria)
+          .sort((a, b) => chaveDataOrdenacao(a).localeCompare(chaveDataOrdenacao(b)));
+
+        select.innerHTML = "";
+
+        if (visitas.length === 0) {
+          select.innerHTML = '<option value="">Nenhuma visita agendada encontrada</option>';
+          return;
+        }
+
+        visitas.forEach(casal => {
+          const option = document.createElement("option");
+          option.value = casal.casal_id || "";
+          option.textContent = labelVisita(casal);
+          if (String(casal.casal_id || "") === String(casalAtualId || "")) option.selected = true;
+          select.appendChild(option);
+        });
+
+        if (!casalAtualId && visitas[0]?.casal_id) {
+          casalAtualId = visitas[0].casal_id;
+          await carregarCasal();
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar visitas agendadas:", erro);
+        select.innerHTML = '<option value="">Não foi possível carregar visitas</option>';
+      }
+    }
+
+    function trocarVisitaSelecionada() {
+      const novoCasalId = document.getElementById("visitasSelect").value;
+      if (!novoCasalId || novoCasalId === casalAtualId) return;
+      let url = "consultoria-cp.html?casal_id=" + encodeURIComponent(novoCasalId);
+      if (usuarioAtualId) url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+      window.location.href = url;
     }
 
     function selecionarChipPorTexto(sectionId, texto) {
@@ -208,10 +305,10 @@
     }
 
     async function carregarCasal() {
-      casalAtualId = pegarCasalIdDaUrl();
       usuarioAtualId = pegarUsuarioIdDaUrl();
+      casalAtualId = casalAtualId || pegarCasalIdDaUrl();
       if (!casalAtualId) {
-        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        document.getElementById("nomeCasal").textContent = "Selecione uma visita";
         return;
       }
       try {
@@ -268,6 +365,11 @@
       box.classList.remove("open");
     }
 
+    function resultadoSelecionado() {
+      const marcado = document.querySelector('input[name="resultadoVisita"]:checked');
+      return marcado ? marcado.value : "";
+    }
+
     async function salvarRegistroCP() {
       esconderAviso();
       atualizarBlocoInformacoesFaltantes();
@@ -301,9 +403,20 @@
       }
 
       const observacoesCP = document.getElementById("observacoesCP").value.trim();
+      const objecoes = document.getElementById("objecoesCasal").value.trim();
+      const resultado = resultadoSelecionado();
+      const valorEvento = document.getElementById("valorEventoCompleto").value.trim();
+
       const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
       const dataRegistro = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      const blocoCP = observacoesCP ? "[Registro CP - " + dataRegistro + "] " + observacoesCP : "[Registro CP - " + dataRegistro + "] Visita presencial registrada pela CP.";
+      const partesRegistro = [];
+      partesRegistro.push("[Registro Consultora Presencial - " + dataRegistro + "]");
+      if (observacoesCP) partesRegistro.push("Observações: " + observacoesCP);
+      if (objecoes) partesRegistro.push("Objeções: " + objecoes);
+      if (resultado) partesRegistro.push("Resultado informado: " + resultado);
+      if (valorEvento) partesRegistro.push("Valor do Evento Completo informado: " + valorEvento);
+      if (partesRegistro.length === 1) partesRegistro.push("Visita presencial registrada pela Consultora Presencial.");
+      const blocoCP = partesRegistro.join("\n");
       const observacoesGerais = observacoesBase ? observacoesBase + "\n\n" + blocoCP : blocoCP;
 
       const payload = {
@@ -327,19 +440,26 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        if (!resposta.ok) throw new Error("Erro ao salvar registro CP");
+        if (!resposta.ok) throw new Error("Erro ao salvar registro da Consultora Presencial");
         document.getElementById("successBox").classList.add("open");
         botao.textContent = "Salvo";
         setTimeout(voltar, 1800);
       } catch (erro) {
         console.error(erro);
-        mostrarAviso("Erro ao salvar registro da CP. Confira o workflow de consultoria.");
+        mostrarAviso("Erro ao salvar registro da Consultora Presencial. Confira o workflow de consultoria.");
         botao.disabled = false;
         botao.textContent = "❤️ Salvar Registro";
       }
     }
 
-    carregarCasal();
+    async function iniciarTela() {
+      usuarioAtualId = pegarUsuarioIdDaUrl();
+      casalAtualId = pegarCasalIdDaUrl();
+      await carregarVisitasAgendadas();
+      if (casalAtualId) await carregarCasal();
+    }
+
+    iniciarTela();
   </script>
 </body>
 </html>
