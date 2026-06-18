@@ -218,7 +218,7 @@
       background: #ffffff;
       border-top: 1px solid #eadada;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       padding: 9px 0 10px;
       z-index: 20;
     }
@@ -239,6 +239,224 @@
 
     .nav-item.active {
       color: #e15f70;
+    }
+
+
+
+    .availability-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 36, 35, 0.42);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 999;
+      padding: 0 12px 14px;
+    }
+
+    .availability-overlay.open {
+      display: flex;
+    }
+
+    .availability-modal {
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-radius: 24px 24px 22px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.24);
+      border: 1px solid #eadada;
+      overflow: hidden;
+      animation: subirModal .18s ease-out;
+    }
+
+    @keyframes subirModal {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .availability-header {
+      padding: 15px 16px 10px;
+      border-bottom: 1px solid #f1dddd;
+      display: grid;
+      grid-template-columns: 1fr 34px;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .availability-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.15;
+    }
+
+    .availability-subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: #8a6f6c;
+    }
+
+    .availability-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      color: #b98286;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .availability-body {
+      padding: 14px 16px 16px;
+    }
+
+    .availability-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+      color: #5b4644;
+      margin-bottom: 6px;
+    }
+
+    .availability-input-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .availability-date {
+      width: 100%;
+      border: 1px solid #eadada;
+      border-radius: 16px;
+      padding: 12px 13px;
+      outline: none;
+      font-size: 16px;
+      color: #2f2423;
+      background: #fffaf9;
+      font-weight: 800;
+    }
+
+    .availability-primary {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, #df6475, #d45167);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .availability-primary:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+
+    .availability-result {
+      display: none;
+      margin-top: 13px;
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .availability-result.show {
+      display: block;
+    }
+
+    .availability-summary {
+      font-size: 14px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.28;
+      margin-bottom: 10px;
+    }
+
+    .period-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .period-card {
+      border-radius: 15px;
+      padding: 10px;
+      border: 1px solid #eadada;
+      background: #ffffff;
+    }
+
+    .period-name {
+      font-size: 12px;
+      font-weight: 900;
+      color: #5b4644;
+      margin-bottom: 4px;
+    }
+
+    .period-hour {
+      font-size: 11px;
+      font-weight: 800;
+      color: #8a6f6c;
+      margin-bottom: 7px;
+    }
+
+    .period-status {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 5px 7px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+
+    .period-status.available {
+      background: #e7f6ec;
+      color: #2d7d46;
+      border: 1px solid #bfe6cb;
+    }
+
+    .period-status.unavailable {
+      background: #f9e4e6;
+      color: #b63c4e;
+      border: 1px solid #efc4ca;
+    }
+
+    .availability-actions {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .availability-actions.show {
+      display: grid;
+    }
+
+    .availability-secondary {
+      width: 100%;
+      border: 1px solid #eadada;
+      border-radius: 15px;
+      padding: 11px 12px;
+      background: #ffffff;
+      color: #b4525f;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .availability-note {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #8a6f6c;
     }
 
     @media (min-width: 700px) {
@@ -291,9 +509,14 @@
         Início
       </div>
 
-      <div class="nav-item" onclick="abrirConsultoria()">
+      <div class="nav-item" onclick="abrirDisponibilidade()">
         <span>📅</span>
-        Agendar Consultoria
+        Consultar Data
+      </div>
+
+      <div class="nav-item" onclick="abrirConsultoria()">
+        <span>📝</span>
+        Agendar
       </div>
 
       <div class="nav-item" onclick="alert('Histórico do casal será ativado em breve.')">
@@ -303,9 +526,62 @@
     </nav>
   </div>
 
+  <div class="availability-overlay" id="availabilityOverlay" onclick="fecharDisponibilidadePeloFundo(event)">
+    <div class="availability-modal" role="dialog" aria-modal="true" aria-labelledby="availabilityTitle">
+      <div class="availability-header">
+        <div>
+          <div class="availability-title" id="availabilityTitle">Consultar data pretendida</div>
+          <div class="availability-subtitle">Valide a data antes de avançar no atendimento ou agendar a visita.</div>
+        </div>
+        <button class="availability-close" onclick="fecharDisponibilidade()">×</button>
+      </div>
+
+      <div class="availability-body">
+        <label class="availability-label" for="availabilityDate">Data pretendida do casamento</label>
+        <div class="availability-input-row">
+          <input class="availability-date" id="availabilityDate" type="date" />
+        </div>
+
+        <button class="availability-primary" id="availabilityCheckBtn" onclick="verificarDisponibilidade()">
+          Verificar disponibilidade
+        </button>
+
+        <div class="availability-result" id="availabilityResult">
+          <div class="availability-summary" id="availabilitySummary"></div>
+          <div class="period-grid">
+            <div class="period-card">
+              <div class="period-name">Manhã</div>
+              <div class="period-hour" id="manhaHorario">09:00 às 14:00</div>
+              <span class="period-status" id="manhaStatus">--</span>
+            </div>
+            <div class="period-card">
+              <div class="period-name">Tarde</div>
+              <div class="period-hour" id="tardeHorario">16:30 às 21:00</div>
+              <span class="period-status" id="tardeStatus">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="availability-actions" id="availabilityActions">
+          <button class="availability-secondary" onclick="preencherMensagemDisponibilidade()">
+            Usar resposta no WhatsApp
+          </button>
+          <button class="availability-secondary" onclick="fecharDisponibilidade()">
+            Seguir atendimento
+          </button>
+        </div>
+
+        <div class="availability-note">
+          Se a data estiver indisponível, conduza a noiva com cuidado para datas alternativas antes de criar expectativa de visita.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
+    const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -617,6 +893,152 @@
       }
 
       travarAlturaDaTela();
+    }
+
+
+    function abrirDisponibilidade() {
+      const overlay = document.getElementById("availabilityOverlay");
+      const inputData = document.getElementById("availabilityDate");
+      const result = document.getElementById("availabilityResult");
+      const actions = document.getElementById("availabilityActions");
+
+      result.classList.remove("show");
+      actions.classList.remove("show");
+
+      if (casalAtual && casalAtual.data_casamento) {
+        const valorConvertido = converterDataParaInput(casalAtual.data_casamento);
+        if (valorConvertido) {
+          inputData.value = valorConvertido;
+        }
+      }
+
+      overlay.classList.add("open");
+      setTimeout(() => inputData.focus(), 120);
+    }
+
+    function fecharDisponibilidade() {
+      document.getElementById("availabilityOverlay").classList.remove("open");
+      travarAlturaDaTela();
+    }
+
+    function fecharDisponibilidadePeloFundo(event) {
+      if (event.target.id === "availabilityOverlay") {
+        fecharDisponibilidade();
+      }
+    }
+
+    function converterDataParaInput(data) {
+      const texto = String(data || "").trim();
+      const partes = texto.split("/");
+
+      if (partes.length !== 3) return "";
+
+      const dia = partes[0].padStart(2, "0");
+      const mes = partes[1].padStart(2, "0");
+      const ano = partes[2];
+
+      if (!dia || !mes || !ano || ano.length !== 4) return "";
+
+      return ano + "-" + mes + "-" + dia;
+    }
+
+    function converterDataParaBR(dataInput) {
+      const texto = String(dataInput || "").trim();
+      const partes = texto.split("-");
+
+      if (partes.length !== 3) return "";
+
+      return partes[2] + "/" + partes[1] + "/" + partes[0];
+    }
+
+    function aplicarStatusPeriodo(elementoId, status) {
+      const elemento = document.getElementById(elementoId);
+      const statusNormalizado = String(status || "").toUpperCase();
+
+      elemento.textContent = statusNormalizado === "DISPONIVEL" ? "DISPONÍVEL" : "INDISPONÍVEL";
+      elemento.classList.remove("available", "unavailable");
+      elemento.classList.add(statusNormalizado === "DISPONIVEL" ? "available" : "unavailable");
+    }
+
+    async function verificarDisponibilidade() {
+      const inputData = document.getElementById("availabilityDate");
+      const botao = document.getElementById("availabilityCheckBtn");
+      const dataEvento = converterDataParaBR(inputData.value);
+
+      if (!dataEvento) {
+        alert("Selecione a data pretendida do casamento.");
+        return;
+      }
+
+      botao.disabled = true;
+      botao.textContent = "Verificando...";
+
+      try {
+        const resposta = await fetch(API_DISPONIBILIDADE, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            data_evento: dataEvento
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao consultar disponibilidade");
+        }
+
+        const retorno = await resposta.json();
+
+        document.getElementById("availabilitySummary").textContent = retorno.resumo || "Consulta realizada.";
+        document.getElementById("manhaHorario").textContent = retorno.manha_horario || "09:00 às 14:00";
+        document.getElementById("tardeHorario").textContent = retorno.tarde_horario || "16:30 às 21:00";
+
+        aplicarStatusPeriodo("manhaStatus", retorno.manha_status);
+        aplicarStatusPeriodo("tardeStatus", retorno.tarde_status);
+
+        document.getElementById("availabilityResult").classList.add("show");
+        document.getElementById("availabilityActions").classList.add("show");
+
+        window.ultimaDisponibilidadeConsultada = {
+          data_evento: dataEvento,
+          resumo: retorno.resumo || "",
+          manha_status: retorno.manha_status || "",
+          tarde_status: retorno.tarde_status || ""
+        };
+
+      } catch (erro) {
+        console.error("Erro ao verificar disponibilidade:", erro);
+        alert("Não foi possível consultar a disponibilidade agora. Confira o workflow v16 ou tente novamente.");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Verificar disponibilidade";
+      }
+    }
+
+    function preencherMensagemDisponibilidade() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de usar a resposta.");
+        return;
+      }
+
+      let mensagem = "";
+
+      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        mensagem = "Verifiquei aqui e essa data aparece disponível nos períodos da manhã e da tarde. Podemos seguir com carinho para entender melhor o casamento de vocês.";
+      } else if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status !== "DISPONIVEL") {
+        mensagem = "Verifiquei aqui e essa data aparece disponível no período da manhã. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      } else if (consulta.manha_status !== "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        mensagem = "Verifiquei aqui e essa data aparece disponível no período da tarde. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      } else {
+        mensagem = "Verifiquei aqui e essa data não aparece disponível nos nossos períodos de evento. Posso te ajudar a olhar uma alternativa próxima com carinho.";
+      }
+
+      document.getElementById("messageInput").value = mensagem;
+      fecharDisponibilidade();
+      document.getElementById("messageInput").focus();
     }
 
     document.getElementById("messageInput").addEventListener("keydown", function (event) {
