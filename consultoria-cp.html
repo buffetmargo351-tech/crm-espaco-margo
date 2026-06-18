@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CRM Espaço Margô - CP</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #f4f0ef; color: #2f2423; min-height: 100vh; }
+    .phone-frame { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; position: relative; overflow: hidden; }
+    .app { padding: 18px 18px 24px; min-height: 100vh; }
+    .top-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 14px; }
+    .nav-arrow { width: 36px; height: 36px; border-radius: 14px; border: 1px solid #eadada; background: #ffffff; color: #d85f6f; font-size: 22px; font-weight: 900; cursor: pointer; line-height: 1; }
+    .couple-name { text-align: center; font-size: 21px; font-weight: 900; color: #2f2423; line-height: 1.1; }
+    .badge { margin: 0 auto 12px; width: fit-content; padding: 6px 10px; border-radius: 999px; background: #f8e9ea; border: 1px solid #efd2d5; color: #a35d61; font-size: 11px; font-weight: 900; }
+    .section { margin-bottom: 15px; }
+    .section-title { font-size: 13px; font-weight: 900; color: #e15f70; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .card { border: 1px solid #eadada; background: #fffaf9; border-radius: 18px; padding: 12px; box-shadow: 0 7px 16px rgba(0,0,0,0.04); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .info-item { background: #ffffff; border: 1px solid #f1dddd; border-radius: 15px; padding: 10px; min-height: 62px; }
+    .info-label { font-size: 10px; font-weight: 900; color: #a07673; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .2px; }
+    .info-value { font-size: 13px; font-weight: 900; color: #2f2423; line-height: 1.25; word-break: break-word; }
+    .full { grid-column: 1 / -1; }
+    .field { margin-bottom: 10px; }
+    .field.hidden, .hidden { display: none !important; }
+    label { display: block; font-size: 12px; font-weight: 900; color: #5b4644; margin-bottom: 6px; }
+    input, textarea { width: 100%; border: 1px solid #eadada; border-radius: 14px; padding: 12px; outline: none; font-size: 15px; color: #2f2423; background: #fffaf9; }
+    textarea { min-height: 96px; resize: vertical; line-height: 1.35; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { border: 1px solid #eadada; background: #fffaf9; color: #7b625f; border-radius: 999px; padding: 9px 11px; font-size: 12px; font-weight: 900; cursor: pointer; }
+    .chip.selected { background: #f5dfe2; border-color: #df6475; color: #b64354; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .btn-home, .btn-confirm { border-radius: 16px; padding: 14px 12px; font-size: 13px; font-weight: 900; cursor: pointer; }
+    .btn-home { border: 1px solid #eadada; background: #ffffff; color: #8a6f6c; }
+    .btn-confirm { border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff; }
+    .btn-confirm:disabled { opacity: .65; cursor: wait; }
+    .success { display: none; margin-top: 14px; border-radius: 18px; padding: 12px; background: #e7f6ec; color: #2d7d46; border: 1px solid #bfe6cb; font-size: 13px; font-weight: 900; line-height: 1.35; text-align: center; }
+    .success.open { display: block; }
+    .warning { display: none; margin-top: 8px; border-radius: 14px; padding: 10px; background: #fff6e6; color: #94610b; border: 1px solid #f3d19a; font-size: 12px; font-weight: 800; line-height: 1.35; }
+    .warning.open { display: block; }
+    .hint { margin-top: 8px; font-size: 11px; font-weight: 700; color: #8a6f6c; line-height: 1.35; }
+    @media (min-width: 700px) { body { padding: 20px 0; } .phone-frame { min-height: calc(100vh - 40px); border-radius: 34px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); } }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <main class="app">
+      <header class="top-nav">
+        <button class="nav-arrow" onclick="voltar()">‹</button>
+        <div class="couple-name" id="nomeCasal">Carregando...</div>
+        <div></div>
+      </header>
+
+      <div class="badge">Modo CP • Visita Presencial</div>
+
+      <section class="section">
+        <div class="section-title">📌 Resumo para receber o casal</div>
+        <div class="card info-grid">
+          <div class="info-item"><div class="info-label">Visita</div><div class="info-value" id="infoVisita">--</div></div>
+          <div class="info-item"><div class="info-label">Data desejada</div><div class="info-value" id="infoDataEvento">--</div></div>
+          <div class="info-item"><div class="info-label">Convidados</div><div class="info-value" id="infoConvidados">--</div></div>
+          <div class="info-item"><div class="info-label">Disponibilidade</div><div class="info-value" id="infoDisponibilidade">--</div></div>
+          <div class="info-item"><div class="info-label">Origem</div><div class="info-value" id="infoOrigem">--</div></div>
+          <div class="info-item"><div class="info-label">CHO</div><div class="info-value" id="infoCHO">--</div></div>
+          <div class="info-item full"><div class="info-label">Observações já registradas</div><div class="info-value" id="infoObservacoes">--</div></div>
+        </div>
+      </section>
+
+      <section class="section" id="informacoesFaltantesSection">
+        <div class="section-title">📌 Informações faltantes</div>
+        <div class="card">
+          <div class="field" id="campoNomeNoivo">
+            <label>Nome do noivo *</label>
+            <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
+          </div>
+          <div class="field" id="campoEmailNoiva">
+            <label>Email da noiva</label>
+            <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="origemSection">
+        <div class="section-title">🌎 Como você conheceu o Margô?</div>
+        <div class="chips">
+          <button class="chip" onclick="selecionarUnico(this)">Instagram</button>
+          <button class="chip" onclick="selecionarUnico(this)">Google</button>
+          <button class="chip" onclick="selecionarUnico(this)">Indicação</button>
+          <button class="chip" onclick="selecionarUnico(this)">TikTok</button>
+          <button class="chip" onclick="selecionarUnico(this)">Facebook</button>
+          <button class="chip" onclick="selecionarUnico(this)">Outro</button>
+        </div>
+      </section>
+
+      <section class="section" id="encantamentosSection">
+        <div class="section-title">✨ O que encantou pelas fotos e vídeos?</div>
+        <div class="chips">
+          <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="jardim">Jardim</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="cerimonia_externa">Cerimônia externa</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="gastronomia">Gastronomia</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="exclusividade">Exclusividade</button>
+        </div>
+      </section>
+
+      <section class="section" id="encantamentoPresencialSection">
+        <div class="section-title">🌿 O que encantou na visita presencial?</div>
+        <div class="chips">
+          <button class="chip" onclick="alternarChip(this)" data-value="cerimonia_externa">Cerimônia externa</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="jardim">Jardim</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="salao">Salão</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="experiencia_completa">Experiência completa</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">📝 Observações da CP</div>
+        <textarea id="observacoesCP" placeholder="Ex: casal gostou mais da cerimônia externa; mãe participa da decisão; objeção sobre data, valor ou quantidade..."></textarea>
+        <div class="hint">Esse registro será salvo nas observações gerais do casal para continuidade comercial.</div>
+      </section>
+
+      <div class="warning" id="warningBox"></div>
+
+      <div class="actions">
+        <button class="btn-home" onclick="voltar()">🏠 Voltar</button>
+        <button class="btn-confirm" id="btnSalvar" onclick="salvarRegistroCP()">❤️ Salvar Registro</button>
+      </div>
+
+      <div class="success" id="successBox">Registro da CP salvo com sucesso. ❤️</div>
+    </main>
+  </div>
+
+  <script>
+    const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
+    const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
+
+    let casalAtualId = null;
+    let usuarioAtualId = null;
+    let casalAtual = {};
+    let origemAtual = "";
+
+    function pegarCasalIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("casal_id");
+    }
+
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id");
+    }
+
+    function voltar() {
+      let url = "oportunidades.html?aba=agendados&t=" + Date.now();
+      if (usuarioAtualId) url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+      window.location.href = url;
+    }
+
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
+      if (noiva && noivo) return noiva + " ❤️ " + noivo;
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    function textoOuPadrao(valor, padrao) {
+      const texto = String(valor || "").trim();
+      return texto || padrao;
+    }
+
+    function selecionarChipPorTexto(sectionId, texto) {
+      const chips = document.querySelectorAll("#" + sectionId + " .chip");
+      chips.forEach(chip => {
+        if (chip.textContent.trim().toLowerCase() === String(texto).trim().toLowerCase()) chip.classList.add("selected");
+      });
+    }
+
+    function selecionarChipPorValor(sectionId, valor) {
+      const chips = document.querySelectorAll("#" + sectionId + " .chip");
+      chips.forEach(chip => {
+        if (chip.dataset.value === valor) chip.classList.add("selected");
+      });
+    }
+
+    function alternarChip(botao) { botao.classList.toggle("selected"); }
+
+    function selecionarUnico(botao) {
+      const container = botao.parentElement;
+      container.querySelectorAll(".chip").forEach(chip => chip.classList.remove("selected"));
+      botao.classList.add("selected");
+    }
+
+    function atualizarBlocoInformacoesFaltantes() {
+      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
+      const emailNoiva = document.getElementById("emailNoiva").value.trim();
+      const section = document.getElementById("informacoesFaltantesSection");
+      const campoNomeNoivo = document.getElementById("campoNomeNoivo");
+      const campoEmailNoiva = document.getElementById("campoEmailNoiva");
+      campoNomeNoivo.classList.toggle("hidden", !!nomeNoivo);
+      campoEmailNoiva.classList.toggle("hidden", !!emailNoiva);
+      section.classList.toggle("hidden", !!nomeNoivo && !!emailNoiva);
+    }
+
+    async function carregarCasal() {
+      casalAtualId = pegarCasalIdDaUrl();
+      usuarioAtualId = pegarUsuarioIdDaUrl();
+      if (!casalAtualId) {
+        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        return;
+      }
+      try {
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now(), { cache: "no-store" });
+        const casal = await resposta.json();
+        if (casal.erro) {
+          document.getElementById("nomeCasal").textContent = "Casal não encontrado";
+          return;
+        }
+        casalAtual = casal;
+        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+        document.getElementById("infoVisita").textContent = textoOuPadrao((casal.data_consultoria || "") + (casal.hora_consultoria ? " às " + casal.hora_consultoria : ""), "Não agendada");
+        document.getElementById("infoDataEvento").textContent = textoOuPadrao(casal.data_casamento, "Não informada");
+        document.getElementById("infoConvidados").textContent = casal.quantidade_convidados ? casal.quantidade_convidados + " convidados" : "Não informado";
+        document.getElementById("infoDisponibilidade").textContent = textoOuPadrao(casal.status_disponibilidade_data, "Não consultada");
+        document.getElementById("infoOrigem").textContent = textoOuPadrao(casal.origem || casal.como_conheceu_margo, "Não informada");
+        document.getElementById("infoCHO").textContent = textoOuPadrao(casal.consultora_responsavel, "Não informada");
+        document.getElementById("infoObservacoes").textContent = textoOuPadrao(casal.observacoes_gerais, "Sem observações registradas");
+
+        if (casal.nome_noivo) document.getElementById("nomeNoivo").value = casal.nome_noivo;
+        if (casal.email) document.getElementById("emailNoiva").value = casal.email;
+        atualizarBlocoInformacoesFaltantes();
+
+        origemAtual = String(casal.origem || casal.como_conheceu_margo || "").trim();
+        if (origemAtual) {
+          selecionarChipPorTexto("origemSection", origemAtual);
+          document.getElementById("origemSection").classList.add("hidden");
+        }
+
+        if (casal.encantamentos_principais) {
+          casal.encantamentos_principais.split("|").forEach(valor => selecionarChipPorValor("encantamentosSection", valor.trim()));
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar casal:", erro);
+        document.getElementById("nomeCasal").textContent = "Erro ao carregar";
+      }
+    }
+
+    function chipsSelecionados(sectionId) {
+      return Array.from(document.querySelectorAll("#" + sectionId + " .chip.selected"))
+        .map(chip => chip.dataset.value || chip.textContent.trim())
+        .filter(Boolean);
+    }
+
+    function mostrarAviso(texto) {
+      const box = document.getElementById("warningBox");
+      box.textContent = texto;
+      box.classList.add("open");
+    }
+
+    function esconderAviso() {
+      const box = document.getElementById("warningBox");
+      box.textContent = "";
+      box.classList.remove("open");
+    }
+
+    async function salvarRegistroCP() {
+      esconderAviso();
+      atualizarBlocoInformacoesFaltantes();
+      if (!casalAtualId) {
+        mostrarAviso("Casal não identificado.");
+        return;
+      }
+
+      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
+      if (!nomeNoivo) {
+        document.getElementById("informacoesFaltantesSection").classList.remove("hidden");
+        document.getElementById("campoNomeNoivo").classList.remove("hidden");
+        mostrarAviso("Informe o nome do noivo antes de salvar o registro da visita.");
+        return;
+      }
+
+      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
+      const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
+      if (!origemFinal) {
+        document.getElementById("origemSection").classList.remove("hidden");
+        mostrarAviso("Informe como o casal conheceu o Espaço Margô.");
+        return;
+      }
+
+      const encantamentosFotos = chipsSelecionados("encantamentosSection");
+      const encantamentosVisita = chipsSelecionados("encantamentoPresencialSection");
+      const todosEncantamentos = Array.from(new Set([...encantamentosFotos, ...encantamentosVisita]));
+      if (todosEncantamentos.length === 0) {
+        mostrarAviso("Selecione pelo menos um encantamento percebido no casal.");
+        return;
+      }
+
+      const observacoesCP = document.getElementById("observacoesCP").value.trim();
+      const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
+      const dataRegistro = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      const blocoCP = observacoesCP ? "[Registro CP - " + dataRegistro + "] " + observacoesCP : "[Registro CP - " + dataRegistro + "] Visita presencial registrada pela CP.";
+      const observacoesGerais = observacoesBase ? observacoesBase + "\n\n" + blocoCP : blocoCP;
+
+      const payload = {
+        casal_id: casalAtualId,
+        nome_noivo: nomeNoivo,
+        email: document.getElementById("emailNoiva").value.trim(),
+        data_consultoria: casalAtual.data_consultoria || "",
+        hora_consultoria: casalAtual.hora_consultoria || "",
+        como_conheceu_margo: origemFinal,
+        encantamentos_principais: todosEncantamentos.join("|"),
+        observacoes_gerais: observacoesGerais
+      };
+
+      const botao = document.getElementById("btnSalvar");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      try {
+        const resposta = await fetch(API_CONSULTORIA, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!resposta.ok) throw new Error("Erro ao salvar registro CP");
+        document.getElementById("successBox").classList.add("open");
+        botao.textContent = "Salvo";
+        setTimeout(voltar, 1800);
+      } catch (erro) {
+        console.error(erro);
+        mostrarAviso("Erro ao salvar registro da CP. Confira o workflow de consultoria.");
+        botao.disabled = false;
+        botao.textContent = "❤️ Salvar Registro";
+      }
+    }
+
+    carregarCasal();
+  </script>
+</body>
+</html>
