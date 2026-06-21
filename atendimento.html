@@ -2,136 +2,6 @@
 <html lang="pt-BR">
 <head>
 
- <style>
-  body.crm-bloqueado {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f6f0ea;
-    color: #3b2f2f;
-  }
-
-  #bloqueio-acesso-crm {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    box-sizing: border-box;
-  }
-
-  .bloqueio-card-crm {
-    width: 100%;
-    max-width: 460px;
-    background: #fff;
-    border-radius: 18px;
-    padding: 28px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
-    text-align: center;
-  }
-
-  .bloqueio-card-crm h1 {
-    margin: 0 0 12px;
-    font-size: 24px;
-    color: #7a4b35;
-  }
-
-  .bloqueio-card-crm p {
-    margin: 8px 0;
-    font-size: 15px;
-    line-height: 1.5;
-    color: #5c4a42;
-  }
-
-  .bloqueio-card-crm .codigo {
-    margin-top: 16px;
-    padding: 10px;
-    background: #f3ebe5;
-    border-radius: 10px;
-    font-size: 13px;
-    color: #7a4b35;
-  }
-</style>
-
-<script>
-  window.MARGO_USUARIO_VALIDADO = false;
-
-  async function validarAcessoUsuarioMargô() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const usuarioId = String(urlParams.get("usuario_id") || "").trim();
-
-    const endpointValidacao = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
-
-    function bloquearAcesso(mensagem, detalhe) {
-      document.body.className = "crm-bloqueado";
-      document.body.innerHTML = `
-        <div id="bloqueio-acesso-crm">
-          <div class="bloqueio-card-crm">
-            <h1>Acesso bloqueado</h1>
-            <p>${mensagem || "Você não tem permissão para acessar esta área do CRM."}</p>
-            <p>Entre em contato com a administração do Espaço Margô.</p>
-            ${detalhe ? `<div class="codigo">${detalhe}</div>` : ""}
-          </div>
-        </div>
-      `;
-    }
-
-    if (!usuarioId) {
-      bloquearAcesso(
-        "Link de acesso inválido. Usuário não informado.",
-        "Código: usuario_id ausente"
-      );
-      return;
-    }
-
-    try {
-      const resposta = await fetch(endpointValidacao, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          usuario_id: usuarioId
-        })
-      });
-
-      const dados = await resposta.json();
-
-      const autorizado =
-        dados.autorizado === true ||
-        dados.autorizado === "true";
-
-      const tipoUsuario = String(dados.tipo_usuario || "").trim().toUpperCase();
-
-      if (!autorizado) {
-        bloquearAcesso(
-          dados.mensagem || "Seu acesso está inativo ou não autorizado.",
-          "Usuário: " + usuarioId
-        );
-        return;
-      }
-
-      if (tipoUsuario !== "CHO" && tipoUsuario !== "ADMIN") {
-        bloquearAcesso(
-          "Este acesso não tem permissão para abrir a área de atendimento da CHO.",
-          "Perfil identificado: " + (tipoUsuario || "não informado")
-        );
-        return;
-      }
-
-      window.MARGO_USUARIO_VALIDADO = true;
-      window.MARGO_USUARIO_LOGADO = dados;
-
-    } catch (erro) {
-      bloquearAcesso(
-        "Não foi possível validar seu acesso neste momento.",
-        "Erro de validação"
-      );
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", validarAcessoUsuarioMargô);
-</script> 
-  
 <style>
   body.crm-bloqueado {
     margin: 0;
@@ -139,6 +9,14 @@
     background: #f6f0ea;
     color: #3b2f2f;
   }
+  body.crm-validando .phone-frame {
+    display: none !important;
+  }
+
+  body.crm-bloqueado .phone-frame {
+    display: none !important;
+  }
+
 
   #bloqueio-acesso-crm {
     min-height: 100vh;
@@ -182,85 +60,7 @@
   }
 </style>
 
-<script>
-  window.MARGO_USUARIO_VALIDADO = false;
 
-  async function validarAcessoUsuarioMargô() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const usuarioId = String(urlParams.get("usuario_id") || "").trim();
-
-    const endpointValidacao = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
-
-    function bloquearAcesso(mensagem, detalhe) {
-      document.body.className = "crm-bloqueado";
-      document.body.innerHTML = `
-        <div id="bloqueio-acesso-crm">
-          <div class="bloqueio-card-crm">
-            <h1>Acesso bloqueado</h1>
-            <p>${mensagem || "Você não tem permissão para acessar esta área do CRM."}</p>
-            <p>Entre em contato com a administração do Espaço Margô.</p>
-            ${detalhe ? `<div class="codigo">${detalhe}</div>` : ""}
-          </div>
-        </div>
-      `;
-    }
-
-    if (!usuarioId) {
-      bloquearAcesso(
-        "Link de acesso inválido. Usuário não informado.",
-        "Código: usuario_id ausente"
-      );
-      return;
-    }
-
-    try {
-      const resposta = await fetch(endpointValidacao, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          usuario_id: usuarioId
-        })
-      });
-
-      const dados = await resposta.json();
-
-      const autorizado =
-        dados.autorizado === true ||
-        dados.autorizado === "true";
-
-      const tipoUsuario = String(dados.tipo_usuario || "").trim().toUpperCase();
-
-      if (!autorizado) {
-        bloquearAcesso(
-          dados.mensagem || "Seu acesso está inativo ou não autorizado.",
-          "Usuário: " + usuarioId
-        );
-        return;
-      }
-
-      if (tipoUsuario !== "CHO" && tipoUsuario !== "ADMIN") {
-        bloquearAcesso(
-          "Este acesso não tem permissão para abrir a área de atendimento da CHO.",
-          "Perfil identificado: " + (tipoUsuario || "não informado")
-        );
-        return;
-      }
-
-      window.MARGO_USUARIO_VALIDADO = true;
-      window.MARGO_USUARIO_LOGADO = dados;
-
-    } catch (erro) {
-      bloquearAcesso(
-        "Não foi possível validar seu acesso neste momento.",
-        "Erro de validação"
-      );
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", validarAcessoUsuarioMargô);
-</script>
   
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
@@ -736,7 +536,7 @@
   </style>
 </head>
 
-<body>
+<body class="crm-validando">
   <div class="phone-frame" id="phoneFrame">
     <header class="header">
       <div class="top-nav">
@@ -1490,7 +1290,103 @@
       setTimeout(travarAlturaDaTela, 500);
     });
 
-    carregarCasal();
+
+    const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
+
+    function bloquearAcessoCRM(mensagem, detalhe) {
+      document.body.className = "crm-bloqueado";
+      document.body.innerHTML = `
+        <div id="bloqueio-acesso-crm">
+          <div class="bloqueio-card-crm">
+            <h1>Acesso bloqueado</h1>
+            <p>${mensagem || "Você não tem permissão para acessar esta área do CRM."}</p>
+            <p>Entre em contato com a administração do Espaço Margô.</p>
+            ${detalhe ? `<div class="codigo">${detalhe}</div>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    async function validarUsuarioAntesDeAbrirAtendimento() {
+      const usuarioId = pegarUsuarioIdDaUrl();
+
+      if (!usuarioId) {
+        bloquearAcessoCRM(
+          "Link de acesso inválido. Usuário não informado.",
+          "Código: usuario_id ausente"
+        );
+        return false;
+      }
+
+      try {
+        const resposta = await fetch(API_VALIDAR_USUARIO, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            usuario_id: usuarioId
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Falha HTTP na validação do usuário");
+        }
+
+        const dados = await resposta.json();
+
+        const autorizado =
+          dados.autorizado === true ||
+          dados.autorizado === "true";
+
+        const tipoUsuario = String(dados.tipo_usuario || "").trim().toUpperCase();
+
+        if (!autorizado) {
+          bloquearAcessoCRM(
+            dados.mensagem || "Seu acesso está inativo ou não autorizado.",
+            "Usuário: " + usuarioId
+          );
+          return false;
+        }
+
+        if (tipoUsuario !== "CHO" && tipoUsuario !== "ADMIN") {
+          bloquearAcessoCRM(
+            "Este acesso não tem permissão para abrir a área de atendimento da CHO.",
+            "Perfil identificado: " + (tipoUsuario || "não informado")
+          );
+          return false;
+        }
+
+        window.MARGO_USUARIO_VALIDADO = true;
+        window.MARGO_USUARIO_LOGADO = dados;
+
+        document.body.classList.remove("crm-validando");
+
+        return true;
+
+      } catch (erro) {
+        console.error("Erro ao validar usuário:", erro);
+
+        bloquearAcessoCRM(
+          "Não foi possível validar seu acesso neste momento.",
+          "Erro de validação"
+        );
+
+        return false;
+      }
+    }
+
+    async function iniciarAtendimentoComTrava() {
+      const acessoLiberado = await validarUsuarioAntesDeAbrirAtendimento();
+
+      if (!acessoLiberado) {
+        return;
+      }
+
+      carregarCasal();
+    }
+
+    iniciarAtendimentoComTrava();
   </script>
 </body>
 </html>
