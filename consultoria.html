@@ -98,20 +98,6 @@
 
     .success.open { display: block; }
 
-    .validation-error {
-      border-color: #d45167 !important;
-      background: #fff3f4 !important;
-      box-shadow: 0 0 0 3px rgba(212,81,103,0.10);
-    }
-
-    .section-warning {
-      display: none; margin-top: 8px; background: #fff3f4; border: 1px solid #f2c7ce;
-      color: #b23b4c; border-radius: 14px; padding: 10px 11px; font-size: 12px;
-      font-weight: 800; line-height: 1.35;
-    }
-
-    .section-warning.open { display: block; }
-
     @media (min-width: 700px) {
       body { padding: 20px 0; }
 
@@ -133,7 +119,7 @@
       </header>
 
       <section class="section">
-        <div class="section-title">✨ Próximas vagas disponíveis *</div>
+        <div class="section-title">✨ Próximas vagas disponíveis</div>
 
         <div class="date-card" data-date="27/06/2026">
           <div class="date-title">Sábado • 27/06</div>
@@ -161,8 +147,6 @@
             <button class="slot" onclick="selecionarHorario(this)">13h</button>
           </div>
         </div>
-
-        <div class="section-warning" id="warningHorario">Selecione uma das próximas vagas disponíveis.</div>
       </section>
 
       <section class="section" id="informacoesFaltantesSection">
@@ -170,19 +154,19 @@
 
         <div class="missing-card">
           <div class="field" id="campoNomeNoivo">
-            <label>Nome do noivo(a) *</label>
+            <label>Nome do noivo</label>
             <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
           </div>
 
           <div class="field" id="campoEmailNoiva">
-            <label>Email da noiva(o)</label>
-            <input id="emailNoiva" type="email" placeholder="Digite o email da noiva(o)" />
+            <label>Email da noiva</label>
+            <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
           </div>
         </div>
       </section>
 
       <section class="section" id="origemSection">
-        <div class="section-title">🌎 Como você conheceu o Margô? *</div>
+        <div class="section-title">🌎 Como você conheceu o Margô?</div>
 
         <div class="chips">
           <button class="chip" onclick="selecionarUnico(this)">Instagram</button>
@@ -192,12 +176,10 @@
           <button class="chip" onclick="selecionarUnico(this)">Facebook</button>
           <button class="chip" onclick="selecionarUnico(this)">Outro</button>
         </div>
-
-        <div class="section-warning" id="warningOrigem">Selecione como o casal conheceu o Espaço Margô.</div>
       </section>
 
       <section class="section" id="encantamentosSection">
-        <div class="section-title">✨ O que mais te encantou pelas fotos e vídeos? *</div>
+        <div class="section-title">✨ O que mais te encantou pelas fotos e vídeos?</div>
 
         <div class="chips">
           <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
@@ -209,8 +191,6 @@
           <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
           <button class="chip" onclick="alternarChip(this)" data-value="exclusividade">Exclusividade</button>
         </div>
-
-        <div class="section-warning" id="warningEncantamentos">Selecione pelo menos um item que encantou o casal.</div>
       </section>
 
       <section class="section">
@@ -220,7 +200,7 @@
       </section>
 
       <div class="actions">
-        <button class="btn-home" onclick="voltarHome()">🏠 Início</button>
+        <button class="btn-home" onclick="irParaMenuPrincipal()">🏠 Menu</button>
         <button class="btn-confirm" id="btnConfirmar" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
       </div>
 
@@ -235,45 +215,47 @@
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
 
     let casalAtualId = null;
-    let usuarioAtualId = null;
-    let origemAtual = "";
+
+    function limpar(valor) {
+      return String(valor || "").trim();
+    }
+
+    function lerSessao() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
+    function pegarUsuarioId() {
+      const params = new URLSearchParams(window.location.search);
+      const sessao = lerSessao();
+      return limpar(params.get("usuario_id")) || limpar(localStorage.getItem("margo_usuario_id")) || limpar(sessao && sessao.usuario_id);
+    }
+
+    function adicionarUsuarioNaUrl(url) {
+      const usuarioId = pegarUsuarioId();
+      if (!usuarioId) return url;
+      const separador = url.includes("?") ? "&" : "?";
+      return url + separador + "usuario_id=" + encodeURIComponent(usuarioId);
+    }
+
+    function irParaMenuPrincipal() {
+      window.location.href = adicionarUsuarioNaUrl("menu.html");
+    }
 
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get("casal_id");
     }
 
-    function pegarUsuarioIdDaUrl() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("usuario_id");
-    }
-
-    function montarQueryUsuario() {
-      if (!usuarioAtualId) return "";
-      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
-    }
-
-    function voltarHome() {
-      const query = montarQueryUsuario();
-      window.location.href = query ? "index.html?" + query : "index.html";
-    }
-
     function voltarAtendimento() {
-      let url = "atendimento.html";
-
       if (casalAtualId) {
-        url += "?casal_id=" + encodeURIComponent(casalAtualId);
-
-        if (usuarioAtualId) {
-          url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
-        }
-      } else if (usuarioAtualId) {
-        url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
+        window.location.href = adicionarUsuarioNaUrl("atendimento.html?casal_id=" + encodeURIComponent(casalAtualId));
       } else {
-        url = "index.html";
+        irParaMenuPrincipal();
       }
-
-      window.location.href = url;
     }
 
     function nomeCasal(casal) {
@@ -313,7 +295,6 @@
 
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
-      usuarioAtualId = pegarUsuarioIdDaUrl();
 
       if (!casalAtualId) {
         document.getElementById("nomeCasal").textContent = "Casal não informado";
@@ -341,13 +322,8 @@
 
         atualizarBlocoInformacoesFaltantes();
 
-        origemAtual = String(casal.origem || casal.como_conheceu_margo || "").trim();
-
-        if (origemAtual) {
-          selecionarChipPorTexto("origemSection", origemAtual);
-          document.getElementById("origemSection").classList.add("hidden");
-        } else {
-          document.getElementById("origemSection").classList.remove("hidden");
+        if (casal.origem) {
+          selecionarChipPorTexto("origemSection", casal.origem);
         }
 
         if (casal.encantamentos_principais) {
@@ -412,38 +388,14 @@
       return texto.replace("h", "").padStart(2, "0") + ":00";
     }
 
-
-    function limparAvisosValidacao() {
-      document.querySelectorAll(".validation-error").forEach(elemento => {
-        elemento.classList.remove("validation-error");
-      });
-
-      document.querySelectorAll(".section-warning").forEach(elemento => {
-        elemento.classList.remove("open");
-      });
-    }
-
-    function abrirSecaoSeOculta(sectionId) {
-      const section = document.getElementById(sectionId);
-      if (section) section.classList.remove("hidden");
-    }
-
-    function destacarCampoObrigatorio(elemento, warningId) {
-      if (elemento) elemento.classList.add("validation-error");
-      const warning = document.getElementById(warningId);
-      if (warning) warning.classList.add("open");
-    }
-
     async function confirmarConsultoria() {
-      limparAvisosValidacao();
       atualizarBlocoInformacoesFaltantes();
 
-      const erros = [];
       const horarioSelecionado = document.querySelector(".slot.selected");
 
       if (!horarioSelecionado) {
-        destacarCampoObrigatorio(null, "warningHorario");
-        erros.push("Selecione uma das próximas vagas disponíveis.");
+        alert("Selecione uma vaga disponível antes de confirmar.");
+        return;
       }
 
       if (!casalAtualId) {
@@ -451,25 +403,22 @@
         return;
       }
 
-      const nomeNoivoInput = document.getElementById("nomeNoivo");
-      const nomeNoivo = nomeNoivoInput.value.trim();
+      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
 
       if (!nomeNoivo) {
-        abrirSecaoSeOculta("informacoesFaltantesSection");
-        const campoNomeNoivo = document.getElementById("campoNomeNoivo");
-        if (campoNomeNoivo) campoNomeNoivo.classList.remove("hidden");
-        destacarCampoObrigatorio(nomeNoivoInput, null);
-        erros.push("Informe o nome do noivo.");
+        alert("Informe o nome do noivo antes de confirmar.");
+        return;
       }
 
       const origemSelecionada = document.querySelector("#origemSection .chip.selected");
-      const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
 
-      if (!origemFinal) {
-        abrirSecaoSeOculta("origemSection");
-        destacarCampoObrigatorio(null, "warningOrigem");
-        erros.push("Selecione como o casal conheceu o Espaço Margô.");
+      if (!origemSelecionada) {
+        alert("Selecione como o casal conheceu o Espaço Margô.");
+        return;
       }
+
+      const dataCard = horarioSelecionado.closest(".date-card");
+      const dataConsultoria = dataCard.dataset.date;
 
       const encantamentos = [];
 
@@ -477,26 +426,13 @@
         encantamentos.push(chip.dataset.value);
       });
 
-      if (encantamentos.length === 0) {
-        destacarCampoObrigatorio(null, "warningEncantamentos");
-        erros.push("Selecione pelo menos um item que encantou o casal pelas fotos e vídeos.");
-      }
-
-      if (erros.length > 0) {
-        alert("Antes de confirmar a consultoria, preencha:\n\n• " + erros.join("\n• "));
-        return;
-      }
-
-      const dataCard = horarioSelecionado.closest(".date-card");
-      const dataConsultoria = dataCard.dataset.date;
-
       const payload = {
         casal_id: casalAtualId,
         nome_noivo: nomeNoivo,
         email: document.getElementById("emailNoiva").value.trim(),
         data_consultoria: dataConsultoria,
         hora_consultoria: horaFormatada(horarioSelecionado.textContent.trim()),
-        como_conheceu_margo: origemFinal,
+        como_conheceu_margo: origemSelecionada.textContent.trim(),
         encantamentos_principais: encantamentos.join("|"),
         observacoes_gerais: document.getElementById("observacoesGerais").value.trim()
       };
@@ -526,14 +462,8 @@
         });
 
         setTimeout(() => {
-          let url = "oportunidades.html?aba=agendados&t=" + Date.now();
-
-          if (usuarioAtualId) {
-            url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
-          }
-
-          window.location.href = url;
-        }, 2200);
+          window.location.href = adicionarUsuarioNaUrl("oportunidades.html");
+        }, 1400);
 
       } catch (erro) {
         console.error(erro);
@@ -543,6 +473,9 @@
         botao.textContent = "❤️ Confirmar Consultoria";
       }
     }
+
+    document.getElementById("nomeNoivo").addEventListener("input", atualizarBlocoInformacoesFaltantes);
+    document.getElementById("emailNoiva").addEventListener("input", atualizarBlocoInformacoesFaltantes);
 
     carregarCasal();
   </script>
