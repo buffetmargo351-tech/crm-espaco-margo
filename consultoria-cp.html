@@ -506,20 +506,38 @@
           <div class="bloqueio-card-crm">
             <h1>Acesso bloqueado</h1>
             <p>${mensagem || "Você não tem permissão para acessar esta área do CRM."}</p>
-            <p>Entre em contato com a administração do Espaço Margô.</p>
+            <p>Sistema indisponível, tente mais tarde.</p>
             ${detalhe ? `<div class="codigo">${detalhe}</div>` : ""}
           </div>
         </div>
       `;
     }
 
+    function obterSenhaSessao() {
+      try {
+        const sessao = JSON.parse(localStorage.getItem("margo_usuario") || "{}");
+        return String(sessao.senha_acesso || "").trim();
+      } catch (erro) {
+        return "";
+      }
+    }
+
     async function validarUsuarioAntesDeAbrirConsultoriaCP() {
-      const usuarioId = pegarUsuarioIdDaUrl();
+      const usuarioId = pegarUsuarioIdDaUrl() || localStorage.getItem("margo_usuario_id") || "";
+      const senhaAcesso = obterSenhaSessao();
 
       if (!usuarioId) {
         bloquearAcessoCRM(
           "Link de acesso inválido. Usuário não informado.",
           "Código: usuario_id ausente"
+        );
+        return false;
+      }
+
+      if (!senhaAcesso) {
+        bloquearAcessoCRM(
+          "Faça login novamente para continuar.",
+          "Sessão não encontrada"
         );
         return false;
       }
@@ -531,7 +549,8 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            usuario_id: usuarioId
+            usuario_id: usuarioId,
+            senha_acesso: senhaAcesso
           })
         });
 
@@ -539,9 +558,14 @@
 
         const autorizado =
           dados.autorizado === true ||
-          dados.autorizado === "true";
+          dados.autorizado === "true" ||
+          dados.autorizado === "SIM";
 
-        const tipoUsuario = String(dados.tipo_usuario || "").trim().toUpperCase();
+        const acessoConsultoriaCp = String(
+          dados.acesso_consultoria_cp ||
+          (dados.acessos && dados.acessos.consultoria_cp) ||
+          ""
+        ).trim().toUpperCase();
 
         if (!autorizado) {
           bloquearAcessoCRM(
@@ -551,10 +575,10 @@
           return false;
         }
 
-        if (tipoUsuario !== "CP" && tipoUsuario !== "ADMIN") {
+        if (acessoConsultoriaCp !== "SIM") {
           bloquearAcessoCRM(
-            "Este acesso não tem permissão para abrir a área da Consultora Presencial.",
-            "Perfil identificado: " + (tipoUsuario || "não informado")
+            "Este acesso não tem permissão para abrir a área de consultoria presencial.",
+            "Permissão necessária: acesso_consultoria_cp"
           );
           return false;
         }
@@ -563,29 +587,16 @@
         window.MARGO_USUARIO_LOGADO = dados;
 
         document.body.classList.remove("crm-validando");
-
+        document.body.classList.add("crm-liberado");
         return true;
-
       } catch (erro) {
         console.error("Erro ao validar usuário:", erro);
-
         bloquearAcessoCRM(
           "Não foi possível validar seu acesso neste momento.",
-          "Erro de validação"
+          "Sistema indisponível, tente mais tarde."
         );
-
         return false;
       }
-    }
-
-    async function iniciarTelaComTrava() {
-      const acessoLiberado = await validarUsuarioAntesDeAbrirConsultoriaCP();
-
-      if (!acessoLiberado) {
-        return;
-      }
-
-      iniciarTelaComTrava();
     }
 
     async function iniciarTela() {
