@@ -364,10 +364,7 @@
         <div class="avatar" id="avatar">M</div>
         <div class="user-info">
           <div class="hello" id="helloText">Olá</div>
-          <div class="meta">
-            <span class="pill" id="tipoPill">USUÁRIO</span>
-            <span class="pill green" id="statusPill">ATIVO</span>
-          </div>
+          
         </div>
       </section>
 
@@ -413,7 +410,7 @@
       },
       {
         chave: "atendimento",
-        titulo: "Atendimento CHO",
+        titulo: "Consultoria Inicial",
         descricao: "Acompanhar conversas e atendimento das noivas.",
         icone: "💬",
         url: "index.html"
@@ -534,8 +531,8 @@
     function montarUsuario(usuario) {
       const nome = limpar(usuario.nome_usuario) || limpar(usuario.usuario_id) || "Usuário";
       helloText.textContent = "Olá, " + nome;
-      tipoPill.textContent = limpar(usuario.tipo_usuario) || "USUÁRIO";
-      statusPill.textContent = limpar(usuario.status_usuario) || "ATIVO";
+      if (tipoPill) tipoPill.textContent = limpar(usuario.tipo_usuario) || "USUÁRIO";
+      if (statusPill) statusPill.textContent = limpar(usuario.status_usuario) || "ATIVO";
 
       avatar.innerHTML = primeiraLetra(nome);
 
