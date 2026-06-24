@@ -229,7 +229,7 @@
     <main class="app">
       <header>
         <div class="top-bar">
-          <div class="menu-icon" onclick="abrirPerfil()">☰</div>
+          <div class="menu-icon" onclick="abrirMenu()">☰</div>
 
           <div class="logo">
             <div class="logo-small">ESPAÇO</div>
@@ -468,9 +468,41 @@
       });
     }
 
+    function lerSessao() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
+    function periodoDia() {
+      const hora = new Date().getHours();
+      if (hora >= 12 && hora < 18) return "Boa tarde";
+      if (hora >= 18 || hora < 5) return "Boa noite";
+      return "Bom dia";
+    }
+
+    function nomeUsuarioSessao() {
+      const sessao = lerSessao();
+      return String((sessao && sessao.nome_usuario) || "").trim();
+    }
+
+    function abrirMenu() {
+      const query = queryUsuario();
+      window.location.href = query ? "menu.html?" + query : "menu.html";
+    }
+
     async function carregarUsuario() {
+      const nomeSessao = nomeUsuarioSessao();
+
+      if (nomeSessao) {
+        document.getElementById("saudacao").textContent = periodoDia() + ", " + nomeSessao + " ☀️";
+        return;
+      }
+
       if (!usuarioAtualId) {
-        document.getElementById("saudacao").textContent = "Bom dia ☀️";
+        document.getElementById("saudacao").textContent = periodoDia() + " ☀️";
         return;
       }
 
@@ -483,15 +515,17 @@
           return String(usuario.usuario_id || "").trim() === String(usuarioAtualId).trim();
         });
 
-        if (usuarioAtual && usuarioAtual.nome) {
-          document.getElementById("saudacao").textContent = "Bom dia, " + usuarioAtual.nome + " ☀️";
+        const nome = usuarioAtual && (usuarioAtual.nome_usuario || usuarioAtual.nome);
+
+        if (nome) {
+          document.getElementById("saudacao").textContent = periodoDia() + ", " + nome + " ☀️";
         } else {
-          document.getElementById("saudacao").textContent = "Bom dia, consultora ☀️";
+          document.getElementById("saudacao").textContent = periodoDia() + " ☀️";
         }
 
       } catch (erro) {
         console.error("Erro ao carregar usuário:", erro);
-        document.getElementById("saudacao").textContent = "Bom dia, consultora ☀️";
+        document.getElementById("saudacao").textContent = periodoDia() + " ☀️";
       }
     }
 
