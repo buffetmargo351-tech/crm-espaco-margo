@@ -286,11 +286,11 @@
 
         <div class="message" id="mensagem"></div>
 
-        <div class="system-note">Sistema indisponível, tente mais tarde.</div>
+        <div class="system-note" id="systemNote" style="display:none;">Sistema indisponível, tente mais tarde.</div>
       </section>
     </main>
 
-    <div class="footer-version">CRM Comercial Espaço Margô</div>
+    <div class="footer-version">ESPAÇO MARGÔ - Aplicativo de Atendimento ao Cliente</div>
   </div>
 
   <div class="loading-overlay" id="loadingOverlay">
@@ -310,6 +310,8 @@
     const btnEntrar = document.getElementById("btnEntrar");
     const mensagem = document.getElementById("mensagem");
     const loadingOverlay = document.getElementById("loadingOverlay");
+    const systemNote = document.getElementById("systemNote");
+    let tentativasInvalidas = 0;
 
     function limpar(valor) {
       return String(valor || "").trim();
@@ -318,6 +320,10 @@
     function setMensagem(texto, tipo) {
       mensagem.textContent = texto || "";
       mensagem.className = "message" + (tipo ? " " + tipo : "");
+    }
+
+    function mostrarNotaSistema(mostrar) {
+      systemNote.style.display = mostrar ? "block" : "none";
     }
 
     function setLoading(ativo) {
@@ -405,15 +411,37 @@
 
       try {
         setMensagem("", "");
+        mostrarNotaSistema(false);
         setLoading(true);
 
         const dados = await validarLogin(usuarioId, senhaAcesso);
 
         if (!dados || dados.autorizado !== true) {
           setLoading(false);
-          setMensagem(dados && dados.mensagem ? dados.mensagem : "Usuário ou senha inválidos.", "error");
+
+          const motivo = limpar(dados && dados.motivo).toLowerCase();
+          const mensagemServidor = limpar(dados && dados.mensagem);
+
+          if (motivo.includes("inativo")) {
+            mostrarNotaSistema(true);
+            setMensagem("Acesso bloqueado.", "error");
+            return;
+          }
+
+          tentativasInvalidas += 1;
+
+          if (tentativasInvalidas >= 3) {
+            mostrarNotaSistema(true);
+            setMensagem("Acesso não autorizado.", "error");
+            return;
+          }
+
+          setMensagem(mensagemServidor || "Usuário ou senha inválidos.", "error");
           return;
         }
+
+        tentativasInvalidas = 0;
+        mostrarNotaSistema(false);
 
         const destino = escolherDestino(dados);
 
