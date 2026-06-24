@@ -119,6 +119,7 @@
     }
 
     .contact {
+      display: none;
       font-size: 12px;
       color: #7d6461;
       font-weight: 800;
@@ -299,7 +300,7 @@
   <div class="phone-frame">
     <main class="app">
       <header class="top">
-        <button class="back" onclick="voltarHome()">‹</button>
+        <button class="back" onclick="abrirMenu()">☰</button>
 
         <div class="page-title">Meu Perfil</div>
 
@@ -367,18 +368,35 @@
   </div>
 
   <script>
-    const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+    const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/listar-usuarios";
 
     let usuarioAtualId = pegarUsuarioIdDaUrl();
 
+    function limpar(valor) {
+      return String(valor || "").trim();
+    }
+
+    function lerSessao() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
     function pegarUsuarioIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("usuario_id") || "";
+      return params.get("usuario_id") || localStorage.getItem("margo_usuario_id") || "";
     }
 
     function montarQueryUsuario() {
       if (!usuarioAtualId) return "";
       return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function abrirMenu() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "menu.html?" + query : "menu.html";
     }
 
     function voltarHome() {
@@ -397,8 +415,9 @@
     }
 
     function primeiraLetra(nome) {
-      if (!nome) return "?";
-      return String(nome).trim().charAt(0).toUpperCase();
+      const texto = limpar(nome);
+      if (!texto) return "?";
+      return texto.charAt(0).toUpperCase();
     }
 
     function labelTipoUsuario(tipo) {
@@ -409,6 +428,15 @@
       if (valor === "ADMIN") return "Administrador";
 
       return "Usuário";
+    }
+
+    function normalizarUsuario(usuario) {
+      return {
+        usuario_id: limpar(usuario.usuario_id),
+        nome: limpar(usuario.nome_usuario || usuario.nome),
+        tipo_usuario: limpar(usuario.tipo_usuario),
+        foto_url: limpar(usuario.foto_url)
+      };
     }
 
     function renderizarFoto(usuario) {
@@ -428,22 +456,26 @@
       }
     }
 
-    function renderizarUsuario(usuario) {
+    function renderizarUsuario(usuarioBruto) {
+      const usuario = normalizarUsuario(usuarioBruto);
       renderizarFoto(usuario);
 
-      document.getElementById("nomePerfil").textContent = usuario.nome || "Usuário sem nome";
+      document.getElementById("nomePerfil").textContent = usuario.nome || "Perfil";
       document.getElementById("tipoPerfil").textContent = labelTipoUsuario(usuario.tipo_usuario);
-
-      document.getElementById("contatoPerfil").innerHTML = `
-        📱 ${usuario.telefone || "--"}<br>
-        ✉️ ${usuario.email || "--"}
-      `;
+      document.getElementById("contatoPerfil").innerHTML = "";
     }
 
     async function carregarUsuario() {
+      const sessao = lerSessao();
+
+      if (sessao && limpar(sessao.usuario_id) === limpar(usuarioAtualId)) {
+        renderizarUsuario(sessao);
+      }
+
       if (!usuarioAtualId) {
-        document.getElementById("nomePerfil").textContent = "Usuário não informado";
-        document.getElementById("tipoPerfil").textContent = "Acesse pelo link da consultora";
+        document.getElementById("nomePerfil").textContent = "Perfil";
+        document.getElementById("tipoPerfil").textContent = "";
+        document.getElementById("contatoPerfil").innerHTML = "";
         return;
       }
 
@@ -457,8 +489,11 @@
         });
 
         if (!usuario) {
-          document.getElementById("nomePerfil").textContent = "Usuário não encontrado";
-          document.getElementById("tipoPerfil").textContent = usuarioAtualId;
+          if (!(sessao && limpar(sessao.usuario_id) === limpar(usuarioAtualId))) {
+            document.getElementById("nomePerfil").textContent = "Perfil";
+            document.getElementById("tipoPerfil").textContent = "";
+            document.getElementById("contatoPerfil").innerHTML = "";
+          }
           return;
         }
 
@@ -466,7 +501,9 @@
 
       } catch (erro) {
         console.error("Erro ao carregar perfil:", erro);
-        document.getElementById("nomePerfil").textContent = "Erro ao carregar perfil";
+        if (!(sessao && limpar(sessao.usuario_id) === limpar(usuarioAtualId))) {
+          document.getElementById("nomePerfil").textContent = "Perfil";
+        }
       }
     }
 
