@@ -52,6 +52,45 @@
       line-height: 1.1;
     }
 
+    .menu-opcoes {
+      position: absolute;
+      top: 62px;
+      left: 22px;
+      width: 190px;
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-radius: 16px;
+      box-shadow: 0 16px 38px rgba(0,0,0,0.14);
+      padding: 8px;
+      z-index: 20;
+    }
+
+    .menu-opcoes.hidden {
+      display: none;
+    }
+
+    .menu-opcao {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #4a2f2d;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 11px 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .menu-opcao:hover {
+      background: #fbf0f1;
+      color: #c45668;
+    }
+
+
     .logo-small {
       font-size: 11px;
       letter-spacing: 2px;
@@ -229,7 +268,7 @@
     <main class="app">
       <header>
         <div class="top-bar">
-          <div class="menu-icon" onclick="abrirMenu()">☰</div>
+          <div class="menu-icon" onclick="abrirMenuOpcoes()">☰</div>
 
           <div class="logo">
             <div class="logo-small">ESPAÇO</div>
@@ -305,9 +344,26 @@
       return "usuario_id=" + encodeURIComponent(usuarioAtualId);
     }
 
+    function abrirMenuOpcoes() {
+      const menu = document.getElementById("menuOpcoes");
+      if (!menu) return;
+      menu.classList.toggle("hidden");
+    }
+
+    function fecharMenuOpcoes() {
+      const menu = document.getElementById("menuOpcoes");
+      if (!menu) return;
+      menu.classList.add("hidden");
+    }
+
     function abrirPerfil() {
       const query = queryUsuario();
       window.location.href = query ? "perfil.html?" + query : "perfil.html";
+    }
+
+    function irParaMenuPrincipal() {
+      const query = queryUsuario();
+      window.location.href = query ? "menu.html?" + query : "menu.html";
     }
 
     function montarUrlAtendimento(casalId) {
@@ -489,9 +545,17 @@
     }
 
     function abrirMenu() {
-      const query = queryUsuario();
-      window.location.href = query ? "menu.html?" + query : "menu.html";
+      irParaMenuPrincipal();
     }
+
+
+    document.addEventListener("click", function(event) {
+      const menu = document.getElementById("menuOpcoes");
+      const botao = document.querySelector(".menu-icon");
+      if (!menu || menu.classList.contains("hidden")) return;
+      if (menu.contains(event.target) || botao.contains(event.target)) return;
+      fecharMenuOpcoes();
+    });
 
     async function carregarUsuario() {
       const nomeSessao = nomeUsuarioSessao();
