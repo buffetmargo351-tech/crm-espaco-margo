@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CRM Espaço Margô - Menu</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: #f4f0ef;
+      color: #2f2423;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 0 30px rgba(47, 36, 35, 0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #f1dddd;
+      padding: 14px 16px 12px;
+    }
+
+    .topbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #fffafa;
+      color: #d85f6f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 900;
+      transition: transform 0.12s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    .logo {
+      text-align: center;
+      line-height: 1;
+      color: #d85f6f;
+      flex: 1;
+    }
+
+    .logo-small {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      color: #c98288;
+      margin-bottom: 2px;
+    }
+
+    .logo-main {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 25px;
+      letter-spacing: 2px;
+      font-weight: 500;
+      color: #d85f6f;
+    }
+
+    .content {
+      flex: 1;
+      padding: 18px 16px 30px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .page-title {
+      font-size: 23px;
+      font-weight: 950;
+      color: #2f2423;
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: #7b6867;
+      line-height: 1.35;
+    }
+
+    .user-card {
+      border: 1px solid #f1dddd;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #fffafa 100%);
+      box-shadow: 0 12px 24px rgba(47, 36, 35, 0.08);
+      padding: 15px;
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 17px;
+    }
+
+    .avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #f7dddd;
+      border: 1px solid #eed0d2;
+      flex: 0 0 auto;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c98288;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hello {
+      font-size: 16px;
+      font-weight: 950;
+      color: #2f2423;
+      margin-bottom: 4px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid #f0ced2;
+      background: #fff7f7;
+      color: #d85f6f;
+      white-space: nowrap;
+    }
+
+    .pill.green {
+      background: #e7f7e9;
+      border-color: #c5eccb;
+      color: #2f7d51;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 950;
+      color: #2f2423;
+      margin: 20px 2px 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .menu-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .menu-card {
+      width: 100%;
+      border: 1px solid #f1dddd;
+      border-radius: 20px;
+      background: #ffffff;
+      color: #2f2423;
+      padding: 14px 14px;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 8px 18px rgba(47, 36, 35, 0.05);
+      transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .menu-card:active {
+      transform: scale(0.985);
+    }
+
+    .menu-card:hover {
+      border-color: #d85f6f;
+      box-shadow: 0 10px 22px rgba(216, 95, 111, 0.10);
+    }
+
+    .menu-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 16px;
+      background: #fff3f4;
+      color: #d85f6f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      flex: 0 0 auto;
+    }
+
+    .menu-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .menu-title {
+      font-size: 14px;
+      font-weight: 950;
+      color: #2f2423;
+      margin-bottom: 2px;
+    }
+
+    .menu-desc {
+      font-size: 12px;
+      color: #7b6867;
+      line-height: 1.25;
+    }
+
+    .menu-arrow {
+      color: #d85f6f;
+      font-size: 20px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .empty {
+      display: none;
+      border: 1px solid #f1dddd;
+      background: #fffafa;
+      border-radius: 22px;
+      padding: 22px 16px;
+      text-align: center;
+      color: #7b6867;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .logout-btn {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 18px;
+      border: 1px solid #eadada;
+      background: #fffafa;
+      color: #b53a48;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(244, 240, 239, 0.78);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .loading-box {
+      width: 220px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid #f1dddd;
+      box-shadow: 0 18px 40px rgba(47, 36, 35, 0.13);
+      padding: 22px 18px;
+      text-align: center;
+      color: #2f2423;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid #f4d5d9;
+      border-top-color: #d85f6f;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <header class="topbar">
+      <div class="topbar-row">
+        <button class="icon-btn" type="button" id="btnRefresh" title="Atualizar">↻</button>
+        <div class="logo" aria-label="Espaço Margô">
+          <span class="logo-small">ESPAÇO</span>
+          <span class="logo-main">MARGÔ</span>
+        </div>
+        <button class="icon-btn" type="button" id="btnLogoutTop" title="Sair">⎋</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="hero">
+        <h1 class="page-title">App de Atendimento</h1>
+        <p class="page-subtitle">Escolha a área que deseja acessar.</p>
+      </section>
+
+      <section class="user-card">
+        <div class="avatar" id="avatar">M</div>
+        <div class="user-info">
+          <div class="hello" id="helloText">Olá</div>
+          <div class="meta">
+            <span class="pill" id="tipoPill">USUÁRIO</span>
+            <span class="pill green" id="statusPill">ATIVO</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-title">🔐 Acessos liberados</div>
+      <section class="menu-grid" id="menuGrid"></section>
+
+      <section class="empty" id="emptyState">
+        Nenhum acesso liberado para este usuário.
+      </section>
+
+      <button class="logout-btn" type="button" id="btnLogout">Sair do sistema</button>
+    </main>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      Carregando menu...
+    </div>
+  </div>
+
+  <script>
+    const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
+
+    const menuGrid = document.getElementById("menuGrid");
+    const emptyState = document.getElementById("emptyState");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const helloText = document.getElementById("helloText");
+    const tipoPill = document.getElementById("tipoPill");
+    const statusPill = document.getElementById("statusPill");
+    const avatar = document.getElementById("avatar");
+    const btnLogout = document.getElementById("btnLogout");
+    const btnLogoutTop = document.getElementById("btnLogoutTop");
+    const btnRefresh = document.getElementById("btnRefresh");
+
+    const DEFINICOES_MENU = [
+      {
+        chave: "home",
+        titulo: "Home / Início",
+        descricao: "Painel inicial com novos casais, oportunidades e resultados.",
+        icone: "🏠",
+        url: "index.html"
+      },
+      {
+        chave: "atendimento",
+        titulo: "Atendimento CHO",
+        descricao: "Acompanhar conversas e atendimento das noivas.",
+        icone: "💬",
+        url: "index.html"
+      },
+      {
+        chave: "consultoria",
+        titulo: "Consultoria / Agendamento",
+        descricao: "Confirmar dados e agendar consultorias.",
+        icone: "📅",
+        url: "consultoria.html"
+      },
+      {
+        chave: "consultoria_cp",
+        titulo: "Consultoria Presencial",
+        descricao: "Registrar visita, encantamento e atendimento presencial.",
+        icone: "🤝",
+        url: "consultoria-cp.html"
+      },
+      {
+        chave: "oportunidades",
+        titulo: "Oportunidades",
+        descricao: "Ver oportunidades, visitas e acompanhamentos comerciais.",
+        icone: "📌",
+        url: "oportunidades.html"
+      },
+      {
+        chave: "perfil",
+        titulo: "Perfil",
+        descricao: "Consultar e revisar dados do usuário.",
+        icone: "👤",
+        url: "perfil.html"
+      },
+      {
+        chave: "simulador",
+        titulo: "Simulador de Lead",
+        descricao: "Criar lead manual para testes ou cadastro interno.",
+        icone: "🧪",
+        url: "simulador-lead.html"
+      },
+      {
+        chave: "admin",
+        titulo: "Administração de Usuários",
+        descricao: "Cadastrar usuários e definir acessos.",
+        icone: "⚙️",
+        url: "admin-usuarios.html"
+      }
+    ];
+
+    function limpar(valor) {
+      return String(valor || "").trim();
+    }
+
+    function acessoSim(valor) {
+      return limpar(valor).toUpperCase() === "SIM";
+    }
+
+    function getParametro(nome) {
+      const params = new URLSearchParams(window.location.search);
+      return limpar(params.get(nome));
+    }
+
+    function lerSessao() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
+    function salvarSessao(usuario, senha) {
+      const sessao = {
+        usuario_id: usuario.usuario_id || "",
+        nome_usuario: usuario.nome_usuario || "",
+        tipo_usuario: usuario.tipo_usuario || "",
+        status_usuario: usuario.status_usuario || "",
+        foto_url: usuario.foto_url || "",
+        acessos: usuario.acessos || {},
+        senha_acesso: senha || "",
+        data_login: new Date().toISOString()
+      };
+
+      localStorage.setItem("margo_usuario", JSON.stringify(sessao));
+      localStorage.setItem("margo_usuario_id", usuario.usuario_id || "");
+    }
+
+    function sair() {
+      localStorage.removeItem("margo_usuario");
+      localStorage.removeItem("margo_usuario_id");
+      window.location.href = "login.html";
+    }
+
+    async function validarUsuario(usuarioId, senhaAcesso) {
+      const resposta = await fetch(API_VALIDAR_USUARIO, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          usuario_id: usuarioId,
+          senha_acesso: senhaAcesso
+        })
+      });
+
+      const texto = await resposta.text();
+
+      try {
+        return JSON.parse(texto);
+      } catch (erro) {
+        throw new Error("Resposta inválida do servidor");
+      }
+    }
+
+    function primeiraLetra(nome) {
+      const texto = limpar(nome);
+      return texto ? texto.charAt(0).toUpperCase() : "M";
+    }
+
+    function montarUsuario(usuario) {
+      const nome = limpar(usuario.nome_usuario) || limpar(usuario.usuario_id) || "Usuário";
+      helloText.textContent = "Olá, " + nome;
+      tipoPill.textContent = limpar(usuario.tipo_usuario) || "USUÁRIO";
+      statusPill.textContent = limpar(usuario.status_usuario) || "ATIVO";
+
+      avatar.innerHTML = primeiraLetra(nome);
+
+      if (limpar(usuario.foto_url)) {
+        const img = document.createElement("img");
+        img.src = usuario.foto_url;
+        img.alt = nome;
+        img.onerror = () => {
+          avatar.innerHTML = primeiraLetra(nome);
+        };
+        avatar.innerHTML = "";
+        avatar.appendChild(img);
+      }
+    }
+
+    function abrirPagina(url, usuarioId) {
+      const separador = url.includes("?") ? "&" : "?";
+      window.location.href = url + separador + "usuario_id=" + encodeURIComponent(usuarioId);
+    }
+
+    function criarCardMenu(item, usuarioId) {
+      const botao = document.createElement("button");
+      botao.className = "menu-card";
+      botao.type = "button";
+      botao.innerHTML = `
+        <div class="menu-icon">${item.icone}</div>
+        <div class="menu-text">
+          <div class="menu-title">${item.titulo}</div>
+          <div class="menu-desc">${item.descricao}</div>
+        </div>
+        <div class="menu-arrow">›</div>
+      `;
+      botao.addEventListener("click", () => abrirPagina(item.url, usuarioId));
+      return botao;
+    }
+
+    function montarMenu(usuario) {
+      const acessos = usuario.acessos || {};
+      const usuarioId = limpar(usuario.usuario_id);
+      menuGrid.innerHTML = "";
+
+      const liberados = DEFINICOES_MENU.filter(item => acessoSim(acessos[item.chave]));
+
+      liberados.forEach(item => {
+        menuGrid.appendChild(criarCardMenu(item, usuarioId));
+      });
+
+      emptyState.style.display = liberados.length ? "none" : "block";
+    }
+
+    async function iniciar() {
+      try {
+        loadingOverlay.style.display = "flex";
+
+        const sessao = lerSessao();
+        const usuarioUrl = getParametro("usuario_id");
+        const usuarioId = limpar(usuarioUrl || (sessao && sessao.usuario_id));
+        const senhaAcesso = limpar(sessao && sessao.senha_acesso);
+
+        if (!usuarioId || !senhaAcesso) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const dados = await validarUsuario(usuarioId, senhaAcesso);
+
+        if (!dados || dados.autorizado !== true) {
+          sair();
+          return;
+        }
+
+        salvarSessao(dados, senhaAcesso);
+        montarUsuario(dados);
+        montarMenu(dados);
+      } catch (erro) {
+        console.error(erro);
+        alert("Sistema indisponível, tente mais tarde.");
+      } finally {
+        loadingOverlay.style.display = "none";
+      }
+    }
+
+    btnLogout.addEventListener("click", sair);
+    btnLogoutTop.addEventListener("click", sair);
+    btnRefresh.addEventListener("click", iniciar);
+
+    iniciar();
+  </script>
+</body>
+</html>
