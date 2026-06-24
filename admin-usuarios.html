@@ -501,6 +501,13 @@
       line-height: 1;
     }
 
+    #formNovoUsuario {
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+
     .modal-body {
       overflow-y: auto;
       padding: 16px 18px 18px;
@@ -730,17 +737,17 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label" for="novo_nome_usuario">Nome</label>
-            <input class="form-input" id="novo_nome_usuario" name="nome_usuario" type="text" placeholder="Ex.: Thaís" required />
+            <input class="form-input" id="novo_nome_usuario" name="nome_usuario" type="text" required />
           </div>
 
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label" for="novo_usuario_id">Usuário</label>
-              <input class="form-input" id="novo_usuario_id" name="usuario_id" type="text" placeholder="thais1855" required />
+              <input class="form-input" id="novo_usuario_id" name="usuario_id" type="text" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="novo_senha_acesso">Senha</label>
-              <input class="form-input" id="novo_senha_acesso" name="senha_acesso" type="text" placeholder="1855" />
+              <input class="form-input" id="novo_senha_acesso" name="senha_acesso" type="text" />
             </div>
           </div>
 
@@ -773,24 +780,23 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="novo_ordem_rodizio">Ordem rodízio</label>
-              <input class="form-input" id="novo_ordem_rodizio" name="ordem_rodizio" type="number" inputmode="numeric" placeholder="1" />
+              <input class="form-input" id="novo_ordem_rodizio" name="ordem_rodizio" type="number" inputmode="numeric" />
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="novo_telefone_whatsapp_comercial">WhatsApp comercial</label>
-            <input class="form-input" id="novo_telefone_whatsapp_comercial" name="telefone_whatsapp_comercial" type="tel" placeholder="11999998888" />
-            <div class="small-note">Pode digitar com ou sem 55. O sistema salva no formato internacional.</div>
+            <input class="form-input" id="novo_telefone_whatsapp_comercial" name="telefone_whatsapp_comercial" type="tel" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="novo_data_cadastro_inicio">Data de cadastro/início</label>
-            <input class="form-input" id="novo_data_cadastro_inicio" name="data_cadastro_inicio" type="text" placeholder="24/06/2026" />
+            <input class="form-input" id="novo_data_cadastro_inicio" name="data_cadastro_inicio" type="text" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="novo_foto_url">Foto URL</label>
-            <input class="form-input" id="novo_foto_url" name="foto_url" type="url" placeholder="https://..." />
+            <input class="form-input" id="novo_foto_url" name="foto_url" type="url" />
           </div>
 
           <div class="section-title" style="margin-top:6px;margin-bottom:0;">
@@ -810,7 +816,7 @@
 
           <div class="form-group">
             <label class="form-label" for="novo_observacoes_usuario">Observações</label>
-            <textarea class="form-textarea" id="novo_observacoes_usuario" name="observacoes_usuario" placeholder="Observações internas"></textarea>
+            <textarea class="form-textarea" id="novo_observacoes_usuario" name="observacoes_usuario"></textarea>
           </div>
         </div>
 
@@ -1024,8 +1030,6 @@
       const iniciais = obterIniciais(nome);
       const telefone = usuario.telefone_whatsapp_comercial_formatado || formatarTelefoneBR(usuario.telefone_whatsapp_comercial) || "-";
       const dataInicio = usuario.data_cadastro_inicio || usuario.data_criacao || "-";
-      const senha = usuario.senha_acesso ? "••••••••" : "-";
-
       card.innerHTML = `
         <div class="user-card-top">
           <div class="avatar">${montarAvatar(usuario.foto_url, iniciais)}</div>
@@ -1041,10 +1045,6 @@
         </div>
 
         <div class="user-grid">
-          <div class="field">
-            <span class="field-label">Senha</span>
-            <span class="field-value">${senha}</span>
-          </div>
           <div class="field">
             <span class="field-label">Ordem no rodízio</span>
             <span class="field-value">${escapar(usuario.ordem_rodizio || "-")}</span>
