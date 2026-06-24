@@ -333,37 +333,13 @@
     function escolherDestino(usuario) {
       const acessos = usuario.acessos || {};
       const usuarioId = encodeURIComponent(usuario.usuario_id || "");
-      const parametro = "?usuario_id=" + usuarioId;
+      const temAlgumAcesso = Object.values(acessos).some(valor => acessoSim(valor));
 
-      if (acessoSim(acessos.home)) {
-        return "index.html" + parametro;
+      if (!temAlgumAcesso) {
+        return "";
       }
 
-      if (acessoSim(acessos.consultoria_cp)) {
-        return "consultoria-cp.html" + parametro;
-      }
-
-      if (acessoSim(acessos.atendimento)) {
-        return "index.html" + parametro;
-      }
-
-      if (acessoSim(acessos.oportunidades)) {
-        return "oportunidades.html" + parametro;
-      }
-
-      if (acessoSim(acessos.perfil)) {
-        return "perfil.html" + parametro;
-      }
-
-      if (acessoSim(acessos.simulador)) {
-        return "simulador-lead.html" + parametro;
-      }
-
-      if (acessoSim(acessos.admin)) {
-        return "admin-usuarios.html" + parametro;
-      }
-
-      return "";
+      return "menu.html?usuario_id=" + usuarioId;
     }
 
     function salvarSessao(usuario, senha) {
