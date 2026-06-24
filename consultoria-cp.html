@@ -600,10 +600,16 @@
     }
 
     async function iniciarTela() {
-      usuarioAtualId = pegarUsuarioIdDaUrl();
+      usuarioAtualId = pegarUsuarioIdDaUrl() || localStorage.getItem("margo_usuario_id") || "";
       casalAtualId = pegarCasalIdDaUrl();
       await carregarVisitasAgendadas();
       if (casalAtualId) await carregarCasal();
+    }
+
+    async function iniciarTelaComTrava() {
+      const liberado = await validarUsuarioAntesDeAbrirConsultoriaCP();
+      if (!liberado) return;
+      await iniciarTela();
     }
 
     iniciarTelaComTrava();
