@@ -907,14 +907,33 @@
       });
     }
 
+    function obterSenhaSessao() {
+      try {
+        const sessao = JSON.parse(localStorage.getItem("margo_usuario") || "{}");
+        return String(sessao.senha_acesso || "").trim();
+      } catch (erro) {
+        return "";
+      }
+    }
+
     async function validarAcessoAdmin(usuarioId) {
       try {
+        const senhaAcesso = obterSenhaSessao();
+
+        if (!senhaAcesso) {
+          mostrarBloqueio("Acesso bloqueado.<br />Faça login novamente para continuar.");
+          return false;
+        }
+
         const resposta = await fetch(API_VALIDAR_USUARIO, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ usuario_id: usuarioId })
+          body: JSON.stringify({
+            usuario_id: usuarioId,
+            senha_acesso: senhaAcesso
+          })
         });
 
         const data = await resposta.json();
@@ -928,7 +947,7 @@
           return false;
         }
 
-        if (tipo !== "ADMIN" && acessoAdmin !== "SIM") {
+        if (acessoAdmin !== "SIM") {
           mostrarBloqueio("Acesso bloqueado.<br />Seu usuário não possui permissão para administrar usuários.");
           return false;
         }
