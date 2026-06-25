@@ -120,31 +120,12 @@
 
       <section class="section">
         <div class="section-title">✨ Próximas vagas disponíveis</div>
-
-        <div class="date-card" data-date="27/06/2026">
-          <div class="date-title">Sábado • 27/06</div>
-          <div class="slots">
-            <button class="slot" onclick="selecionarHorario(this)">11h</button>
-            <button class="slot" onclick="selecionarHorario(this)">13h</button>
-            <button class="slot" onclick="selecionarHorario(this)">15h</button>
-          </div>
-        </div>
-
-        <div class="date-card" data-date="04/07/2026">
-          <div class="date-title">Sábado • 04/07</div>
-          <div class="slots">
-            <button class="slot" onclick="selecionarHorario(this)">11h</button>
-            <button class="slot" onclick="selecionarHorario(this)">13h</button>
-            <button class="slot" onclick="selecionarHorario(this)">15h</button>
-            <button class="slot" onclick="selecionarHorario(this)">17h</button>
-          </div>
-        </div>
-
-        <div class="date-card" data-date="05/07/2026">
-          <div class="date-title">Domingo • 05/07</div>
-          <div class="slots">
-            <button class="slot" onclick="selecionarHorario(this)">11h</button>
-            <button class="slot" onclick="selecionarHorario(this)">13h</button>
+        <div id="agendaConsultoriasLista">
+          <div class="date-card">
+            <div class="date-title">Carregando vagas...</div>
+            <div class="slots">
+              <button class="slot" type="button" disabled>aguarde</button>
+            </div>
           </div>
         </div>
       </section>
@@ -213,6 +194,7 @@
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
+    const API_AGENDA_CONSULTORIAS = "https://n8n.espacomargo.com.br/webhook/crm/listar-agenda-consultorias";
 
     let casalAtualId = null;
 
@@ -264,6 +246,88 @@
 
       if (noiva && noivo) return noiva + " ❤️ " + noivo;
       return noiva || noivo || "Casal sem nome";
+    }
+
+    function formatarHoraBotao(hora) {
+      const texto = limpar(hora);
+
+      if (!texto) return "";
+
+      const partes = texto.split(":");
+      const h = String(Number(partes[0] || 0));
+      const m = String(partes[1] || "00").padStart(2, "0");
+
+      if (m === "00") return h + "h";
+
+      return h + "h" + m;
+    }
+
+    function criarMensagemAgenda(texto) {
+      const container = document.getElementById("agendaConsultoriasLista");
+      container.innerHTML = `
+        <div class="date-card">
+          <div class="date-title">${texto}</div>
+          <div class="slots">
+            <button class="slot" type="button" disabled>sem vagas</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function carregarAgendaConsultorias() {
+      const container = document.getElementById("agendaConsultoriasLista");
+
+      try {
+        const resposta = await fetch(API_AGENDA_CONSULTORIAS);
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao buscar agenda de consultorias");
+        }
+
+        const dados = await resposta.json();
+        const grupos = Array.isArray(dados.grupos) ? dados.grupos : [];
+
+        if (!grupos.length) {
+          criarMensagemAgenda("Nenhuma vaga disponível no momento");
+          return;
+        }
+
+        container.innerHTML = grupos.map(grupo => {
+          const horarios = Array.isArray(grupo.horarios) ? grupo.horarios : [];
+
+          const botoes = horarios.map(horario => {
+            const hora = limpar(horario.hora);
+            const agendaId = limpar(horario.agenda_id);
+            const vagasLivres = limpar(horario.vagas_livres);
+            const consultoras = limpar(horario.consultoras_disponiveis);
+
+            return `
+              <button
+                class="slot"
+                type="button"
+                data-agenda-id="${agendaId}"
+                data-hora="${hora}"
+                data-vagas-livres="${vagasLivres}"
+                data-consultoras-disponiveis="${consultoras}"
+                onclick="selecionarHorario(this)"
+              >${formatarHoraBotao(hora)}</button>
+            `;
+          }).join("");
+
+          return `
+            <div class="date-card" data-date="${limpar(grupo.data)}">
+              <div class="date-title">${limpar(grupo.data_exibicao) || limpar(grupo.data)}</div>
+              <div class="slots">
+                ${botoes}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (erro) {
+        console.error("Erro ao carregar agenda:", erro);
+        criarMensagemAgenda("Erro ao carregar vagas");
+      }
     }
 
     function atualizarBlocoInformacoesFaltantes() {
@@ -385,7 +449,20 @@
     }
 
     function horaFormatada(texto) {
-      return texto.replace("h", "").padStart(2, "0") + ":00";
+      const valor = limpar(texto);
+
+      if (!valor) return "";
+
+      if (valor.includes(":")) return valor;
+
+      if (valor.includes("h")) {
+        const partes = valor.split("h");
+        const h = String(partes[0] || "").padStart(2, "0");
+        const m = String(partes[1] || "00").padStart(2, "0");
+        return h + ":" + m;
+      }
+
+      return valor.padStart(2, "0") + ":00";
     }
 
     async function confirmarConsultoria() {
@@ -419,6 +496,8 @@
 
       const dataCard = horarioSelecionado.closest(".date-card");
       const dataConsultoria = dataCard.dataset.date;
+      const agendaId = horarioSelecionado.dataset.agendaId || "";
+      const horaSelecionada = horarioSelecionado.dataset.hora || horarioSelecionado.textContent.trim();
 
       const encantamentos = [];
 
@@ -431,7 +510,8 @@
         nome_noivo: nomeNoivo,
         email: document.getElementById("emailNoiva").value.trim(),
         data_consultoria: dataConsultoria,
-        hora_consultoria: horaFormatada(horarioSelecionado.textContent.trim()),
+        hora_consultoria: horaFormatada(horaSelecionada),
+        agenda_id: agendaId,
         como_conheceu_margo: origemSelecionada.textContent.trim(),
         encantamentos_principais: encantamentos.join("|"),
         observacoes_gerais: document.getElementById("observacoesGerais").value.trim()
@@ -477,6 +557,7 @@
     document.getElementById("nomeNoivo").addEventListener("input", atualizarBlocoInformacoesFaltantes);
     document.getElementById("emailNoiva").addEventListener("input", atualizarBlocoInformacoesFaltantes);
 
+    carregarAgendaConsultorias();
     carregarCasal();
   </script>
 </body>
