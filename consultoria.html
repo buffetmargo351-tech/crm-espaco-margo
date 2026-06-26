@@ -193,7 +193,7 @@
 
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
-    const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
+    const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/registrar-visita-agendada";
     const API_AGENDA_CONSULTORIAS = "https://n8n.espacomargo.com.br/webhook/crm/listar-agenda-consultorias";
 
     let casalAtualId = null;
@@ -386,8 +386,10 @@
 
         atualizarBlocoInformacoesFaltantes();
 
-        if (casal.origem) {
-          selecionarChipPorTexto("origemSection", casal.origem);
+        const origemCasal = limpar(casal.como_conheceu_margo || casal.origem);
+
+        if (origemCasal) {
+          selecionarChipPorTexto("origemSection", origemCasal);
         }
 
         if (casal.encantamentos_principais) {
@@ -480,7 +482,7 @@
         return;
       }
 
-      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
+      const nomeNoivo = limpar(document.getElementById("nomeNoivo").value);
 
       if (!nomeNoivo) {
         alert("Informe o nome do noivo antes de confirmar.");
@@ -494,27 +496,66 @@
         return;
       }
 
-      const dataCard = horarioSelecionado.closest(".date-card");
-      const dataConsultoria = dataCard.dataset.date;
-      const agendaId = horarioSelecionado.dataset.agendaId || "";
-      const horaSelecionada = horarioSelecionado.dataset.hora || horarioSelecionado.textContent.trim();
-
       const encantamentos = [];
 
       document.querySelectorAll("#encantamentosSection .chip.selected").forEach(chip => {
-        encantamentos.push(chip.dataset.value);
+        encantamentos.push(limpar(chip.dataset.value || chip.textContent));
       });
+
+      if (encantamentos.length === 0) {
+        alert("Selecione pelo menos um item que encantou o casal.");
+        return;
+      }
+
+      const dataCard = horarioSelecionado.closest(".date-card");
+      const dataConsultoria = limpar(dataCard && dataCard.dataset.date);
+      const agendaId = limpar(horarioSelecionado.dataset.agendaId);
+      const horaSelecionada = limpar(horarioSelecionado.dataset.hora || horarioSelecionado.textContent);
+
+      if (!agendaId) {
+        alert("Erro: agenda_id não encontrado para este horário.");
+        return;
+      }
+
+      if (!dataConsultoria || !horaSelecionada) {
+        alert("Erro: data ou horário da consultoria não encontrados.");
+        return;
+      }
+
+      const usuarioId = pegarUsuarioId();
+
+      const consultorasDisponiveisTexto = limpar(horarioSelecionado.dataset.consultorasDisponiveis);
+      const consultorasDisponiveis = consultorasDisponiveisTexto
+        .split(",")
+        .map(item => limpar(item))
+        .filter(Boolean);
+
+      let consultoraResponsavel = usuarioId;
+
+      if (consultorasDisponiveis.length > 0) {
+        if (usuarioId && consultorasDisponiveis.includes(usuarioId)) {
+          consultoraResponsavel = usuarioId;
+        } else {
+          consultoraResponsavel = consultorasDisponiveis[0];
+        }
+      }
 
       const payload = {
         casal_id: casalAtualId,
-        nome_noivo: nomeNoivo,
-        email: document.getElementById("emailNoiva").value.trim(),
+
+        agenda_id: agendaId,
         data_consultoria: dataConsultoria,
         hora_consultoria: horaFormatada(horaSelecionada),
-        agenda_id: agendaId,
-        como_conheceu_margo: origemSelecionada.textContent.trim(),
+
+        usuario_id: usuarioId,
+        consultora_responsavel: consultoraResponsavel,
+        origem: "CRM_AGENDAR_CONSULTORIA",
+
+        nome_noivo: nomeNoivo,
+        email: limpar(document.getElementById("emailNoiva").value),
+        como_conheceu_margo: limpar(origemSelecionada.textContent),
         encantamentos_principais: encantamentos.join("|"),
-        observacoes_gerais: document.getElementById("observacoesGerais").value.trim()
+        observacoes_gerais: limpar(document.getElementById("observacoesGerais").value)
       };
 
       const botao = document.getElementById("btnConfirmar");
@@ -530,8 +571,14 @@
           body: JSON.stringify(payload)
         });
 
+        const textoResposta = await resposta.text();
+
+        console.log("STATUS v25:", resposta.status);
+        console.log("RESPOSTA v25:", textoResposta);
+        console.log("PAYLOAD ENVIADO:", payload);
+
         if (!resposta.ok) {
-          throw new Error("Erro ao salvar consultoria");
+          throw new Error(textoResposta || "Erro ao salvar consultoria");
         }
 
         document.getElementById("successBox").classList.add("open");
@@ -542,11 +589,11 @@
         });
 
         setTimeout(() => {
-          window.location.href = adicionarUsuarioNaUrl("oportunidades.html");
+          window.location.href = adicionarUsuarioNaUrl("oportunidades.html?aba=agendados&t=" + Date.now());
         }, 1400);
 
       } catch (erro) {
-        console.error(erro);
+        console.error("Erro ao confirmar consultoria:", erro);
         alert("Erro ao confirmar consultoria.");
 
         botao.disabled = false;
