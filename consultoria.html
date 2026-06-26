@@ -331,30 +331,13 @@
     }
 
     function atualizarBlocoInformacoesFaltantes() {
-      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
-      const emailNoiva = document.getElementById("emailNoiva").value.trim();
-
       const section = document.getElementById("informacoesFaltantesSection");
       const campoNomeNoivo = document.getElementById("campoNomeNoivo");
       const campoEmailNoiva = document.getElementById("campoEmailNoiva");
 
-      if (nomeNoivo) {
-        campoNomeNoivo.classList.add("hidden");
-      } else {
-        campoNomeNoivo.classList.remove("hidden");
-      }
-
-      if (emailNoiva) {
-        campoEmailNoiva.classList.add("hidden");
-      } else {
-        campoEmailNoiva.classList.remove("hidden");
-      }
-
-      if (nomeNoivo && emailNoiva) {
-        section.classList.add("hidden");
-      } else {
-        section.classList.remove("hidden");
-      }
+      if (section) section.classList.remove("hidden");
+      if (campoNomeNoivo) campoNomeNoivo.classList.remove("hidden");
+      if (campoEmailNoiva) campoEmailNoiva.classList.remove("hidden");
     }
 
     async function carregarCasal() {
@@ -524,22 +507,6 @@
 
       const usuarioId = pegarUsuarioId();
 
-      const consultorasDisponiveisTexto = limpar(horarioSelecionado.dataset.consultorasDisponiveis);
-      const consultorasDisponiveis = consultorasDisponiveisTexto
-        .split(",")
-        .map(item => limpar(item))
-        .filter(Boolean);
-
-      let consultoraResponsavel = usuarioId;
-
-      if (consultorasDisponiveis.length > 0) {
-        if (usuarioId && consultorasDisponiveis.includes(usuarioId)) {
-          consultoraResponsavel = usuarioId;
-        } else {
-          consultoraResponsavel = consultorasDisponiveis[0];
-        }
-      }
-
       const payload = {
         casal_id: casalAtualId,
 
@@ -548,7 +515,6 @@
         hora_consultoria: horaFormatada(horaSelecionada),
 
         usuario_id: usuarioId,
-        consultora_responsavel: consultoraResponsavel,
         origem: "CRM_AGENDAR_CONSULTORIA",
 
         nome_noivo: nomeNoivo,
@@ -601,9 +567,8 @@
       }
     }
 
-    document.getElementById("nomeNoivo").addEventListener("input", atualizarBlocoInformacoesFaltantes);
-    document.getElementById("emailNoiva").addEventListener("input", atualizarBlocoInformacoesFaltantes);
-
+    // Não ocultar campos enquanto a consultora digita.
+    // A seção de informações faltantes fica sempre visível nesta tela.
     carregarAgendaConsultorias();
     carregarCasal();
   </script>
