@@ -364,6 +364,7 @@
     const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
+    const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
 
     let usuarioAtualId = pegarUsuarioIdDaUrl();
     let usuarioAtual = null;
@@ -660,6 +661,68 @@
       fecharMenuOpcoes();
     });
 
+    function extrairListaUsuarios(dados) {
+      if (Array.isArray(dados)) return dados;
+      if (dados && Array.isArray(dados.usuarios)) return dados.usuarios;
+      if (dados && Array.isArray(dados.data)) return dados.data;
+      if (dados && dados.usuario_id) return [dados];
+      return [];
+    }
+
+    function campoPreenchido(valor) {
+      return limpar(valor) !== "";
+    }
+
+    function combinarUsuarios(base, extra) {
+      const combinado = Object.assign({}, base || {});
+
+      Object.keys(extra || {}).forEach(chave => {
+        if (!campoPreenchido(combinado[chave]) && campoPreenchido(extra[chave])) {
+          combinado[chave] = extra[chave];
+        }
+      });
+
+      return combinado;
+    }
+
+    async function buscarUsuarioLista() {
+      try {
+        const resposta = await fetch(API_USUARIOS + "?t=" + Date.now(), { cache: "no-store" });
+        const dados = await resposta.json();
+        const usuarios = extrairListaUsuarios(dados);
+        return usuarios.find(usuario => {
+          return String(usuario.usuario_id || "").trim() === String(usuarioAtualId).trim();
+        }) || null;
+      } catch (erro) {
+        console.warn("Erro ao buscar usuário na lista:", erro);
+        return null;
+      }
+    }
+
+    async function buscarUsuarioValidado() {
+      try {
+        const sessao = lerSessao();
+        const senhaAcesso = limpar(sessao && sessao.senha_acesso);
+        if (!usuarioAtualId || !senhaAcesso) return null;
+
+        const resposta = await fetch(API_VALIDAR_USUARIO, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario_id: usuarioAtualId,
+            senha_acesso: senhaAcesso
+          })
+        });
+
+        const dados = await resposta.json();
+        if (!dados || dados.autorizado !== true) return null;
+        return dados;
+      } catch (erro) {
+        console.warn("Erro ao validar usuário para carregar foto:", erro);
+        return null;
+      }
+    }
+
     async function carregarUsuario() {
       const sessao = lerSessao();
       const nomeSessao = limpar(sessao && sessao.nome_usuario);
@@ -674,13 +737,9 @@
       }
 
       try {
-        const resposta = await fetch(API_USUARIOS + "?t=" + Date.now());
-        const dados = await resposta.json();
-
-        const usuarios = dados.usuarios || [];
-        usuarioAtual = usuarios.find(usuario => {
-          return String(usuario.usuario_id || "").trim() === String(usuarioAtualId).trim();
-        });
+        const usuarioLista = await buscarUsuarioLista();
+        const usuarioValidado = await buscarUsuarioValidado();
+        usuarioAtual = combinarUsuarios(combinarUsuarios(sessao, usuarioLista), usuarioValidado);
 
         if (usuarioAtual) {
           aplicarFotoUsuarioTopo(usuarioAtual);
