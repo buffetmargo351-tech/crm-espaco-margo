@@ -34,7 +34,7 @@
 
     .top {
       display: grid;
-      grid-template-columns: 42px 1fr 82px;
+      grid-template-columns: 42px 1fr 42px;
       align-items: center;
       margin-bottom: 20px;
     }
@@ -235,6 +235,10 @@
       margin-top: 2px;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .resgate-btn {
       width: 100%;
       height: 46px;
@@ -304,10 +308,7 @@
 
         <div class="page-title">Meu Perfil</div>
 
-        <div class="top-actions">
-          <button class="icon-btn" onclick="alert('Configurações serão ativadas em breve.')">⚙️</button>
-          <button class="icon-btn" onclick="alert('Sair do app será ativado em breve.')">↪</button>
-        </div>
+        <div></div>
       </header>
 
       <section class="profile">
@@ -324,7 +325,7 @@
         </div>
       </section>
 
-      <div class="section-label">Meu Resultado</div>
+      <div class="section-label">Meus Resultados</div>
 
       <section class="result-grid">
         <div class="result-card">
@@ -334,9 +335,9 @@
           <div class="big-number">0</div>
           <div class="caption">contratos fechados</div>
 
-          <div class="money">
+          <div class="money" id="comissaoMesAtual">
             R$ 0,00
-            <small>em comissão</small>
+            <small id="labelComissaoMesAtual">em comissão</small>
           </div>
         </div>
 
@@ -347,9 +348,9 @@
           <div class="big-number">0</div>
           <div class="caption">casais para resgatar</div>
 
-          <div class="money">
+          <div class="money" id="comissaoEmAberto">
             R$ 0,00
-            <small>potencial de comissão</small>
+            <small id="labelComissaoEmAberto">potencial de comissão</small>
           </div>
         </div>
       </section>
@@ -430,12 +431,52 @@
       return "Usuário";
     }
 
+    function primeiraFuncaoDisponivel(usuario) {
+      return (
+        limpar(usuario.funcao_exibicao) ||
+        limpar(usuario.funcao) ||
+        limpar(usuario.cargo) ||
+        limpar(usuario.perfil_exibicao) ||
+        labelTipoUsuario(usuario.tipo_usuario)
+      );
+    }
+
+    function primeiroPercentualDisponivel(usuario) {
+      return (
+        limpar(usuario.percentual_comissao) ||
+        limpar(usuario.comissao_percentual) ||
+        limpar(usuario.percentual) ||
+        limpar(usuario.comissao)
+      );
+    }
+
+    function formatarPercentualComissao(valor) {
+      const texto = limpar(valor);
+
+      if (!texto) return "";
+
+      if (texto.includes("%")) return texto;
+
+      const numero = Number(texto.replace(",", "."));
+
+      if (Number.isNaN(numero) || numero <= 0) return "";
+
+      const percentual = numero <= 1 ? numero * 100 : numero;
+
+      return percentual.toLocaleString("pt-BR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }) + "%";
+    }
+
     function normalizarUsuario(usuario) {
       return {
         usuario_id: limpar(usuario.usuario_id),
         nome: limpar(usuario.nome_usuario || usuario.nome),
         tipo_usuario: limpar(usuario.tipo_usuario),
-        foto_url: limpar(usuario.foto_url)
+        funcao_exibicao: primeiraFuncaoDisponivel(usuario),
+        foto_url: limpar(usuario.foto_url),
+        percentual_comissao: primeiroPercentualDisponivel(usuario)
       };
     }
 
@@ -456,12 +497,33 @@
       }
     }
 
+    function renderizarComissao(usuario) {
+      const percentual = formatarPercentualComissao(usuario.percentual_comissao);
+      const comissaoMesAtual = document.getElementById("comissaoMesAtual");
+      const comissaoEmAberto = document.getElementById("comissaoEmAberto");
+      const labelMesAtual = document.getElementById("labelComissaoMesAtual");
+      const labelEmAberto = document.getElementById("labelComissaoEmAberto");
+
+      if (!percentual) {
+        comissaoMesAtual.classList.add("hidden");
+        comissaoEmAberto.classList.add("hidden");
+        return;
+      }
+
+      comissaoMesAtual.classList.remove("hidden");
+      comissaoEmAberto.classList.remove("hidden");
+
+      labelMesAtual.textContent = "em comissão (" + percentual + ")";
+      labelEmAberto.textContent = "potencial de comissão (" + percentual + ")";
+    }
+
     function renderizarUsuario(usuarioBruto) {
       const usuario = normalizarUsuario(usuarioBruto);
       renderizarFoto(usuario);
+      renderizarComissao(usuario);
 
       document.getElementById("nomePerfil").textContent = usuario.nome || "Perfil";
-      document.getElementById("tipoPerfil").textContent = labelTipoUsuario(usuario.tipo_usuario);
+      document.getElementById("tipoPerfil").textContent = usuario.funcao_exibicao || labelTipoUsuario(usuario.tipo_usuario);
       document.getElementById("contatoPerfil").innerHTML = "";
     }
 
