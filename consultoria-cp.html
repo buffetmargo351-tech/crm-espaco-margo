@@ -244,7 +244,7 @@
     }
 
     function voltar() {
-      let url = "oportunidades.html?aba=agendados&t=" + Date.now();
+      let url = "menu.html?t=" + Date.now();
       if (usuarioAtualId) url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
       window.location.href = url;
     }
