@@ -74,6 +74,12 @@
       transform: scale(0.96);
     }
 
+    .topbar-spacer {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+    }
+
     .logo {
       text-align: center;
       line-height: 1;
@@ -350,7 +356,7 @@
           <span class="logo-small">ESPAÇO</span>
           <span class="logo-main">MARGÔ</span>
         </div>
-        <button class="icon-btn" type="button" id="btnLogoutTop" title="Sair">⎋</button>
+        <div class="topbar-spacer" aria-hidden="true"></div>
       </div>
     </header>
 
@@ -368,7 +374,6 @@
         </div>
       </section>
 
-      <div class="section-title">🔐 Acessos liberados</div>
       <section class="menu-grid" id="menuGrid"></section>
 
       <section class="empty" id="emptyState">
@@ -397,7 +402,6 @@
     const statusPill = document.getElementById("statusPill");
     const avatar = document.getElementById("avatar");
     const btnLogout = document.getElementById("btnLogout");
-    const btnLogoutTop = document.getElementById("btnLogoutTop");
     const btnRefresh = document.getElementById("btnRefresh");
 
     const DEFINICOES_MENU = [
@@ -417,7 +421,7 @@
       },
       {
         chave: "consultoria",
-        titulo: "Consultoria / Agendamento",
+        titulo: "Agendamento",
         descricao: "Confirmar dados e agendar consultorias.",
         icone: "📅",
         url: "consultoria.html"
@@ -616,7 +620,6 @@
     }
 
     btnLogout.addEventListener("click", sair);
-    btnLogoutTop.addEventListener("click", sair);
     btnRefresh.addEventListener("click", iniciar);
 
     iniciar();
