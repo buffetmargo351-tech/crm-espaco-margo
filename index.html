@@ -39,11 +39,44 @@
       margin-bottom: 14px;
     }
 
-    .menu-icon,
-    .bell-icon {
+    .menu-icon {
       font-size: 25px;
       color: #4a2f2d;
       cursor: pointer;
+    }
+
+    .usuario-topo {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #fff7f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      padding: 0;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    }
+
+    .usuario-foto-topo {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d85f6f;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .usuario-foto-topo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .logo {
@@ -275,7 +308,9 @@
             <div class="logo-main">MARGÔ</div>
           </div>
 
-          <div class="bell-icon">🔔</div>
+          <button type="button" class="usuario-topo" onclick="abrirPerfil()" aria-label="Abrir perfil">
+            <span class="usuario-foto-topo" id="fotoUsuarioTopo">?</span>
+          </button>
         </div>
 
         <div id="menuOpcoes" class="menu-opcoes hidden">
@@ -341,7 +376,26 @@
 
     function pegarUsuarioIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("usuario_id") || "";
+      const usuarioUrl = limpar(params.get("usuario_id"));
+      const sessao = lerSessao();
+      const usuarioSessao = limpar(sessao && sessao.usuario_id);
+      const usuarioLocal = limpar(localStorage.getItem("margo_usuario_id"));
+
+      return usuarioUrl || usuarioSessao || usuarioLocal || "";
+    }
+
+    function garantirSessaoObrigatoria() {
+      const sessao = lerSessao();
+      const usuarioSessao = limpar(sessao && sessao.usuario_id);
+
+      if (!usuarioSessao) {
+        localStorage.removeItem("margo_usuario");
+        localStorage.removeItem("margo_usuario_id");
+        window.location.replace("login.html");
+        return false;
+      }
+
+      return true;
     }
 
     function queryUsuario() {
@@ -549,6 +603,43 @@
       return String((sessao && sessao.nome_usuario) || "").trim();
     }
 
+    function iniciaisUsuario(usuario) {
+      const nome = limpar((usuario && (usuario.nome_usuario || usuario.nome)) || "");
+
+      if (!nome) return "?";
+
+      const partes = nome.split(/\s+/).filter(Boolean);
+      const primeira = partes[0] ? partes[0].charAt(0) : "";
+      const segunda = partes.length > 1 ? partes[partes.length - 1].charAt(0) : "";
+
+      return (primeira + segunda).toUpperCase() || "?";
+    }
+
+    function aplicarFotoUsuarioTopo(usuario) {
+      const container = document.getElementById("fotoUsuarioTopo");
+      if (!container) return;
+
+      const fotoUrl = limpar(usuario && usuario.foto_url);
+      const iniciais = iniciaisUsuario(usuario);
+
+      container.innerHTML = "";
+
+      if (!fotoUrl) {
+        container.textContent = iniciais;
+        return;
+      }
+
+      const imagem = document.createElement("img");
+      imagem.src = fotoUrl;
+      imagem.alt = "Foto do usuário";
+      imagem.onerror = function () {
+        container.innerHTML = "";
+        container.textContent = iniciais;
+      };
+
+      container.appendChild(imagem);
+    }
+
     function abrirMenu() {
       irParaMenuPrincipal();
     }
@@ -563,11 +654,11 @@
     });
 
     async function carregarUsuario() {
-      const nomeSessao = nomeUsuarioSessao();
+      const sessao = lerSessao();
+      const nomeSessao = limpar(sessao && sessao.nome_usuario);
 
-      if (nomeSessao) {
-        document.getElementById("saudacao").textContent = periodoDia() + ", " + nomeSessao + " ☀️";
-        return;
+      if (sessao) {
+        aplicarFotoUsuarioTopo(sessao);
       }
 
       if (!usuarioAtualId) {
@@ -584,7 +675,11 @@
           return String(usuario.usuario_id || "").trim() === String(usuarioAtualId).trim();
         });
 
-        const nome = usuarioAtual && (usuarioAtual.nome_usuario || usuarioAtual.nome);
+        if (usuarioAtual) {
+          aplicarFotoUsuarioTopo(usuarioAtual);
+        }
+
+        const nome = limpar((usuarioAtual && (usuarioAtual.nome_usuario || usuarioAtual.nome)) || nomeSessao);
 
         if (nome) {
           document.getElementById("saudacao").textContent = periodoDia() + ", " + nome + " ☀️";
@@ -594,7 +689,12 @@
 
       } catch (erro) {
         console.error("Erro ao carregar usuário:", erro);
-        document.getElementById("saudacao").textContent = periodoDia() + " ☀️";
+
+        if (nomeSessao) {
+          document.getElementById("saudacao").textContent = periodoDia() + ", " + nomeSessao + " ☀️";
+        } else {
+          document.getElementById("saudacao").textContent = periodoDia() + " ☀️";
+        }
       }
     }
 
@@ -635,16 +735,20 @@
     }
 
     window.addEventListener("pageshow", function () {
-      carregarCasais();
-    });
-
-    document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) {
+      if (garantirSessaoObrigatoria()) {
         carregarCasais();
       }
     });
 
-    iniciarHome();
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden && garantirSessaoObrigatoria()) {
+        carregarCasais();
+      }
+    });
+
+    if (garantirSessaoObrigatoria()) {
+      iniciarHome();
+    }
   </script>
 </body>
 </html>
