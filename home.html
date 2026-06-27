@@ -308,14 +308,14 @@
     <main class="app">
       <header>
         <div class="top-bar">
-          <button type="button" class="menu-icon" onclick="irParaMenuPrincipal()" aria-label="Abrir menu">☰</button>
+          <button type="button" class="menu-icon" onclick="window.location.href='menu.html' + (localStorage.getItem('margo_usuario_id') ? '?usuario_id=' + encodeURIComponent(localStorage.getItem('margo_usuario_id')) : '')" aria-label="Abrir menu">☰</button>
 
           <div class="logo">
             <div class="logo-small">ESPAÇO</div>
             <div class="logo-main">MARGÔ</div>
           </div>
 
-          <button type="button" class="usuario-topo" onclick="abrirPerfil()" aria-label="Abrir perfil">
+          <button type="button" class="usuario-topo" onclick="window.location.href='perfil.html' + (localStorage.getItem('margo_usuario_id') ? '?usuario_id=' + encodeURIComponent(localStorage.getItem('margo_usuario_id')) : '')" aria-label="Abrir perfil">
             <span class="usuario-foto-topo" id="fotoUsuarioTopo">?</span>
           </button>
         </div>
@@ -412,7 +412,7 @@
     }
 
     function abrirMenuOpcoes() {
-      irParaMenuPrincipal();
+      window.location.href = 'menu.html' + (localStorage.getItem('margo_usuario_id') ? '?usuario_id=' + encodeURIComponent(localStorage.getItem('margo_usuario_id')) : '');
     }
 
     function fecharMenuOpcoes() {
@@ -422,13 +422,11 @@
     }
 
     function abrirPerfil() {
-      const query = queryUsuario();
-      window.location.href = query ? "perfil.html?" + query : "perfil.html";
+      window.location.href = 'perfil.html' + (localStorage.getItem('margo_usuario_id') ? '?usuario_id=' + encodeURIComponent(localStorage.getItem('margo_usuario_id')) : '');
     }
 
     function irParaMenuPrincipal() {
-      const query = queryUsuario();
-      window.location.href = query ? "menu.html?" + query : "menu.html";
+      window.location.href = 'menu.html' + (localStorage.getItem('margo_usuario_id') ? '?usuario_id=' + encodeURIComponent(localStorage.getItem('margo_usuario_id')) : '');
     }
 
     function montarUrlAtendimento(casalId) {
