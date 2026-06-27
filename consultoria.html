@@ -47,6 +47,12 @@
       box-shadow: 0 5px 12px rgba(216,95,111,0.13);
     }
 
+    .retry-agenda {
+      border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff;
+      border-radius: 999px; padding: 8px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
+      box-shadow: 0 7px 14px rgba(216,95,111,0.16);
+    }
+
     .missing-card {
       background: #ffffff; border: 1px solid #eadada; border-radius: 16px;
       padding: 11px 12px; margin-bottom: 8px; box-shadow: 0 7px 16px rgba(0,0,0,0.04);
@@ -262,72 +268,114 @@
       return h + "h" + m;
     }
 
-    function criarMensagemAgenda(texto) {
+    function criarMensagemAgenda(texto, permitirTentarNovamente = false) {
       const container = document.getElementById("agendaConsultoriasLista");
+      const botaoRetry = permitirTentarNovamente
+        ? '<button class="retry-agenda" type="button" onclick="carregarAgendaConsultorias()">Tentar carregar novamente</button>'
+        : '<button class="slot" type="button" disabled>aguarde</button>';
+
       container.innerHTML = `
         <div class="date-card">
           <div class="date-title">${texto}</div>
           <div class="slots">
-            <button class="slot" type="button" disabled>sem vagas</button>
+            ${botaoRetry}
           </div>
         </div>
       `;
     }
 
-    async function carregarAgendaConsultorias() {
-      const container = document.getElementById("agendaConsultoriasLista");
+    function esperar(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function fetchComTimeout(url, timeoutMs = 12000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
-        const resposta = await fetch(API_AGENDA_CONSULTORIAS);
+        const resposta = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal
+        });
 
-        if (!resposta.ok) {
-          throw new Error("Erro ao buscar agenda de consultorias");
-        }
+        return resposta;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
-        const dados = await resposta.json();
-        const grupos = Array.isArray(dados.grupos) ? dados.grupos : [];
+    async function carregarAgendaConsultorias() {
+      const container = document.getElementById("agendaConsultoriasLista");
+      criarMensagemAgenda("Carregando vagas...");
 
-        if (!grupos.length) {
-          criarMensagemAgenda("Nenhuma vaga disponível no momento");
-          return;
-        }
+      let ultimoErro = null;
 
-        container.innerHTML = grupos.map(grupo => {
-          const horarios = Array.isArray(grupo.horarios) ? grupo.horarios : [];
+      for (let tentativa = 1; tentativa <= 3; tentativa++) {
+        try {
+          const url = API_AGENDA_CONSULTORIAS + "?t=" + Date.now() + "&tentativa=" + tentativa;
+          const resposta = await fetchComTimeout(url, 12000);
 
-          const botoes = horarios.map(horario => {
-            const hora = limpar(horario.hora);
-            const agendaId = limpar(horario.agenda_id);
-            const vagasLivres = limpar(horario.vagas_livres);
-            const consultoras = limpar(horario.consultoras_disponiveis);
+          if (!resposta.ok) {
+            throw new Error("Erro ao buscar agenda de consultorias");
+          }
+
+          const textoResposta = await resposta.text();
+          const dados = textoResposta ? JSON.parse(textoResposta) : {};
+          const grupos = Array.isArray(dados.grupos) ? dados.grupos : [];
+
+          if (!grupos.length) {
+            criarMensagemAgenda("Nenhuma vaga disponível no momento", true);
+            return;
+          }
+
+          container.innerHTML = grupos.map(grupo => {
+            const horarios = Array.isArray(grupo.horarios) ? grupo.horarios : [];
+
+            const botoes = horarios.map(horario => {
+              const hora = limpar(horario.hora);
+              const agendaId = limpar(horario.agenda_id);
+              const vagasLivres = limpar(horario.vagas_livres);
+              const consultoras = limpar(horario.consultoras_disponiveis);
+
+              return `
+                <button
+                  class="slot"
+                  type="button"
+                  data-agenda-id="${agendaId}"
+                  data-hora="${hora}"
+                  data-vagas-livres="${vagasLivres}"
+                  data-consultoras-disponiveis="${consultoras}"
+                  onclick="selecionarHorario(this)"
+                >${formatarHoraBotao(hora)}</button>
+              `;
+            }).join("");
 
             return `
-              <button
-                class="slot"
-                type="button"
-                data-agenda-id="${agendaId}"
-                data-hora="${hora}"
-                data-vagas-livres="${vagasLivres}"
-                data-consultoras-disponiveis="${consultoras}"
-                onclick="selecionarHorario(this)"
-              >${formatarHoraBotao(hora)}</button>
+              <div class="date-card" data-date="${limpar(grupo.data)}">
+                <div class="date-title">${limpar(grupo.data_exibicao) || limpar(grupo.data)}</div>
+                <div class="slots">
+                  ${botoes || '<button class="slot" type="button" disabled>sem vagas</button>'}
+                </div>
+              </div>
             `;
           }).join("");
 
-          return `
-            <div class="date-card" data-date="${limpar(grupo.data)}">
-              <div class="date-title">${limpar(grupo.data_exibicao) || limpar(grupo.data)}</div>
-              <div class="slots">
-                ${botoes}
-              </div>
-            </div>
-          `;
-        }).join("");
+          return;
 
-      } catch (erro) {
-        console.error("Erro ao carregar agenda:", erro);
-        criarMensagemAgenda("Erro ao carregar vagas");
+        } catch (erro) {
+          ultimoErro = erro;
+          console.error("Erro ao carregar agenda. Tentativa " + tentativa + ":", erro);
+
+          if (tentativa < 3) {
+            criarMensagemAgenda("Carregando vagas... tentando novamente");
+            await esperar(900);
+          }
+        }
       }
+
+      console.error("Erro final ao carregar agenda:", ultimoErro);
+      criarMensagemAgenda("Não foi possível carregar as vagas agora", true);
     }
 
     function atualizarBlocoInformacoesFaltantes() {
