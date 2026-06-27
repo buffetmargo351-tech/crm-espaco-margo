@@ -96,6 +96,9 @@
       font-weight: 900;
       box-shadow: 0 8px 18px rgba(0,0,0,0.06);
       overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .photo img {
@@ -506,19 +509,42 @@
 
     function renderizarFoto(usuario) {
       const foto = document.getElementById("fotoPerfil");
-      foto.innerHTML = "";
+      if (!foto) return;
 
-      if (usuario.foto_url) {
-        const img = document.createElement("img");
-        img.src = usuario.foto_url + (usuario.foto_url.includes("?") ? "&" : "?") + "v=" + Date.now();
-        img.alt = usuario.nome || "Foto da consultora";
-        img.onerror = function () {
-          foto.innerHTML = primeiraLetra(usuario.nome);
-        };
-        foto.appendChild(img);
-      } else {
-        foto.textContent = primeiraLetra(usuario.nome);
+      let fotoUrl = limpar(usuario && usuario.foto_url);
+      const inicial = primeiraLetra(usuario && usuario.nome);
+
+      foto.innerHTML = "";
+      foto.textContent = "";
+      foto.style.backgroundImage = "";
+      foto.style.backgroundSize = "cover";
+      foto.style.backgroundPosition = "center";
+      foto.style.backgroundRepeat = "no-repeat";
+
+      if (!fotoUrl) {
+        foto.textContent = inicial;
+        return;
       }
+
+      fotoUrl = fotoUrl.replace(/^http:\/\//i, "https://");
+
+      const urlFinal = fotoUrl + (fotoUrl.includes("?") ? "&" : "?") + "v=" + Date.now();
+      const teste = new Image();
+
+      teste.onload = function () {
+        foto.innerHTML = "";
+        foto.textContent = "";
+        foto.style.backgroundImage = `url("${urlFinal}")`;
+      };
+
+      teste.onerror = function () {
+        console.warn("Erro ao carregar foto do perfil:", urlFinal);
+        foto.innerHTML = "";
+        foto.style.backgroundImage = "";
+        foto.textContent = inicial;
+      };
+
+      teste.src = urlFinal;
     }
 
     function renderizarComissao(usuario) {
