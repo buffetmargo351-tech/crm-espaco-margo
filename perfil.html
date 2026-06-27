@@ -371,6 +371,7 @@
   <script>
     const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/listar-usuarios";
     const API_USUARIOS_ALTERNATIVO = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
+    const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
 
     let usuarioAtualId = pegarUsuarioIdDaUrl();
 
@@ -509,7 +510,7 @@
 
       if (usuario.foto_url) {
         const img = document.createElement("img");
-        img.src = usuario.foto_url;
+        img.src = usuario.foto_url + (usuario.foto_url.includes("?") ? "&" : "?") + "v=" + Date.now();
         img.alt = usuario.nome || "Foto da consultora";
         img.onerror = function () {
           foto.innerHTML = primeiraLetra(usuario.nome);
@@ -536,8 +537,8 @@
       comissaoMesAtual.classList.remove("hidden");
       comissaoEmAberto.classList.remove("hidden");
 
-      labelMesAtual.textContent = "em comissão (" + percentual + ")";
-      labelEmAberto.textContent = "potencial de comissão (" + percentual + ")";
+      labelMesAtual.textContent = "comissão: " + percentual + " sobre contratos do mês";
+      labelEmAberto.textContent = "potencial: " + percentual + " sobre contratos em aberto";
     }
 
     function renderizarUsuario(usuarioBruto) {
@@ -589,10 +590,36 @@
       }
     }
 
+    async function buscarUsuarioValidado() {
+      try {
+        const sessao = lerSessao();
+        const senhaAcesso = limpar(sessao && sessao.senha_acesso);
+        if (!usuarioAtualId || !senhaAcesso) return null;
+
+        const resposta = await fetch(API_VALIDAR_USUARIO, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario_id: usuarioAtualId,
+            senha_acesso: senhaAcesso
+          })
+        });
+
+        const dados = await resposta.json();
+        if (!dados || dados.autorizado !== true) return null;
+        return dados;
+      } catch (erro) {
+        console.warn("Erro ao validar usuário:", erro);
+        return null;
+      }
+    }
+
     async function buscarUsuarioCompleto() {
       const usuarioPrincipal = await buscarUsuarioEmApi(API_USUARIOS);
       const usuarioAlternativo = await buscarUsuarioEmApi(API_USUARIOS_ALTERNATIVO);
-      return combinarUsuarios(usuarioPrincipal, usuarioAlternativo);
+      const usuarioValidado = await buscarUsuarioValidado();
+      const sessao = lerSessao();
+      return combinarUsuarios(combinarUsuarios(combinarUsuarios(sessao, usuarioPrincipal), usuarioAlternativo), usuarioValidado);
     }
 
     async function carregarUsuario() {
