@@ -367,6 +367,10 @@
     const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
 
+    function limpar(valor) {
+      return String(valor || "").trim();
+    }
+
     let usuarioAtualId = pegarUsuarioIdDaUrl();
     let usuarioAtual = null;
 
