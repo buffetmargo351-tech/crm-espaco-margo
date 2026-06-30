@@ -698,7 +698,7 @@
 
     function voltarHome() {
       const query = montarQueryUsuario();
-      window.location.href = query ? "index.html?" + query : "index.html";
+      window.location.href = query ? "home.html?" + query : "home.html";
     }
 
     function nomeCasal(casal) {
@@ -1307,6 +1307,55 @@
       `;
     }
 
+    function lerSessaoUsuarioCRM() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
+    function textoLimpoCRM(valor) {
+      return String(valor || "").trim();
+    }
+
+    function simCRM(valor) {
+      return textoLimpoCRM(valor).toUpperCase() === "SIM";
+    }
+
+    function usuarioPodeAbrirAtendimento(usuario) {
+      if (!usuario) return { ok: false, motivo: "Sessão não encontrada." };
+
+      const tipoUsuario = textoLimpoCRM(usuario.tipo_usuario).toUpperCase();
+      const statusUsuario = textoLimpoCRM(usuario.status_usuario).toUpperCase();
+      const acessos = usuario.acessos || {};
+
+      if (statusUsuario && statusUsuario !== "ATIVO") {
+        return { ok: false, motivo: "Usuário inativo." };
+      }
+
+      if (tipoUsuario === "ADMIN") {
+        return { ok: true, motivo: "Administrador autorizado." };
+      }
+
+      if (tipoUsuario !== "CHO") {
+        return { ok: false, motivo: "Perfil sem acesso ao atendimento." };
+      }
+
+      const acessoAtendimento = textoLimpoCRM(acessos.atendimento || usuario.acesso_atendimento).toUpperCase();
+
+      if (acessoAtendimento === "NAO") {
+        return { ok: false, motivo: "Usuário sem permissão de atendimento." };
+      }
+
+      // Se a sessão foi criada antes de existir o campo de permissões, libera CHO ativo.
+      if (!acessoAtendimento || acessoAtendimento === "SIM") {
+        return { ok: true, motivo: "CHO autorizado." };
+      }
+
+      return { ok: false, motivo: "Permissão de atendimento inválida." };
+    }
+
     async function validarUsuarioAntesDeAbrirAtendimento() {
       const usuarioId = pegarUsuarioIdDaUrl();
 
@@ -1318,62 +1367,38 @@
         return false;
       }
 
-      try {
-        const resposta = await fetch(API_VALIDAR_USUARIO, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            usuario_id: usuarioId
-          })
-        });
+      const sessao = lerSessaoUsuarioCRM();
+      const usuarioSessaoId = textoLimpoCRM(sessao && sessao.usuario_id);
 
-        if (!resposta.ok) {
-          throw new Error("Falha HTTP na validação do usuário");
-        }
+      // Caminho principal: usuário já fez login. Não exige senha novamente nesta tela.
+      if (sessao && usuarioSessaoId === usuarioId) {
+        const permissao = usuarioPodeAbrirAtendimento(sessao);
 
-        const dados = await resposta.json();
-
-        const autorizado =
-          dados.autorizado === true ||
-          dados.autorizado === "true";
-
-        const tipoUsuario = String(dados.tipo_usuario || "").trim().toUpperCase();
-
-        if (!autorizado) {
+        if (!permissao.ok) {
           bloquearAcessoCRM(
-            dados.mensagem || "Seu acesso está inativo ou não autorizado.",
+            permissao.motivo || "Você não tem permissão para acessar esta área do CRM.",
             "Usuário: " + usuarioId
           );
           return false;
         }
 
-        if (tipoUsuario !== "CHO" && tipoUsuario !== "ADMIN") {
-          bloquearAcessoCRM(
-            "Este acesso não tem permissão para abrir a área de atendimento da CHO.",
-            "Perfil identificado: " + (tipoUsuario || "não informado")
-          );
-          return false;
-        }
-
         window.MARGO_USUARIO_VALIDADO = true;
-        window.MARGO_USUARIO_LOGADO = dados;
-
+        window.MARGO_USUARIO_LOGADO = sessao;
         document.body.classList.remove("crm-validando");
-
         return true;
-
-      } catch (erro) {
-        console.error("Erro ao validar usuário:", erro);
-
-        bloquearAcessoCRM(
-          "Não foi possível validar seu acesso neste momento.",
-          "Erro de validação"
-        );
-
-        return false;
       }
+
+      // Se a URL veio com outro usuário ou não existe sessão, volta para o login.
+      // Evita chamar validar-usuario sem senha e bloquear com "Informe a senha".
+      try {
+        localStorage.setItem("margo_redirect_after_login", window.location.href);
+      } catch (erro) {}
+
+      bloquearAcessoCRM(
+        "Faça login novamente para abrir este atendimento.",
+        "Usuário: " + usuarioId
+      );
+      return false;
     }
 
     async function iniciarAtendimentoComTrava() {
