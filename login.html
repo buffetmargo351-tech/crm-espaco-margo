@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CRM Espaço Margô - Login</title>
+  <title>Espaço Margô</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="theme-color" content="#b98286">
+  <meta name="application-name" content="Espaço Margô">
+  <meta name="apple-mobile-web-app-title" content="Espaço Margô">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <style>
     * {
@@ -463,6 +472,14 @@
         setMensagem("Sistema indisponível, tente mais tarde.", "error");
       }
     });
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js").catch(function (erro) {
+          console.warn("Service Worker não registrado:", erro);
+        });
+      });
+    }
   </script>
 </body>
 </html>
