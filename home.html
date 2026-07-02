@@ -473,7 +473,7 @@
         <div id="notificacaoMeta" class="notificacao-meta">Origem não informada</div>
         <div id="notificacaoMensagem" class="notificacao-mensagem">Mensagem inicial não informada.</div>
         <div class="notificacao-acoes">
-          <button type="button" class="btn-whatsapp" onclick="atenderNotificacaoWhatsApp()">Atender no WhatsApp</button>
+          <button type="button" class="btn-whatsapp" onclick="atenderNotificacaoWhatsApp(event)">Atender no WhatsApp</button>
           <button type="button" class="btn-crm" onclick="abrirNotificacaoNoCRM()">Ver ficha no CRM</button>
           <button type="button" class="btn-fechar" onclick="fecharPopupNotificacao()">Agora não</button>
         </div>
@@ -550,6 +550,7 @@
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
     const API_NOTIFICACOES_CHO = "https://n8n.espacomargo.com.br/webhook/crm/notificacoes-cho";
     const API_MARCAR_NOTIFICACAO_CHO = "https://n8n.espacomargo.com.br/webhook/crm/notificacoes-cho/marcar";
+    const API_APRESENTAR_CHO_NOIVA = "https://n8n.espacomargo.com.br/webhook/crm/apresentar-cho-noiva";
 
     function limpar(valor) {
       return String(valor || "").trim();
@@ -1060,15 +1061,30 @@
       }
     }
 
+    function linkEhWhatsApp(link) {
+      const texto = limpar(link).toLowerCase();
+      return (
+        texto.startsWith("https://wa.me/") ||
+        texto.startsWith("http://wa.me/") ||
+        texto.startsWith("https://api.whatsapp.com/") ||
+        texto.startsWith("http://api.whatsapp.com/") ||
+        texto.startsWith("whatsapp://")
+      );
+    }
+
     function montarLinkWhatsAppNotificacao(notificacao) {
-      const linkPronto = limpar(notificacao && notificacao.link_whatsapp);
-      if (linkPronto) return removerTextoDoLinkWhatsApp(linkPronto);
-
+      // Preferimos SEMPRE montar o link pelo telefone da noiva.
+      // Isso evita abrir atendimento.html caso alguma linha antiga da planilha tenha link errado.
       const telefone = normalizarTelefoneWhatsApp(notificacao && (notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp));
-      if (!telefone) return "";
+      if (telefone) {
+        return "https://wa.me/" + telefone;
+      }
 
-      // Abre apenas a conversa. A CHO escreve com a própria voz, sem texto pronto.
-      return "https://wa.me/" + telefone;
+      // Fallback somente se o link salvo na planilha for realmente WhatsApp.
+      const linkPronto = removerTextoDoLinkWhatsApp(notificacao && notificacao.link_whatsapp);
+      if (linkPronto && linkEhWhatsApp(linkPronto)) return linkPronto;
+
+      return "";
     }
 
     let notificacaoAtual = null;
@@ -1207,31 +1223,84 @@
       if (overlay) overlay.classList.add("hidden");
     }
 
+    async function postJsonComTimeout(url, payload, timeoutMs = 9000) {
+      const controlador = new AbortController();
+      const timer = setTimeout(() => controlador.abort(), timeoutMs);
+
+      try {
+        const resposta = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload || {}),
+          signal: controlador.signal
+        });
+
+        let dados = null;
+        try {
+          dados = await resposta.json();
+        } catch (erroJson) {
+          dados = null;
+        }
+
+        if (!resposta.ok) {
+          throw new Error("HTTP " + resposta.status + " ao chamar " + url);
+        }
+
+        return dados || { ok: true };
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     async function marcarNotificacaoCHO(notificacao, status) {
       const notificacaoId = idNotificacao(notificacao);
       if (!notificacaoId && !(notificacao && notificacao.casal_id)) return;
 
       try {
-        await fetch(API_MARCAR_NOTIFICACAO_CHO, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            notificacao_id: notificacaoId,
-            casal_id: notificacao && notificacao.casal_id,
-            usuario_id: usuarioAtualId,
-            consultora_responsavel: usuarioAtualId,
-            status_notificacao: status,
-            data_evento: new Date().toISOString()
-          })
-        });
+        await postJsonComTimeout(API_MARCAR_NOTIFICACAO_CHO, {
+          notificacao_id: notificacaoId,
+          casal_id: notificacao && notificacao.casal_id,
+          usuario_id: usuarioAtualId,
+          consultora_responsavel: usuarioAtualId,
+          status_notificacao: status,
+          data_evento: new Date().toISOString()
+        }, 9000);
       } catch (erro) {
         console.warn("Não foi possível marcar notificação:", erro);
       }
     }
 
-    async function atenderNotificacaoWhatsApp() {
+    async function apresentarCHOParaNoiva(notificacao) {
+      if (!notificacao) return { ok: false, erro: "Notificação vazia" };
+
+      const payload = {
+        notificacao_id: idNotificacao(notificacao),
+        casal_id: notificacao.casal_id || "",
+        telefone_noiva: notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp || "",
+        nome_noiva: notificacao.nome_noiva || "",
+        consultora_responsavel: notificacao.consultora_responsavel || usuarioAtualId || "",
+        usuario_id: usuarioAtualId || "",
+        origem: notificacao.origem || "PWA_CHO",
+        acao: "ATENDER_WHATSAPP"
+      };
+
+      const resposta = await postJsonComTimeout(API_APRESENTAR_CHO_NOIVA, payload, 12000);
+
+      if (resposta && resposta.ok === false) {
+        throw new Error(resposta.erro || resposta.mensagem || "Falha ao apresentar CHO para a noiva");
+      }
+
+      return resposta || { ok: true };
+    }
+
+    async function atenderNotificacaoWhatsApp(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
       if (!notificacaoAtual) return;
 
       const link = montarLinkWhatsAppNotificacao(notificacaoAtual);
@@ -1241,9 +1310,33 @@
         return;
       }
 
-      await marcarNotificacaoCHO(notificacaoAtual, "ATENDIDA");
-      fecharPopupNotificacao();
-      window.open(link, "_blank", "noopener,noreferrer");
+      const botao = document.querySelector(".btn-whatsapp");
+      const textoOriginalBotao = botao ? botao.textContent : "";
+
+      try {
+        if (botao) {
+          botao.disabled = true;
+          botao.textContent = "Apresentando CHO...";
+        }
+
+        // Primeiro o número oficial/API apresenta a CHO para a noiva.
+        // Só depois abrimos o WhatsApp Business da consultora, sem texto pronto.
+        await apresentarCHOParaNoiva(notificacaoAtual);
+        await marcarNotificacaoCHO(notificacaoAtual, "ATENDIDA");
+
+        fecharPopupNotificacao();
+
+        // No celular/PWA, location.href aciona melhor o app do WhatsApp do que window.open.
+        window.location.href = link;
+      } catch (erro) {
+        console.error("Erro ao apresentar CHO antes de abrir WhatsApp:", erro);
+        alert("Não consegui enviar a apresentação da CHO pelo número oficial agora. Tente novamente em alguns segundos. Se persistir, avise o Frank.");
+      } finally {
+        if (botao) {
+          botao.disabled = false;
+          botao.textContent = textoOriginalBotao || "Atender no WhatsApp";
+        }
+      }
     }
 
     async function abrirNotificacaoNoCRM() {
