@@ -1047,26 +1047,28 @@
       return digitos;
     }
 
-    function montarMensagemInicialWhatsApp(notificacao) {
-      const nome = primeiroNome(notificacao && notificacao.nome_noiva);
-      const nomeConsultora = limpar((usuarioAtual && (usuarioAtual.nome_usuario || usuarioAtual.nome)) || nomeUsuarioSessao() || "consultora do Espaço Margô");
+    function removerTextoDoLinkWhatsApp(link) {
+      const texto = limpar(link);
+      if (!texto) return "";
 
-      return (
-        "Oi, " + nome + "! Tudo bem? Aqui é a " + nomeConsultora + " do Espaço Margô 💛\n\n" +
-        "Recebi sua mensagem sobre conhecer o nosso espaço e vou te atender com todo carinho.\n\n" +
-        "Você já tem uma data pensada e uma ideia de quantidade de convidados?"
-      );
+      try {
+        const url = new URL(texto);
+        url.searchParams.delete("text");
+        return url.toString();
+      } catch (erro) {
+        return texto.split("?text=")[0];
+      }
     }
 
     function montarLinkWhatsAppNotificacao(notificacao) {
       const linkPronto = limpar(notificacao && notificacao.link_whatsapp);
-      if (linkPronto) return linkPronto;
+      if (linkPronto) return removerTextoDoLinkWhatsApp(linkPronto);
 
       const telefone = normalizarTelefoneWhatsApp(notificacao && (notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp));
       if (!telefone) return "";
 
-      const mensagem = montarMensagemInicialWhatsApp(notificacao);
-      return "https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem);
+      // Abre apenas a conversa. A CHO escreve com a própria voz, sem texto pronto.
+      return "https://wa.me/" + telefone;
     }
 
     let notificacaoAtual = null;
