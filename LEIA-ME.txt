@@ -1,0 +1,15 @@
+# CRM Margô PWA - Arquivos
+
+Arquivos incluídos:
+- home.html
+- manifest.json
+- service-worker.js
+- icons/icon-192.png
+- icons/icon-512.png
+
+Suba todos na mesma pasta pública do CRM, junto dos demais HTMLs.
+
+Depois, abra:
+https://crm.espacomargo.com.br/home.html?usuario_id=thais0303
+
+No Chrome, use a opção "Instalar app" ou o ícone de instalação na barra de endereço.
