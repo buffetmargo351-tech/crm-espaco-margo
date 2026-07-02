@@ -1,7 +1,7 @@
 {
-  "name": "CRM Espaço Margô",
-  "short_name": "CRM Margô",
-  "description": "CRM comercial do Espaço Margô para atendimento de noivas.",
+  "name": "App Espaço Margô",
+  "short_name": "Espaço Margô",
+  "description": "Aplicativo comercial do Espaço Margô para atendimento de noivas.",
   "start_url": "home.html",
   "scope": "./",
   "display": "standalone",
