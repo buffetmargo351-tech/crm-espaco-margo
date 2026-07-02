@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#b98286" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="CRM Margô" />
+  <meta name="apple-mobile-web-app-title" content="Espaço Margô" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <title>CRM Espaço Margô - Home Office</title>
+  <title>Espaço Margô</title>
 
   <style>
     * {
@@ -349,6 +349,13 @@
       font-weight: 900;
       z-index: 30;
       box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .contador-notificacoes:active {
+      transform: scale(0.94);
     }
 
     .contador-notificacoes.visivel {
@@ -464,7 +471,7 @@
 
 <body>
   <div class="phone-frame">
-    <div id="contadorNotificacoes" class="contador-notificacoes">0</div>
+    <button id="contadorNotificacoes" class="contador-notificacoes" type="button" onclick="abrirUltimaNotificacaoPendente()" aria-label="Abrir notificações novas">0</button>
 
     <div id="notificacaoOverlay" class="notificacao-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="notificacaoTitulo">
       <div class="notificacao-card">
@@ -1088,6 +1095,7 @@
     }
 
     let notificacaoAtual = null;
+    let notificacoesPendentesAtuais = [];
     let verificacaoNotificacoesTimer = null;
     let audioContextoCRM = null;
 
@@ -1185,6 +1193,28 @@
       } catch (erro) {
         console.warn("Não foi possível mostrar notificação do sistema:", erro);
       }
+    }
+
+    function abrirUltimaNotificacaoPendente() {
+      if (notificacaoAtual) {
+        mostrarPopupNotificacao(notificacaoAtual);
+        return;
+      }
+
+      if (Array.isArray(notificacoesPendentesAtuais) && notificacoesPendentesAtuais.length > 0) {
+        mostrarPopupNotificacao(notificacoesPendentesAtuais[0]);
+        return;
+      }
+
+      verificarNotificacoesCHO().then(function () {
+        if (Array.isArray(notificacoesPendentesAtuais) && notificacoesPendentesAtuais.length > 0) {
+          mostrarPopupNotificacao(notificacoesPendentesAtuais[0]);
+        } else {
+          alert("Nenhuma notificação nova no momento.");
+        }
+      }).catch(function () {
+        alert("Não foi possível consultar notificações agora.");
+      });
     }
 
     function atualizarContadorNotificacoes(total) {
@@ -1324,6 +1354,11 @@
         await apresentarCHOParaNoiva(notificacaoAtual);
         await marcarNotificacaoCHO(notificacaoAtual, "ATENDIDA");
 
+        notificacoesPendentesAtuais = notificacoesPendentesAtuais.filter(function (item) {
+          return idNotificacao(item) !== idNotificacao(notificacaoAtual);
+        });
+        atualizarContadorNotificacoes(notificacoesPendentesAtuais.length);
+
         fecharPopupNotificacao();
 
         // No celular/PWA, location.href aciona melhor o app do WhatsApp do que window.open.
@@ -1343,6 +1378,12 @@
       if (!notificacaoAtual) return;
 
       await marcarNotificacaoCHO(notificacaoAtual, "VISUALIZADA");
+
+      notificacoesPendentesAtuais = notificacoesPendentesAtuais.filter(function (item) {
+        return idNotificacao(item) !== idNotificacao(notificacaoAtual);
+      });
+      atualizarContadorNotificacoes(notificacoesPendentesAtuais.length);
+
       fecharPopupNotificacao();
 
       const casalId = notificacaoAtual.casal_id;
@@ -1364,6 +1405,7 @@
           return pertence && (!status || status === "NOVA");
         });
 
+        notificacoesPendentesAtuais = notificacoes;
         atualizarContadorNotificacoes(notificacoes.length);
 
         const jaExibidas = getIdsNotificacoesExibidas();
