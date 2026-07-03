@@ -559,6 +559,14 @@
     const API_MARCAR_NOTIFICACAO_CHO = "https://n8n.espacomargo.com.br/webhook/crm/notificacoes-cho/marcar";
     const API_APRESENTAR_CHO_NOIVA = "https://n8n.espacomargo.com.br/webhook/crm/apresentar-cho-noiva";
 
+    // Regra de alarme comercial:
+    // segunda a sábado, das 09h até antes das 18h, horário de São Paulo.
+    // Frequência por notificação pendente: imediato, 2 min, 10 min e 20 min.
+    const ALARME_HORA_INICIO = 9;
+    const ALARME_HORA_FIM = 18;
+    const ALARME_DIAS_PERMITIDOS = [1, 2, 3, 4, 5, 6];
+    const ALARME_LIMIARES_MINUTOS = [0, 2, 10, 20];
+
     function limpar(valor) {
       return String(valor || "").trim();
     }
@@ -1131,11 +1139,94 @@
       }
 
       mostrarBarraAlertasSeNecessario();
-      alert("Alertas ativados. Deixe o CRM aberto ou minimizado para receber avisos de novos leads.");
+      alert("Alertas ativados. O som tocará de segunda a sábado, das 9h às 18h, enquanto o CRM estiver aberto ou minimizado.");
     }
 
-    function tocarAlertaNovoLead(teste) {
+    function horarioComercialAlarmeAgora() {
+      const partes = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Sao_Paulo",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(new Date());
+
+      const mapa = {};
+      partes.forEach(function (parte) {
+        mapa[parte.type] = parte.value;
+      });
+
+      const diaSemana = {
+        Sun: 0,
+        Mon: 1,
+        Tue: 2,
+        Wed: 3,
+        Thu: 4,
+        Fri: 5,
+        Sat: 6
+      }[mapa.weekday];
+
+      const hora = Number(mapa.hour || 0);
+      return ALARME_DIAS_PERMITIDOS.includes(diaSemana) && hora >= ALARME_HORA_INICIO && hora < ALARME_HORA_FIM;
+    }
+
+    function parseDataCriacaoNotificacao(valor) {
+      const texto = limpar(valor);
+      if (!texto) return null;
+
+      const direta = new Date(texto);
+      if (!Number.isNaN(direta.getTime())) return direta;
+
+      const br = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,?\s+|\s+)(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (br) {
+        const dia = br[1].padStart(2, "0");
+        const mes = br[2].padStart(2, "0");
+        const ano = br[3];
+        const hora = br[4].padStart(2, "0");
+        const minuto = br[5];
+        const segundo = br[6] || "00";
+        return new Date(`${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}-03:00`);
+      }
+
+      return null;
+    }
+
+    function minutosDesdeCriacao(notificacao) {
+      const data = parseDataCriacaoNotificacao(notificacao && notificacao.data_criacao);
+      if (!data) return 0;
+      return Math.max(0, Math.floor((Date.now() - data.getTime()) / 60000));
+    }
+
+    function chaveAlarmesEmitidos(notificacao) {
+      return "margo_alarmes_emitidos_" + (idNotificacao(notificacao) || limpar(notificacao && notificacao.casal_id) || "sem_id");
+    }
+
+    function alarmesEmitidos(notificacao) {
+      try {
+        const valor = localStorage.getItem(chaveAlarmesEmitidos(notificacao));
+        const lista = JSON.parse(valor || "[]");
+        return Array.isArray(lista) ? lista.map(Number) : [];
+      } catch (erro) {
+        return [];
+      }
+    }
+
+    function salvarAlarmeEmitido(notificacao, limiar) {
+      const lista = alarmesEmitidos(notificacao);
+      if (!lista.includes(Number(limiar))) lista.push(Number(limiar));
+      localStorage.setItem(chaveAlarmesEmitidos(notificacao), JSON.stringify(lista.slice(-10)));
+    }
+
+    function textoNivelAlarme(limiar) {
+      if (limiar >= 20) return "20 minutos sem atendimento";
+      if (limiar >= 10) return "10 minutos sem atendimento";
+      if (limiar >= 2) return "2 minutos sem atendimento";
+      return "Novo lead";
+    }
+
+    function tocarAlertaNovoLead(teste, nivelMinutos) {
       if (!teste && localStorage.getItem("margo_alertas_ativos") !== "SIM") return;
+      if (!teste && !horarioComercialAlarmeAgora()) return;
 
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) return;
@@ -1148,41 +1239,81 @@
         audioContextoCRM.resume();
       }
 
+      const nivel = Number(nivelMinutos || 0);
       const agora = audioContextoCRM.currentTime;
-      const frequencias = [880, 1046, 1318];
+      const repeticoes = nivel >= 20 ? 4 : nivel >= 10 ? 3 : nivel >= 2 ? 2 : 1;
+      const frequencias = nivel >= 10 ? [988, 1318, 1568] : [880, 1046, 1318];
 
-      frequencias.forEach((freq, index) => {
-        const oscilador = audioContextoCRM.createOscillator();
-        const ganho = audioContextoCRM.createGain();
+      for (let repeticao = 0; repeticao < repeticoes; repeticao++) {
+        const base = agora + repeticao * 0.72;
 
-        oscilador.type = "sine";
-        oscilador.frequency.setValueAtTime(freq, agora + index * 0.16);
+        frequencias.forEach((freq, index) => {
+          const oscilador = audioContextoCRM.createOscillator();
+          const ganho = audioContextoCRM.createGain();
 
-        ganho.gain.setValueAtTime(0.0001, agora + index * 0.16);
-        ganho.gain.exponentialRampToValueAtTime(0.22, agora + index * 0.16 + 0.03);
-        ganho.gain.exponentialRampToValueAtTime(0.0001, agora + index * 0.16 + 0.13);
+          oscilador.type = nivel >= 10 ? "square" : "sine";
+          oscilador.frequency.setValueAtTime(freq, base + index * 0.16);
 
-        oscilador.connect(ganho);
-        ganho.connect(audioContextoCRM.destination);
+          ganho.gain.setValueAtTime(0.0001, base + index * 0.16);
+          ganho.gain.exponentialRampToValueAtTime(nivel >= 10 ? 0.30 : 0.22, base + index * 0.16 + 0.03);
+          ganho.gain.exponentialRampToValueAtTime(0.0001, base + index * 0.16 + 0.13);
 
-        oscilador.start(agora + index * 0.16);
-        oscilador.stop(agora + index * 0.16 + 0.14);
-      });
+          oscilador.connect(ganho);
+          ganho.connect(audioContextoCRM.destination);
+
+          oscilador.start(base + index * 0.16);
+          oscilador.stop(base + index * 0.16 + 0.14);
+        });
+      }
     }
 
-    function mostrarNotificacaoSistema(notificacao) {
+    function processarAlarmesPendentes(notificacoes) {
+      if (!Array.isArray(notificacoes) || notificacoes.length === 0) return;
+      if (localStorage.getItem("margo_alertas_ativos") !== "SIM") return;
+      if (!horarioComercialAlarmeAgora()) return;
+
+      let notificacaoParaPopup = null;
+      let maiorLimiarDisparado = null;
+
+      notificacoes.forEach(function (notificacao) {
+        const idadeMinutos = minutosDesdeCriacao(notificacao);
+        const emitidos = alarmesEmitidos(notificacao);
+        const limiaresVencidos = ALARME_LIMIARES_MINUTOS
+          .filter(function (limiar) { return idadeMinutos >= limiar && !emitidos.includes(limiar); })
+          .sort(function (a, b) { return b - a; });
+
+        if (limiaresVencidos.length === 0) return;
+
+        const limiar = limiaresVencidos[0];
+        salvarAlarmeEmitido(notificacao, limiar);
+
+        if (maiorLimiarDisparado === null || limiar > maiorLimiarDisparado) {
+          maiorLimiarDisparado = limiar;
+          notificacaoParaPopup = notificacao;
+        }
+      });
+
+      if (notificacaoParaPopup) {
+        tocarAlertaNovoLead(false, maiorLimiarDisparado);
+        mostrarPopupNotificacao(notificacaoParaPopup);
+        mostrarNotificacaoSistema(notificacaoParaPopup, textoNivelAlarme(maiorLimiarDisparado));
+      }
+    }
+
+    function mostrarNotificacaoSistema(notificacao, tituloExtra) {
       if (!("Notification" in window)) return;
       if (Notification.permission !== "granted") return;
 
       const nome = limpar(notificacao && notificacao.nome_noiva) || "Nova noiva";
       const origem = limpar(notificacao && notificacao.origem) || "Origem não informada";
+      const titulo = tituloExtra || "Novo lead Espaço Margô";
 
       try {
-        const aviso = new Notification("Novo lead Espaço Margô", {
+        const aviso = new Notification(titulo, {
           body: nome + " · " + origem,
           icon: "icons/icon-192.png",
           badge: "icons/icon-192.png",
-          tag: idNotificacao(notificacao) || "novo-lead-margo"
+          tag: (idNotificacao(notificacao) || "novo-lead-margo") + "_" + limpar(titulo)
         });
 
         aviso.onclick = function () {
@@ -1408,6 +1539,10 @@
         notificacoesPendentesAtuais = notificacoes;
         atualizarContadorNotificacoes(notificacoes.length);
 
+        // Alarmes sonoros por horário comercial e por idade da notificação:
+        // imediato, 2 min, 10 min e 20 min.
+        processarAlarmesPendentes(notificacoes);
+
         const jaExibidas = getIdsNotificacoesExibidas();
         const nova = notificacoes.find(notificacao => {
           const id = idNotificacao(notificacao);
@@ -1417,9 +1552,12 @@
         if (!nova) return;
 
         salvarIdNotificacaoExibida(idNotificacao(nova));
-        tocarAlertaNovoLead(false);
-        mostrarPopupNotificacao(nova);
-        mostrarNotificacaoSistema(nova);
+
+        // Fora do horário comercial não toca som, mas pode exibir visualmente se o app estiver aberto.
+        if (!horarioComercialAlarmeAgora()) {
+          mostrarPopupNotificacao(nova);
+          mostrarNotificacaoSistema(nova, "Novo lead Espaço Margô");
+        }
 
       } catch (erro) {
         console.warn("Não foi possível verificar notificações da CHO:", erro);
@@ -1434,7 +1572,7 @@
         clearInterval(verificacaoNotificacoesTimer);
       }
 
-      verificacaoNotificacoesTimer = setInterval(verificarNotificacoesCHO, 30000);
+      verificacaoNotificacoesTimer = setInterval(verificarNotificacoesCHO, 20000);
     }
 
     function registrarServiceWorkerPWA() {
