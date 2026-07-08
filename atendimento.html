@@ -514,6 +514,44 @@
       cursor: pointer;
     }
 
+    .proposal-primary {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 13px 14px;
+      background: linear-gradient(135deg, #7a4b35, #4d2e22);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .proposal-primary:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+
+    #generateProposalBtn {
+      margin-top: 10px;
+    }
+
+    .proposal-status {
+      display: none;
+      margin-top: 10px;
+      border-radius: 15px;
+      background: #f6eee8;
+      border: 1px solid #eadada;
+      padding: 10px 11px;
+      color: #5b4644;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .proposal-status.show {
+      display: block;
+    }
+
     .availability-note {
       margin-top: 10px;
       font-size: 11px;
@@ -640,6 +678,12 @@
           </div>
         </div>
 
+        <div class="proposal-status" id="proposalStatus"></div>
+
+        <button class="proposal-primary" id="generateProposalBtn" onclick="gerarPropostaDigital()">
+          Gerar Proposta Digital
+        </button>
+
         <div class="availability-actions" id="availabilityActions">
           <button class="availability-secondary" id="availabilityWhatsappBtn" onclick="usarRespostaDisponibilidade()">
             Chamar pelo WhatsApp
@@ -661,6 +705,7 @@
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
     const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
     const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
+    const API_GERAR_PROPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/gerar-proposta";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -1061,9 +1106,14 @@
       const inputConvidados = document.getElementById("availabilityGuests");
       const result = document.getElementById("availabilityResult");
       const actions = document.getElementById("availabilityActions");
+      const proposalStatus = document.getElementById("proposalStatus");
 
       result.classList.remove("show");
       actions.classList.remove("show");
+      atualizarStatusPropostaNoPopup();
+
+      // O botão Gerar Proposta fica sempre visível.
+      // As ações abaixo continuam aparecendo somente depois da consulta/proposta.
 
       inputNomeNoiva.value = casalAtual && casalAtual.nome_noiva ? casalAtual.nome_noiva : "";
       inputNomeNoivo.value = casalAtual && casalAtual.nome_noivo ? casalAtual.nome_noivo : "";
@@ -1224,6 +1274,214 @@
       }
     }
 
+    function formatarDataHoraProposta(valor) {
+      if (!valor) return "";
+      const data = new Date(valor);
+      if (isNaN(data.getTime())) return String(valor);
+
+      return data.toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function atualizarStatusPropostaNoPopup() {
+      const status = document.getElementById("proposalStatus");
+      if (!status) return;
+
+      const dataProposta = casalAtual && casalAtual.proposta_ativa_data;
+      const urlProposta = casalAtual && casalAtual.proposta_ativa_url;
+
+      if (!dataProposta && !urlProposta) {
+        status.classList.remove("show");
+        status.textContent = "";
+        return;
+      }
+
+      const dataFormatada = formatarDataHoraProposta(dataProposta);
+      status.classList.add("show");
+      status.textContent = dataFormatada
+        ? "Última proposta gerada em " + dataFormatada + "."
+        : "Este casal já possui uma proposta gerada.";
+    }
+
+    function coletarDadosObrigatoriosDoPopup() {
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
+      const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
+
+      return {
+        nome_noiva: textoObrigatorio(inputNomeNoiva.value),
+        nome_noivo: textoObrigatorio(inputNomeNoivo.value),
+        data_casamento: converterDataParaBR(inputData.value),
+        quantidade_convidados: String(inputConvidados.value || "").trim(),
+        inputNomeNoiva,
+        inputNomeNoivo,
+        inputData,
+        inputConvidados
+      };
+    }
+
+    function validarDadosObrigatoriosPopup(dados) {
+      if (!dados.nome_noiva) {
+        alert("Informe o nome da noiva.");
+        dados.inputNomeNoiva.focus();
+        return false;
+      }
+
+      if (!dados.nome_noivo) {
+        alert("Informe o nome do noivo.");
+        dados.inputNomeNoivo.focus();
+        return false;
+      }
+
+      if (!dados.data_casamento) {
+        alert("Selecione a data pretendida do casamento.");
+        dados.inputData.focus();
+        return false;
+      }
+
+      if (!dados.quantidade_convidados || Number(dados.quantidade_convidados) <= 0) {
+        alert("Informe a quantidade estimada de convidados.");
+        dados.inputConvidados.focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    async function salvarDadosObrigatoriosProposta(statusDisponibilidade = "") {
+      const dados = coletarDadosObrigatoriosDoPopup();
+
+      if (!validarDadosObrigatoriosPopup(dados)) {
+        return false;
+      }
+
+      if (!casalAtualId) {
+        alert("Casal não identificado para salvar os dados.");
+        return false;
+      }
+
+      const resposta = await fetch(API_ATUALIZAR_DADOS_EVENTO, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          casal_id: casalAtualId,
+          nome_noiva: dados.nome_noiva,
+          nome_noivo: dados.nome_noivo,
+          data_casamento: dados.data_casamento,
+          quantidade_convidados: dados.quantidade_convidados,
+          status_disponibilidade_data: statusDisponibilidade
+        })
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao salvar dados obrigatórios da proposta");
+      }
+
+      casalAtual.nome_noiva = dados.nome_noiva;
+      casalAtual.nome_noivo = dados.nome_noivo;
+      casalAtual.data_casamento = dados.data_casamento;
+      casalAtual.quantidade_convidados = dados.quantidade_convidados;
+      casalAtual.status_disponibilidade_data = statusDisponibilidade;
+
+      document.getElementById("nomeCasal").textContent = nomeCasal(casalAtual);
+      document.getElementById("dataCasamento").textContent = formatarDataCasamento(casalAtual.data_casamento);
+      document.getElementById("qtdConvidados").textContent = formatarConvidados(casalAtual.quantidade_convidados);
+
+      return true;
+    }
+
+    function montarMensagemPropostaWhatsApp(retorno) {
+      const nomeNoiva = String(casalAtual.nome_noiva || "").trim() || "Olá";
+      const url = retorno.proposta_url || casalAtual.proposta_ativa_url || "";
+
+      return `${nomeNoiva}, preparei a proposta digital do Espaço Margô para vocês visualizarem com carinho. 💛\n\nSegue o link:\n${url}\n\nQualquer dúvida, eu te ajudo por aqui.`;
+    }
+
+    async function gerarPropostaDigital() {
+      const botao = document.getElementById("generateProposalBtn");
+      const actions = document.getElementById("availabilityActions");
+
+      try {
+        botao.disabled = true;
+        botao.textContent = "Salvando dados...";
+
+        const salvou = await salvarDadosObrigatoriosProposta(casalAtual.status_disponibilidade_data || "");
+
+        if (!salvou) {
+          return;
+        }
+
+        botao.textContent = "Gerando proposta...";
+
+        const resposta = await fetch(API_GERAR_PROPOSTA, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            nome_noiva: casalAtual.nome_noiva,
+            nome_noivo: casalAtual.nome_noivo,
+            telefone: casalAtual.telefone || "",
+            data_casamento: casalAtual.data_casamento,
+            quantidade_convidados: casalAtual.quantidade_convidados,
+            consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
+            periodo: "Almoço/manhã",
+            validade_dias: 30,
+            tipo_proposta: "PADRAO",
+            motivo_geracao: casalAtual.proposta_ativa_id ? "NOVA_VERSAO" : "PRIMEIRA_PROPOSTA"
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao gerar proposta");
+        }
+
+        const retorno = await resposta.json();
+
+        if (!retorno.sucesso) {
+          throw new Error(retorno.mensagem || retorno.erro || "Erro ao gerar proposta");
+        }
+
+        const agora = new Date().toISOString();
+
+        casalAtual.proposta_ativa_url = retorno.proposta_url || "";
+        casalAtual.proposta_ativa_id = retorno.proposta_id || "";
+        casalAtual.proposta_ativa_data = agora;
+        casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || "";
+
+        atualizarStatusPropostaNoPopup();
+
+        botao.textContent = "Gerar Proposta Digital";
+        actions.classList.add("show");
+
+        const whatsappUrl = retorno.whatsapp_url || (
+          "https://wa.me/" +
+          String(casalAtual.telefone || "").replace(/\D/g, "") +
+          "?text=" +
+          encodeURIComponent(montarMensagemPropostaWhatsApp(retorno))
+        );
+
+        window.open(whatsappUrl, "_blank");
+
+      } catch (erro) {
+        console.error("Erro ao gerar proposta:", erro);
+        alert("Não foi possível gerar a proposta agora. Confira o workflow V30 ou tente novamente.");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Gerar Proposta Digital";
+      }
+    }
+
     function montarMensagemDisponibilidade(consulta) {
       if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
         return "Verifiquei aqui e essa data aparece disponível nos períodos da manhã e da tarde. Podemos seguir com carinho para entender melhor o casamento de vocês.";
@@ -1321,6 +1579,21 @@
       botao.textContent = "Chamar pelo WhatsApp";
 
       if (!salvou) return;
+
+      if (casalAtual.proposta_ativa_url) {
+        const mensagem = montarMensagemPropostaWhatsApp({
+          proposta_url: casalAtual.proposta_ativa_url
+        });
+        const telefone = String(casalAtual.telefone || "").replace(/\D/g, "");
+        if (telefone) {
+          window.open("https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem), "_blank");
+        } else {
+          document.getElementById("messageInput").value = mensagem;
+          fecharDisponibilidade();
+          document.getElementById("messageInput").focus();
+        }
+        return;
+      }
 
       document.getElementById("messageInput").value = montarMensagemDisponibilidade(consulta);
       fecharDisponibilidade();
