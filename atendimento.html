@@ -391,7 +391,8 @@
     }
 
     .availability-date,
-    .availability-guests {
+    .availability-guests,
+    .availability-name {
       width: 100%;
       border: 1px solid #eadada;
       border-radius: 16px;
@@ -592,14 +593,24 @@
     <div class="availability-modal" role="dialog" aria-modal="true" aria-labelledby="availabilityTitle">
       <div class="availability-header">
         <div>
-          <div class="availability-title" id="availabilityTitle">Consultar data pretendida</div>
-          <div class="availability-subtitle">Valide a data antes de avançar no atendimento ou agendar a visita.</div>
+          <div class="availability-title" id="availabilityTitle">Dados da proposta e data pretendida</div>
+          <div class="availability-subtitle">Complete os dados essenciais para gerar a proposta digital e consultar a disponibilidade.</div>
         </div>
         <button class="availability-close" onclick="fecharDisponibilidade()">×</button>
       </div>
 
       <div class="availability-body">
-        <label class="availability-label" for="availabilityDate">Data pretendida do casamento</label>
+        <label class="availability-label" for="availabilityNomeNoiva">Nome da noiva</label>
+        <div class="availability-input-row">
+          <input class="availability-name" id="availabilityNomeNoiva" type="text" placeholder="Ex.: Thais" autocomplete="off" />
+        </div>
+
+        <label class="availability-label" for="availabilityNomeNoivo" style="margin-top: 10px;">Nome do noivo</label>
+        <div class="availability-input-row">
+          <input class="availability-name" id="availabilityNomeNoivo" type="text" placeholder="Ex.: Gabriel" autocomplete="off" />
+        </div>
+
+        <label class="availability-label" for="availabilityDate" style="margin-top: 10px;">Data pretendida do casamento</label>
         <div class="availability-input-row">
           <input class="availability-date" id="availabilityDate" type="date" />
         </div>
@@ -631,7 +642,7 @@
 
         <div class="availability-actions" id="availabilityActions">
           <button class="availability-secondary" id="availabilityWhatsappBtn" onclick="usarRespostaDisponibilidade()">
-            Usar resposta no WhatsApp
+            Chamar pelo WhatsApp
           </button>
           <button class="availability-secondary" id="availabilityContinueBtn" onclick="seguirAtendimentoDisponibilidade()">
             Seguir atendimento
@@ -721,6 +732,20 @@
       if (!qtd) return "👥 Convidados não informados";
       return "👥 " + qtd + " convidados";
     }
+
+    function dadosObrigatoriosPropostaOK(casal) {
+      return Boolean(
+        String(casal.nome_noiva || "").trim() &&
+        String(casal.nome_noivo || "").trim() &&
+        String(casal.data_casamento || "").trim() &&
+        Number(casal.quantidade_convidados || 0) > 0
+      );
+    }
+
+    function textoObrigatorio(valor) {
+      return String(valor || "").trim();
+    }
+
 
     function labelEncantamento(valor) {
       const mapa = {
@@ -1030,6 +1055,8 @@
 
     function abrirDisponibilidade() {
       const overlay = document.getElementById("availabilityOverlay");
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
       const inputData = document.getElementById("availabilityDate");
       const inputConvidados = document.getElementById("availabilityGuests");
       const result = document.getElementById("availabilityResult");
@@ -1038,19 +1065,26 @@
       result.classList.remove("show");
       actions.classList.remove("show");
 
+      inputNomeNoiva.value = casalAtual && casalAtual.nome_noiva ? casalAtual.nome_noiva : "";
+      inputNomeNoivo.value = casalAtual && casalAtual.nome_noivo ? casalAtual.nome_noivo : "";
+
       if (casalAtual && casalAtual.data_casamento) {
         const valorConvertido = converterDataParaInput(casalAtual.data_casamento);
         if (valorConvertido) {
           inputData.value = valorConvertido;
         }
+      } else {
+        inputData.value = "";
       }
 
       if (casalAtual && casalAtual.quantidade_convidados) {
         inputConvidados.value = casalAtual.quantidade_convidados;
+      } else {
+        inputConvidados.value = "";
       }
 
       overlay.classList.add("open");
-      setTimeout(() => inputData.focus(), 120);
+      setTimeout(() => inputNomeNoiva.focus(), 120);
     }
 
     function fecharDisponibilidade() {
@@ -1098,18 +1132,36 @@
     }
 
     async function verificarDisponibilidade() {
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
       const inputData = document.getElementById("availabilityDate");
       const inputConvidados = document.getElementById("availabilityGuests");
       const botao = document.getElementById("availabilityCheckBtn");
+
+      const nomeNoiva = textoObrigatorio(inputNomeNoiva.value);
+      const nomeNoivo = textoObrigatorio(inputNomeNoivo.value);
       const dataEvento = converterDataParaBR(inputData.value);
       const quantidadeConvidados = String(inputConvidados.value || "").trim();
 
-      if (!dataEvento) {
-        alert("Selecione a data pretendida do casamento.");
+      if (!nomeNoiva) {
+        alert("Informe o nome da noiva.");
+        inputNomeNoiva.focus();
         return;
       }
 
-      if (!quantidadeConvidados) {
+      if (!nomeNoivo) {
+        alert("Informe o nome do noivo.");
+        inputNomeNoivo.focus();
+        return;
+      }
+
+      if (!dataEvento) {
+        alert("Selecione a data pretendida do casamento.");
+        inputData.focus();
+        return;
+      }
+
+      if (!quantidadeConvidados || Number(quantidadeConvidados) <= 0) {
         alert("Informe a quantidade estimada de convidados.");
         inputConvidados.focus();
         return;
@@ -1135,6 +1187,24 @@
 
         const retorno = await resposta.json();
 
+        window.ultimaDisponibilidadeConsultada = {
+          nome_noiva: nomeNoiva,
+          nome_noivo: nomeNoivo,
+          data_evento: dataEvento,
+          quantidade_convidados: quantidadeConvidados,
+          resumo: retorno.resumo || "",
+          manha_status: retorno.manha_status || "",
+          tarde_status: retorno.tarde_status || ""
+        };
+
+        botao.textContent = "Salvando dados...";
+
+        const salvou = await salvarDadosEventoConsultados();
+
+        if (!salvou) {
+          return;
+        }
+
         document.getElementById("availabilitySummary").textContent = retorno.resumo || "Consulta realizada.";
         document.getElementById("manhaHorario").textContent = retorno.manha_horario || "09:00 às 14:00";
         document.getElementById("tardeHorario").textContent = retorno.tarde_horario || "16:30 às 21:00";
@@ -1144,14 +1214,6 @@
 
         document.getElementById("availabilityResult").classList.add("show");
         document.getElementById("availabilityActions").classList.add("show");
-
-        window.ultimaDisponibilidadeConsultada = {
-          data_evento: dataEvento,
-          quantidade_convidados: quantidadeConvidados,
-          resumo: retorno.resumo || "",
-          manha_status: retorno.manha_status || "",
-          tarde_status: retorno.tarde_status || ""
-        };
 
       } catch (erro) {
         console.error("Erro ao verificar disponibilidade:", erro);
@@ -1205,6 +1267,8 @@
           },
           body: JSON.stringify({
             casal_id: casalAtualId,
+            nome_noiva: consulta.nome_noiva,
+            nome_noivo: consulta.nome_noivo,
             data_casamento: consulta.data_evento,
             quantidade_convidados: consulta.quantidade_convidados,
             status_disponibilidade_data: consulta.resumo
@@ -1215,10 +1279,13 @@
           throw new Error("Erro ao salvar dados do evento");
         }
 
+        casalAtual.nome_noiva = consulta.nome_noiva;
+        casalAtual.nome_noivo = consulta.nome_noivo;
         casalAtual.data_casamento = consulta.data_evento;
         casalAtual.quantidade_convidados = consulta.quantidade_convidados;
         casalAtual.status_disponibilidade_data = consulta.resumo;
 
+        document.getElementById("nomeCasal").textContent = nomeCasal(casalAtual);
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casalAtual.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casalAtual.quantidade_convidados);
 
@@ -1238,6 +1305,12 @@
         return;
       }
 
+      if (!dadosObrigatoriosPropostaOK(casalAtual)) {
+        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        abrirDisponibilidade();
+        return;
+      }
+
       const botao = document.getElementById("availabilityWhatsappBtn");
       botao.disabled = true;
       botao.textContent = "Salvando...";
@@ -1245,7 +1318,7 @@
       const salvou = await salvarDadosEventoConsultados();
 
       botao.disabled = false;
-      botao.textContent = "Usar resposta no WhatsApp";
+      botao.textContent = "Chamar pelo WhatsApp";
 
       if (!salvou) return;
 
@@ -1259,6 +1332,12 @@
 
       if (!consulta) {
         alert("Consulte uma data antes de seguir.");
+        return;
+      }
+
+      if (!dadosObrigatoriosPropostaOK(casalAtual)) {
+        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        abrirDisponibilidade();
         return;
       }
 
