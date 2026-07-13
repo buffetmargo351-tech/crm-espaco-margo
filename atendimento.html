@@ -1399,6 +1399,19 @@
       return true;
     }
 
+
+    function abrirWhatsAppSeguro(url) {
+      const destino = String(url || "").trim();
+
+      if (!destino) {
+        throw new Error("URL do WhatsApp não foi gerada.");
+      }
+
+      // Navegação na mesma aba: funciona no Safari/iPhone mesmo após operações assíncronas.
+      // window.open(..., "_blank") pode ser bloqueado como pop-up depois de await/fetch.
+      window.location.assign(destino);
+    }
+
     function montarMensagemPropostaWhatsApp(retorno) {
       const nomeNoiva = String(casalAtual.nome_noiva || "").trim() || "Olá";
       const url = retorno.proposta_url || casalAtual.proposta_ativa_url || "";
@@ -1471,7 +1484,7 @@
           encodeURIComponent(montarMensagemPropostaWhatsApp(retorno))
         );
 
-        window.open(whatsappUrl, "_blank");
+        abrirWhatsAppSeguro(whatsappUrl);
 
       } catch (erro) {
         console.error("Erro ao gerar proposta:", erro);
@@ -1586,7 +1599,7 @@
         });
         const telefone = String(casalAtual.telefone || "").replace(/\D/g, "");
         if (telefone) {
-          window.open("https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem), "_blank");
+          abrirWhatsAppSeguro("https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem));
         } else {
           document.getElementById("messageInput").value = mensagem;
           fecharDisponibilidade();
