@@ -3,13 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#b98286" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Espaço Margô" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <title>Espaço Margô</title>
+  <title>CRM Espaço Margô - Home Office</title>
 
   <style>
     * {
@@ -264,6 +258,15 @@
       margin-bottom: 3px;
     }
 
+    .telefone-card {
+      font-size: 12px;
+      color: #6f5552;
+      font-weight: 850;
+      line-height: 1.25;
+      margin-bottom: 3px;
+      letter-spacing: 0.1px;
+    }
+
     .sub {
       font-size: 11px;
       color: #8b6f6c;
@@ -295,166 +298,6 @@
       line-height: 1.35;
     }
 
-
-    .barra-alertas {
-      background: #fff7f7;
-      border: 1px solid #eadada;
-      border-radius: 16px;
-      padding: 12px;
-      margin: 0 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
-    }
-
-    .barra-alertas.hidden {
-      display: none;
-    }
-
-    .barra-alertas-texto {
-      font-size: 11px;
-      color: #6f5552;
-      font-weight: 800;
-      line-height: 1.35;
-    }
-
-    .barra-alertas button {
-      border: none;
-      background: #d85f6f;
-      color: #fff;
-      padding: 9px 10px;
-      border-radius: 11px;
-      font-size: 11px;
-      font-weight: 900;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .contador-notificacoes {
-      position: absolute;
-      top: 72px;
-      right: 20px;
-      min-width: 24px;
-      height: 24px;
-      border-radius: 999px;
-      background: #d85f6f;
-      color: #fff;
-      border: 2px solid #fff;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 900;
-      z-index: 30;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.16);
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .contador-notificacoes:active {
-      transform: scale(0.94);
-    }
-
-    .contador-notificacoes.visivel {
-      display: flex;
-    }
-
-    .notificacao-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(47,36,35,0.42);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-    }
-
-    .notificacao-overlay.hidden {
-      display: none;
-    }
-
-    .notificacao-card {
-      width: 100%;
-      max-width: 390px;
-      background: #fff;
-      border-radius: 24px;
-      padding: 20px;
-      box-shadow: 0 24px 70px rgba(0,0,0,0.28);
-      border: 1px solid #eadada;
-    }
-
-    .notificacao-kicker {
-      font-size: 12px;
-      color: #d85f6f;
-      font-weight: 900;
-      margin-bottom: 8px;
-      letter-spacing: 0.3px;
-    }
-
-    .notificacao-titulo {
-      font-size: 18px;
-      font-weight: 900;
-      color: #2f2423;
-      margin-bottom: 6px;
-    }
-
-    .notificacao-meta {
-      font-size: 12px;
-      color: #8b6f6c;
-      font-weight: 700;
-      line-height: 1.45;
-      margin-bottom: 12px;
-    }
-
-    .notificacao-mensagem {
-      background: #fff7f7;
-      border: 1px solid #eadada;
-      border-radius: 15px;
-      padding: 12px;
-      font-size: 12px;
-      color: #4a2f2d;
-      line-height: 1.45;
-      margin-bottom: 14px;
-      max-height: 110px;
-      overflow: auto;
-    }
-
-    .notificacao-acoes {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px;
-    }
-
-    .notificacao-acoes button {
-      border: none;
-      border-radius: 14px;
-      padding: 13px 12px;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .btn-whatsapp {
-      background: #21a565;
-      color: #fff;
-    }
-
-    .btn-crm {
-      background: #f8e9ea;
-      color: #a35d61;
-    }
-
-    .btn-fechar {
-      background: transparent;
-      color: #8b6f6c;
-      padding: 9px 12px !important;
-    }
-
-
     @media (min-width: 700px) {
       body {
         padding: 20px 0;
@@ -471,22 +314,6 @@
 
 <body>
   <div class="phone-frame">
-    <button id="contadorNotificacoes" class="contador-notificacoes" type="button" onclick="abrirUltimaNotificacaoPendente()" aria-label="Abrir notificações novas">0</button>
-
-    <div id="notificacaoOverlay" class="notificacao-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="notificacaoTitulo">
-      <div class="notificacao-card">
-        <div class="notificacao-kicker">🔔 NOVO LEAD</div>
-        <div id="notificacaoTitulo" class="notificacao-titulo">Nova noiva para atendimento</div>
-        <div id="notificacaoMeta" class="notificacao-meta">Origem não informada</div>
-        <div id="notificacaoMensagem" class="notificacao-mensagem">Mensagem inicial não informada.</div>
-        <div class="notificacao-acoes">
-          <button type="button" class="btn-whatsapp" onclick="atenderNotificacaoWhatsApp(event)">Atender no WhatsApp</button>
-          <button type="button" class="btn-crm" onclick="abrirNotificacaoNoCRM()">Ver ficha no CRM</button>
-          <button type="button" class="btn-fechar" onclick="fecharPopupNotificacao()">Agora não</button>
-        </div>
-      </div>
-    </div>
-
     <main class="app">
       <header>
         <div class="top-bar">
@@ -510,13 +337,6 @@
         <div class="saudacao" id="saudacao">Bom dia ☀️</div>
         <div class="frase" id="fraseMotivacional">Vamos encantar noivas hoje?</div>
       </header>
-
-        <div id="barraAlertas" class="barra-alertas hidden">
-          <div class="barra-alertas-texto">
-            🔔 Ative os alertas para ser avisada quando uma nova noiva chegar.
-          </div>
-          <button type="button" onclick="ativarAlertasCRM()">Ativar</button>
-        </div>
 
       <section class="cards-resumo">
         <div class="card-resumo" onclick="irParaSecao('novos')">
@@ -555,17 +375,6 @@
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
-    const API_NOTIFICACOES_CHO = "https://n8n.espacomargo.com.br/webhook/crm/notificacoes-cho";
-    const API_MARCAR_NOTIFICACAO_CHO = "https://n8n.espacomargo.com.br/webhook/crm/notificacoes-cho/marcar";
-    const API_APRESENTAR_CHO_NOIVA = "https://n8n.espacomargo.com.br/webhook/crm/apresentar-cho-noiva";
-
-    // Regra de alarme comercial:
-    // segunda a sábado, das 09h até antes das 18h, horário de São Paulo.
-    // Frequência por notificação pendente: imediato, 2 min, 10 min e 20 min.
-    const ALARME_HORA_INICIO = 9;
-    const ALARME_HORA_FIM = 18;
-    const ALARME_DIAS_PERMITIDOS = [1, 2, 3, 4, 5, 6];
-    const ALARME_LIMIARES_MINUTOS = [0, 2, 10, 20];
 
     function limpar(valor) {
       return String(valor || "").trim();
@@ -708,6 +517,24 @@
       return noiva || noivo || "Casal sem nome";
     }
 
+    function formatarTelefoneCard(valor) {
+      let telefone = String(valor || "").replace(/\D/g, "");
+
+      if ((telefone.length === 12 || telefone.length === 13) && telefone.startsWith("55")) {
+        telefone = telefone.slice(2);
+      }
+
+      if (telefone.length === 11) {
+        return "(" + telefone.slice(0, 2) + ") " + telefone.slice(2, 7) + "-" + telefone.slice(7);
+      }
+
+      if (telefone.length === 10) {
+        return "(" + telefone.slice(0, 2) + ") " + telefone.slice(2, 6) + "-" + telefone.slice(6);
+      }
+
+      return telefone || "Telefone não informado";
+    }
+
     function formatarSubtitulo(casal) {
       const origem = casal.origem || "Origem não informada";
       const entrada = casal.data_entrada ? "Entrou em " + casal.data_entrada : "Entrada não informada";
@@ -788,6 +615,7 @@
 
             <div class="info">
               <div class="nome">${nomeCasal(casal)}</div>
+              <div class="telefone-card">📱 ${formatarTelefoneCard(casal.telefone || casal.telefone_noiva || casal.whatsapp)}</div>
               <div class="sub">${formatarSubtitulo(casal)}</div>
             </div>
 
@@ -1008,584 +836,6 @@
       }
     }
 
-
-    function getIdsNotificacoesExibidas() {
-      try {
-        const lista = JSON.parse(localStorage.getItem("margo_notificacoes_exibidas") || "[]");
-        return Array.isArray(lista) ? lista : [];
-      } catch (erro) {
-        return [];
-      }
-    }
-
-    function salvarIdNotificacaoExibida(id) {
-      if (!id) return;
-      const lista = getIdsNotificacoesExibidas().filter(Boolean);
-      if (!lista.includes(id)) lista.unshift(id);
-      localStorage.setItem("margo_notificacoes_exibidas", JSON.stringify(lista.slice(0, 80)));
-    }
-
-    function extrairListaNotificacoes(dados) {
-      if (Array.isArray(dados)) return dados;
-      if (dados && Array.isArray(dados.notificacoes)) return dados.notificacoes;
-      if (dados && Array.isArray(dados.data)) return dados.data;
-      if (dados && Array.isArray(dados.items)) return dados.items;
-      if (dados && dados.notificacao_id) return [dados];
-      return [];
-    }
-
-    function statusNotificacao(notificacao) {
-      return String((notificacao && notificacao.status_notificacao) || "").trim().toUpperCase();
-    }
-
-    function idNotificacao(notificacao) {
-      return limpar(notificacao && (notificacao.notificacao_id || notificacao.id || notificacao.casal_id));
-    }
-
-    function primeiroNome(nome) {
-      const partes = String(nome || "").trim().split(/\s+/).filter(Boolean);
-      return partes[0] || "tudo bem";
-    }
-
-    function normalizarTelefoneWhatsApp(telefone) {
-      let digitos = String(telefone || "").replace(/\D/g, "");
-
-      if (!digitos) return "";
-
-      if (digitos.startsWith("55") && digitos.length >= 12) {
-        return digitos;
-      }
-
-      if (digitos.length === 11 || digitos.length === 10) {
-        return "55" + digitos;
-      }
-
-      return digitos;
-    }
-
-    function removerTextoDoLinkWhatsApp(link) {
-      const texto = limpar(link);
-      if (!texto) return "";
-
-      try {
-        const url = new URL(texto);
-        url.searchParams.delete("text");
-        return url.toString();
-      } catch (erro) {
-        return texto.split("?text=")[0];
-      }
-    }
-
-    function linkEhWhatsApp(link) {
-      const texto = limpar(link).toLowerCase();
-      return (
-        texto.startsWith("https://wa.me/") ||
-        texto.startsWith("http://wa.me/") ||
-        texto.startsWith("https://api.whatsapp.com/") ||
-        texto.startsWith("http://api.whatsapp.com/") ||
-        texto.startsWith("whatsapp://")
-      );
-    }
-
-    function montarLinkWhatsAppNotificacao(notificacao) {
-      // Preferimos SEMPRE montar o link pelo telefone da noiva.
-      // Isso evita abrir atendimento.html caso alguma linha antiga da planilha tenha link errado.
-      const telefone = normalizarTelefoneWhatsApp(notificacao && (notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp));
-      if (telefone) {
-        return "https://wa.me/" + telefone;
-      }
-
-      // Fallback somente se o link salvo na planilha for realmente WhatsApp.
-      const linkPronto = removerTextoDoLinkWhatsApp(notificacao && notificacao.link_whatsapp);
-      if (linkPronto && linkEhWhatsApp(linkPronto)) return linkPronto;
-
-      return "";
-    }
-
-    let notificacaoAtual = null;
-    let notificacoesPendentesAtuais = [];
-    let verificacaoNotificacoesTimer = null;
-    let audioContextoCRM = null;
-
-    function mostrarBarraAlertasSeNecessario() {
-      const barra = document.getElementById("barraAlertas");
-      if (!barra) return;
-
-      const alertasAtivos = localStorage.getItem("margo_alertas_ativos") === "SIM";
-      const notificacoesOk = !("Notification" in window) || Notification.permission === "granted";
-
-      if (alertasAtivos && notificacoesOk) {
-        barra.classList.add("hidden");
-      } else {
-        barra.classList.remove("hidden");
-      }
-    }
-
-    async function ativarAlertasCRM() {
-      localStorage.setItem("margo_alertas_ativos", "SIM");
-
-      try {
-        tocarAlertaNovoLead(true);
-      } catch (erro) {
-        console.warn("Não foi possível testar o som de alerta:", erro);
-      }
-
-      if ("Notification" in window && Notification.permission === "default") {
-        try {
-          await Notification.requestPermission();
-        } catch (erro) {
-          console.warn("Não foi possível solicitar permissão de notificação:", erro);
-        }
-      }
-
-      mostrarBarraAlertasSeNecessario();
-      alert("Alertas ativados. O som tocará de segunda a sábado, das 9h às 18h, enquanto o CRM estiver aberto ou minimizado.");
-    }
-
-    function horarioComercialAlarmeAgora() {
-      const partes = new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Sao_Paulo",
-        weekday: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      }).formatToParts(new Date());
-
-      const mapa = {};
-      partes.forEach(function (parte) {
-        mapa[parte.type] = parte.value;
-      });
-
-      const diaSemana = {
-        Sun: 0,
-        Mon: 1,
-        Tue: 2,
-        Wed: 3,
-        Thu: 4,
-        Fri: 5,
-        Sat: 6
-      }[mapa.weekday];
-
-      const hora = Number(mapa.hour || 0);
-      return ALARME_DIAS_PERMITIDOS.includes(diaSemana) && hora >= ALARME_HORA_INICIO && hora < ALARME_HORA_FIM;
-    }
-
-    function parseDataCriacaoNotificacao(valor) {
-      const texto = limpar(valor);
-      if (!texto) return null;
-
-      const direta = new Date(texto);
-      if (!Number.isNaN(direta.getTime())) return direta;
-
-      const br = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,?\s+|\s+)(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-      if (br) {
-        const dia = br[1].padStart(2, "0");
-        const mes = br[2].padStart(2, "0");
-        const ano = br[3];
-        const hora = br[4].padStart(2, "0");
-        const minuto = br[5];
-        const segundo = br[6] || "00";
-        return new Date(`${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}-03:00`);
-      }
-
-      return null;
-    }
-
-    function minutosDesdeCriacao(notificacao) {
-      const data = parseDataCriacaoNotificacao(notificacao && notificacao.data_criacao);
-      if (!data) return 0;
-      return Math.max(0, Math.floor((Date.now() - data.getTime()) / 60000));
-    }
-
-    function chaveAlarmesEmitidos(notificacao) {
-      return "margo_alarmes_emitidos_" + (idNotificacao(notificacao) || limpar(notificacao && notificacao.casal_id) || "sem_id");
-    }
-
-    function alarmesEmitidos(notificacao) {
-      try {
-        const valor = localStorage.getItem(chaveAlarmesEmitidos(notificacao));
-        const lista = JSON.parse(valor || "[]");
-        return Array.isArray(lista) ? lista.map(Number) : [];
-      } catch (erro) {
-        return [];
-      }
-    }
-
-    function salvarAlarmeEmitido(notificacao, limiar) {
-      const lista = alarmesEmitidos(notificacao);
-      if (!lista.includes(Number(limiar))) lista.push(Number(limiar));
-      localStorage.setItem(chaveAlarmesEmitidos(notificacao), JSON.stringify(lista.slice(-10)));
-    }
-
-    function textoNivelAlarme(limiar) {
-      if (limiar >= 20) return "20 minutos sem atendimento";
-      if (limiar >= 10) return "10 minutos sem atendimento";
-      if (limiar >= 2) return "2 minutos sem atendimento";
-      return "Novo lead";
-    }
-
-    function tocarAlertaNovoLead(teste, nivelMinutos) {
-      if (!teste && localStorage.getItem("margo_alertas_ativos") !== "SIM") return;
-      if (!teste && !horarioComercialAlarmeAgora()) return;
-
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-
-      if (!audioContextoCRM) {
-        audioContextoCRM = new AudioContext();
-      }
-
-      if (audioContextoCRM.state === "suspended") {
-        audioContextoCRM.resume();
-      }
-
-      const nivel = Number(nivelMinutos || 0);
-      const agora = audioContextoCRM.currentTime;
-      const repeticoes = nivel >= 20 ? 4 : nivel >= 10 ? 3 : nivel >= 2 ? 2 : 1;
-      const frequencias = nivel >= 10 ? [988, 1318, 1568] : [880, 1046, 1318];
-
-      for (let repeticao = 0; repeticao < repeticoes; repeticao++) {
-        const base = agora + repeticao * 0.72;
-
-        frequencias.forEach((freq, index) => {
-          const oscilador = audioContextoCRM.createOscillator();
-          const ganho = audioContextoCRM.createGain();
-
-          oscilador.type = nivel >= 10 ? "square" : "sine";
-          oscilador.frequency.setValueAtTime(freq, base + index * 0.16);
-
-          ganho.gain.setValueAtTime(0.0001, base + index * 0.16);
-          ganho.gain.exponentialRampToValueAtTime(nivel >= 10 ? 0.30 : 0.22, base + index * 0.16 + 0.03);
-          ganho.gain.exponentialRampToValueAtTime(0.0001, base + index * 0.16 + 0.13);
-
-          oscilador.connect(ganho);
-          ganho.connect(audioContextoCRM.destination);
-
-          oscilador.start(base + index * 0.16);
-          oscilador.stop(base + index * 0.16 + 0.14);
-        });
-      }
-    }
-
-    function processarAlarmesPendentes(notificacoes) {
-      if (!Array.isArray(notificacoes) || notificacoes.length === 0) return;
-      if (localStorage.getItem("margo_alertas_ativos") !== "SIM") return;
-      if (!horarioComercialAlarmeAgora()) return;
-
-      let notificacaoParaPopup = null;
-      let maiorLimiarDisparado = null;
-
-      notificacoes.forEach(function (notificacao) {
-        const idadeMinutos = minutosDesdeCriacao(notificacao);
-        const emitidos = alarmesEmitidos(notificacao);
-        const limiaresVencidos = ALARME_LIMIARES_MINUTOS
-          .filter(function (limiar) { return idadeMinutos >= limiar && !emitidos.includes(limiar); })
-          .sort(function (a, b) { return b - a; });
-
-        if (limiaresVencidos.length === 0) return;
-
-        const limiar = limiaresVencidos[0];
-        salvarAlarmeEmitido(notificacao, limiar);
-
-        if (maiorLimiarDisparado === null || limiar > maiorLimiarDisparado) {
-          maiorLimiarDisparado = limiar;
-          notificacaoParaPopup = notificacao;
-        }
-      });
-
-      if (notificacaoParaPopup) {
-        tocarAlertaNovoLead(false, maiorLimiarDisparado);
-        mostrarPopupNotificacao(notificacaoParaPopup);
-        mostrarNotificacaoSistema(notificacaoParaPopup, textoNivelAlarme(maiorLimiarDisparado));
-      }
-    }
-
-    function mostrarNotificacaoSistema(notificacao, tituloExtra) {
-      if (!("Notification" in window)) return;
-      if (Notification.permission !== "granted") return;
-
-      const nome = limpar(notificacao && notificacao.nome_noiva) || "Nova noiva";
-      const origem = limpar(notificacao && notificacao.origem) || "Origem não informada";
-      const titulo = tituloExtra || "Novo lead Espaço Margô";
-
-      try {
-        const aviso = new Notification(titulo, {
-          body: nome + " · " + origem,
-          icon: "icons/icon-192.png",
-          badge: "icons/icon-192.png",
-          tag: (idNotificacao(notificacao) || "novo-lead-margo") + "_" + limpar(titulo)
-        });
-
-        aviso.onclick = function () {
-          window.focus();
-          mostrarPopupNotificacao(notificacao);
-          aviso.close();
-        };
-      } catch (erro) {
-        console.warn("Não foi possível mostrar notificação do sistema:", erro);
-      }
-    }
-
-    function abrirUltimaNotificacaoPendente() {
-      if (notificacaoAtual) {
-        mostrarPopupNotificacao(notificacaoAtual);
-        return;
-      }
-
-      if (Array.isArray(notificacoesPendentesAtuais) && notificacoesPendentesAtuais.length > 0) {
-        mostrarPopupNotificacao(notificacoesPendentesAtuais[0]);
-        return;
-      }
-
-      verificarNotificacoesCHO().then(function () {
-        if (Array.isArray(notificacoesPendentesAtuais) && notificacoesPendentesAtuais.length > 0) {
-          mostrarPopupNotificacao(notificacoesPendentesAtuais[0]);
-        } else {
-          alert("Nenhuma notificação nova no momento.");
-        }
-      }).catch(function () {
-        alert("Não foi possível consultar notificações agora.");
-      });
-    }
-
-    function atualizarContadorNotificacoes(total) {
-      const contador = document.getElementById("contadorNotificacoes");
-      if (!contador) return;
-
-      const numero = Number(total || 0);
-
-      if (numero > 0) {
-        contador.textContent = numero > 9 ? "9+" : String(numero);
-        contador.classList.add("visivel");
-      } else {
-        contador.textContent = "0";
-        contador.classList.remove("visivel");
-      }
-    }
-
-    function mostrarPopupNotificacao(notificacao) {
-      notificacaoAtual = notificacao;
-
-      const nome = limpar(notificacao && notificacao.nome_noiva) || "Nova noiva";
-      const origem = limpar(notificacao && notificacao.origem) || "Origem não informada";
-      const telefone = limpar(notificacao && (notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp)) || "Telefone não informado";
-      const mensagem = limpar(notificacao && notificacao.mensagem_inicial) || "Mensagem inicial não informada.";
-
-      document.getElementById("notificacaoTitulo").textContent = nome;
-      document.getElementById("notificacaoMeta").textContent = origem + " · " + telefone;
-      document.getElementById("notificacaoMensagem").textContent = mensagem;
-
-      const overlay = document.getElementById("notificacaoOverlay");
-      if (overlay) overlay.classList.remove("hidden");
-    }
-
-    function fecharPopupNotificacao() {
-      const overlay = document.getElementById("notificacaoOverlay");
-      if (overlay) overlay.classList.add("hidden");
-    }
-
-    async function postJsonComTimeout(url, payload, timeoutMs = 9000) {
-      const controlador = new AbortController();
-      const timer = setTimeout(() => controlador.abort(), timeoutMs);
-
-      try {
-        const resposta = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload || {}),
-          signal: controlador.signal
-        });
-
-        let dados = null;
-        try {
-          dados = await resposta.json();
-        } catch (erroJson) {
-          dados = null;
-        }
-
-        if (!resposta.ok) {
-          throw new Error("HTTP " + resposta.status + " ao chamar " + url);
-        }
-
-        return dados || { ok: true };
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    async function marcarNotificacaoCHO(notificacao, status) {
-      const notificacaoId = idNotificacao(notificacao);
-      if (!notificacaoId && !(notificacao && notificacao.casal_id)) return;
-
-      try {
-        await postJsonComTimeout(API_MARCAR_NOTIFICACAO_CHO, {
-          notificacao_id: notificacaoId,
-          casal_id: notificacao && notificacao.casal_id,
-          usuario_id: usuarioAtualId,
-          consultora_responsavel: usuarioAtualId,
-          status_notificacao: status,
-          data_evento: new Date().toISOString()
-        }, 9000);
-      } catch (erro) {
-        console.warn("Não foi possível marcar notificação:", erro);
-      }
-    }
-
-    async function apresentarCHOParaNoiva(notificacao) {
-      if (!notificacao) return { ok: false, erro: "Notificação vazia" };
-
-      const payload = {
-        notificacao_id: idNotificacao(notificacao),
-        casal_id: notificacao.casal_id || "",
-        telefone_noiva: notificacao.telefone_noiva || notificacao.telefone || notificacao.whatsapp || "",
-        nome_noiva: notificacao.nome_noiva || "",
-        consultora_responsavel: notificacao.consultora_responsavel || usuarioAtualId || "",
-        usuario_id: usuarioAtualId || "",
-        origem: notificacao.origem || "PWA_CHO",
-        acao: "ATENDER_WHATSAPP"
-      };
-
-      const resposta = await postJsonComTimeout(API_APRESENTAR_CHO_NOIVA, payload, 12000);
-
-      if (resposta && resposta.ok === false) {
-        throw new Error(resposta.erro || resposta.mensagem || "Falha ao apresentar CHO para a noiva");
-      }
-
-      return resposta || { ok: true };
-    }
-
-    async function atenderNotificacaoWhatsApp(event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
-      if (!notificacaoAtual) return;
-
-      const link = montarLinkWhatsAppNotificacao(notificacaoAtual);
-
-      if (!link) {
-        alert("Não encontrei telefone/link de WhatsApp para esta noiva.");
-        return;
-      }
-
-      const botao = document.querySelector(".btn-whatsapp");
-      const textoOriginalBotao = botao ? botao.textContent : "";
-
-      try {
-        if (botao) {
-          botao.disabled = true;
-          botao.textContent = "Apresentando CHO...";
-        }
-
-        // Primeiro o número oficial/API apresenta a CHO para a noiva.
-        // Só depois abrimos o WhatsApp Business da consultora, sem texto pronto.
-        await apresentarCHOParaNoiva(notificacaoAtual);
-        await marcarNotificacaoCHO(notificacaoAtual, "ATENDIDA");
-
-        notificacoesPendentesAtuais = notificacoesPendentesAtuais.filter(function (item) {
-          return idNotificacao(item) !== idNotificacao(notificacaoAtual);
-        });
-        atualizarContadorNotificacoes(notificacoesPendentesAtuais.length);
-
-        fecharPopupNotificacao();
-
-        // No celular/PWA, location.href aciona melhor o app do WhatsApp do que window.open.
-        window.location.href = link;
-      } catch (erro) {
-        console.error("Erro ao apresentar CHO antes de abrir WhatsApp:", erro);
-        alert("Não consegui enviar a apresentação da CHO pelo número oficial agora. Tente novamente em alguns segundos. Se persistir, avise o Frank.");
-      } finally {
-        if (botao) {
-          botao.disabled = false;
-          botao.textContent = textoOriginalBotao || "Atender no WhatsApp";
-        }
-      }
-    }
-
-    async function abrirNotificacaoNoCRM() {
-      if (!notificacaoAtual) return;
-
-      await marcarNotificacaoCHO(notificacaoAtual, "VISUALIZADA");
-
-      notificacoesPendentesAtuais = notificacoesPendentesAtuais.filter(function (item) {
-        return idNotificacao(item) !== idNotificacao(notificacaoAtual);
-      });
-      atualizarContadorNotificacoes(notificacoesPendentesAtuais.length);
-
-      fecharPopupNotificacao();
-
-      const casalId = notificacaoAtual.casal_id;
-      if (casalId) {
-        window.location.href = montarUrlAtendimento(casalId);
-      }
-    }
-
-    async function verificarNotificacoesCHO() {
-      if (!usuarioAtualId) return;
-
-      try {
-        const url = API_NOTIFICACOES_CHO + "?" + queryUsuario() + "&status=NOVA&t=" + Date.now();
-        const dados = await fetchJsonComTimeout(url, 7000);
-        const notificacoes = extrairListaNotificacoes(dados).filter(notificacao => {
-          const consultora = limparConsultora(notificacao.consultora_responsavel || notificacao.usuario_id);
-          const pertence = !consultora || consultora === limparConsultora(usuarioAtualId);
-          const status = statusNotificacao(notificacao);
-          return pertence && (!status || status === "NOVA");
-        });
-
-        notificacoesPendentesAtuais = notificacoes;
-        atualizarContadorNotificacoes(notificacoes.length);
-
-        // Alarmes sonoros por horário comercial e por idade da notificação:
-        // imediato, 2 min, 10 min e 20 min.
-        processarAlarmesPendentes(notificacoes);
-
-        const jaExibidas = getIdsNotificacoesExibidas();
-        const nova = notificacoes.find(notificacao => {
-          const id = idNotificacao(notificacao);
-          return id && !jaExibidas.includes(id);
-        }) || null;
-
-        if (!nova) return;
-
-        salvarIdNotificacaoExibida(idNotificacao(nova));
-
-        // Fora do horário comercial não toca som, mas pode exibir visualmente se o app estiver aberto.
-        if (!horarioComercialAlarmeAgora()) {
-          mostrarPopupNotificacao(nova);
-          mostrarNotificacaoSistema(nova, "Novo lead Espaço Margô");
-        }
-
-      } catch (erro) {
-        console.warn("Não foi possível verificar notificações da CHO:", erro);
-      }
-    }
-
-    function iniciarMonitorDeNotificacoes() {
-      mostrarBarraAlertasSeNecessario();
-      verificarNotificacoesCHO();
-
-      if (verificacaoNotificacoesTimer) {
-        clearInterval(verificacaoNotificacoesTimer);
-      }
-
-      verificacaoNotificacoesTimer = setInterval(verificarNotificacoesCHO, 20000);
-    }
-
-    function registrarServiceWorkerPWA() {
-      if (!("serviceWorker" in navigator)) return;
-
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("service-worker.js").catch(function (erro) {
-          console.warn("Service Worker não registrado:", erro);
-        });
-      });
-    }
-
-
     async function carregarCasais() {
       const lista = document.getElementById("listaCasais");
       const totalNovos = document.getElementById("totalNovos");
@@ -1627,9 +877,9 @@
     async function iniciarHome() {
       await carregarUsuario();
       await carregarCasais();
-      iniciarMonitorDeNotificacoes();
 
-      setTimeout(carregarCasais, 2500);
+      setTimeout(carregarCasais, 900);
+      setTimeout(carregarCasais, 1800);
     }
 
     window.addEventListener("pageshow", function () {
@@ -1641,11 +891,8 @@
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden && garantirSessaoObrigatoria()) {
         carregarCasais();
-        verificarNotificacoesCHO();
       }
     });
-
-    registrarServiceWorkerPWA();
 
     if (garantirSessaoObrigatoria()) {
       iniciarHome();
