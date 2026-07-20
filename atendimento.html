@@ -246,6 +246,18 @@
       z-index: 20;
     }
 
+    .ai-suggest-btn {
+      grid-column: 1 / -1;
+      min-height: 34px;
+      border: 1px solid #e6c9cc;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #fff8f6, #f8e9ea);
+      color: #9f5360;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
     .composer input {
       border: 1px solid #eadada;
       border-radius: 18px;
@@ -275,6 +287,7 @@
     }
 
     .composer input:disabled,
+    .ai-suggest-btn:disabled,
     .audio-btn:disabled,
     .send-btn:disabled {
       opacity: 0.55;
@@ -606,6 +619,7 @@
     </section>
 
     <div class="composer">
+      <button class="ai-suggest-btn" id="suggestResponseBtn" type="button" onclick="sugerirRespostaIA()">✨ Sugerir resposta com IA</button>
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
       <button class="send-btn" id="sendMessageBtn" type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">➤</button>
@@ -711,6 +725,7 @@
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
     const API_ENVIAR_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-whatsapp";
+    const API_SUGERIR_RESPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/sugerir-resposta";
     const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
     const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
     const API_GERAR_PROPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/gerar-proposta";
@@ -721,6 +736,8 @@
     let carregandoHistoricoConversas = false;
     let assinaturaUltimoHistorico = "";
     let enviandoMensagemManual = false;
+    let gerandoSugestaoIA = false;
+    let historicoConversasAtual = [];
 
     function travarAlturaDaTela() {
       const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -976,6 +993,7 @@
 
         const retorno = await resposta.json();
         const conversas = Array.isArray(retorno.conversas) ? retorno.conversas : [];
+        historicoConversasAtual = conversas;
         const novaAssinatura = criarAssinaturaHistorico(conversas);
 
         if (!opcoes.forcar && novaAssinatura === assinaturaUltimoHistorico) {
@@ -1167,6 +1185,95 @@
       }
 
       travarAlturaDaTela();
+    }
+
+    async function sugerirRespostaIA() {
+      const input = document.getElementById("messageInput");
+      const botao = document.getElementById("suggestResponseBtn");
+
+      if (gerandoSugestaoIA) return;
+
+      if (!casalAtualId) {
+        alert("Não foi possível identificar o casal.");
+        return;
+      }
+
+      if (!historicoConversasAtual.length) {
+        alert("Ainda não há conversa para a IA analisar.");
+        return;
+      }
+
+      const ultima = historicoConversasAtual[historicoConversasAtual.length - 1] || {};
+      if (String(ultima.direcao || "").toUpperCase() !== "ENTRADA") {
+        alert("A mensagem mais recente já é uma saída. Não há resposta pendente da noiva.");
+        return;
+      }
+
+      if (input.value.trim()) {
+        const substituir = confirm("Já existe um texto no campo. Deseja substituí-lo pela sugestão da IA?");
+        if (!substituir) return;
+      }
+
+      gerandoSugestaoIA = true;
+      botao.disabled = true;
+      botao.textContent = "✨ Analisando a conversa...";
+
+      try {
+        // Mantém contexto suficiente para a Milene sem enviar conversas ilimitadas.
+        const conversas = historicoConversasAtual.slice(-60).map(conversa => ({
+          direcao: conversa.direcao || "",
+          tipo_mensagem: conversa.tipo_mensagem || "TEXTO",
+          mensagem: conversa.mensagem || "",
+          transcricao_audio: conversa.transcricao_audio || "",
+          data_hora: conversa.data_hora || ""
+        }));
+
+        const resposta = await fetch(API_SUGERIR_RESPOSTA, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            usuario_id: usuarioAtualId || "",
+            casal: {
+              nome_noiva: casalAtual.nome_noiva || "",
+              nome_noivo: casalAtual.nome_noivo || "",
+              data_casamento: casalAtual.data_casamento || "",
+              quantidade_convidados: casalAtual.quantidade_convidados || "",
+              status_casal: casalAtual.status_casal || "",
+              origem: casalAtual.origem || "",
+              sonhos_do_casal: casalAtual.sonhos_do_casal || "",
+              encantamentos_principais: casalAtual.encantamentos_principais || "",
+              observacoes_gerais: casalAtual.observacoes_gerais || ""
+            },
+            conversas
+          })
+        });
+
+        let retorno = {};
+        try {
+          retorno = await resposta.json();
+        } catch (_) {
+          retorno = {};
+        }
+
+        if (!resposta.ok || retorno.sucesso !== true || !String(retorno.sugestao || "").trim()) {
+          throw new Error(retorno.erro || retorno.mensagem || "A IA não retornou uma sugestão.");
+        }
+
+        input.value = String(retorno.sugestao).trim();
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      } catch (erro) {
+        console.error("Erro ao sugerir resposta:", erro);
+        alert("Não foi possível gerar a sugestão. Você pode continuar respondendo manualmente. " + (erro.message || ""));
+      } finally {
+        gerandoSugestaoIA = false;
+        botao.disabled = false;
+        botao.textContent = "✨ Sugerir resposta com IA";
+        travarAlturaDaTela();
+      }
     }
 
 
