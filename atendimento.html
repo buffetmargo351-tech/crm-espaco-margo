@@ -274,6 +274,13 @@
       background: linear-gradient(135deg, #df6475, #d45167);
     }
 
+    .composer input:disabled,
+    .audio-btn:disabled,
+    .send-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     .bottom-nav {
       width: 100%;
       background: #ffffff;
@@ -601,7 +608,7 @@
     <div class="composer">
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
-      <button class="send-btn" onclick="enviarMensagem()">➤</button>
+      <button class="send-btn" id="sendMessageBtn" type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">➤</button>
     </div>
 
     <nav class="bottom-nav">
@@ -703,6 +710,7 @@
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
+    const API_ENVIAR_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-whatsapp";
     const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
     const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
     const API_GERAR_PROPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/gerar-proposta";
@@ -712,6 +720,7 @@
     let atualizacaoConversasTimer = null;
     let carregandoHistoricoConversas = false;
     let assinaturaUltimoHistorico = "";
+    let enviandoMensagemManual = false;
 
     function travarAlturaDaTela() {
       const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -1058,7 +1067,9 @@
         audio_url: "",
         transcricao_audio: "",
         enviado_por: "CHO",
-        origem_mensagem: "APP_CRM",
+        // O envio já foi confirmado diretamente antes deste registro.
+        // Esta origem evita que o workflow de conversas tente enviar novamente.
+        origem_mensagem: "APP_CRM_HISTORICO",
         status_registro: "REGISTRADO"
       };
 
@@ -1077,21 +1088,82 @@
       return await resposta.json();
     }
 
+    function normalizarTelefoneWhatsApp(valor) {
+      let telefone = String(valor || "").replace(/\D/g, "");
+
+      if (telefone.length === 10 || telefone.length === 11) {
+        telefone = "55" + telefone;
+      }
+
+      return telefone;
+    }
+
+    async function enviarTextoParaWhatsApp(texto) {
+      const telefone = normalizarTelefoneWhatsApp(casalAtual.telefone);
+
+      if (telefone.length < 12 || telefone.length > 15) {
+        throw new Error("Telefone da noiva inválido ou não informado no CRM.");
+      }
+
+      const resposta = await fetch(API_ENVIAR_WHATSAPP, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          telefone,
+          mensagem: texto
+        })
+      });
+
+      let retorno = {};
+      try {
+        retorno = await resposta.json();
+      } catch (_) {
+        retorno = {};
+      }
+
+      if (!resposta.ok || retorno.sucesso === false || retorno.enviado === false) {
+        throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio.");
+      }
+
+      return retorno;
+    }
+
     async function enviarMensagem() {
       const input = document.getElementById("messageInput");
+      const botao = document.getElementById("sendMessageBtn");
       const texto = input.value.trim();
 
-      if (!texto) return;
+      if (!texto || enviandoMensagemManual) return;
 
-      input.value = "";
-      adicionarMensagemNaTela(texto);
+      enviandoMensagemManual = true;
+      input.disabled = true;
+      botao.disabled = true;
+      botao.textContent = "…";
 
       try {
-        await registrarMensagem(texto);
-        await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        await enviarTextoParaWhatsApp(texto);
+
+        input.value = "";
+        adicionarMensagemNaTela(texto);
+
+        try {
+          await registrarMensagem(texto);
+          await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        } catch (erroRegistro) {
+          console.error("Mensagem enviada, mas não registrada:", erroRegistro);
+          alert("A mensagem foi enviada para a noiva, mas não foi registrada no histórico. Atualize a tela e confira o CRM.");
+        }
       } catch (erro) {
-        console.error("Erro ao registrar mensagem:", erro);
-        alert("A mensagem apareceu na tela, mas não foi registrada na planilha.");
+        console.error("Erro ao enviar mensagem:", erro);
+        alert("A mensagem não foi enviada. " + (erro.message || "Verifique o WhatsApp e tente novamente."));
+      } finally {
+        enviandoMensagemManual = false;
+        input.disabled = false;
+        botao.disabled = false;
+        botao.textContent = "➤";
+        input.focus();
       }
 
       travarAlturaDaTela();
