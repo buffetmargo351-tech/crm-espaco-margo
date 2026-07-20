@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<style>
+  body.crm-bloqueado {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f6f0ea;
+    color: #3b2f2f;
+  }
+  body.crm-validando .phone-frame {
+    display: none !important;
+  }
+
+  body.crm-bloqueado .phone-frame {
+    display: none !important;
+  }
+
+
+  #bloqueio-acesso-crm {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  .bloqueio-card-crm {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    text-align: center;
+  }
+
+  .bloqueio-card-crm h1 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    color: #7a4b35;
+  }
+
+  .bloqueio-card-crm p {
+    margin: 8px 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #5c4a42;
+  }
+
+  .bloqueio-card-crm .codigo {
+    margin-top: 16px;
+    padding: 10px;
+    background: #f3ebe5;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #7a4b35;
+  }
+</style>
+
+
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+  <title>CRM Espaço Margô - Atendimento</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f4f0ef;
+      color: #2f2423;
+      overscroll-behavior: none;
+      position: fixed;
+      inset: 0;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 430px;
+      height: var(--app-height, 100dvh);
+      margin: 0 auto;
+      background: #ffffff;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      position: fixed;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+    }
+
+    .header {
+      padding: 14px 18px 9px;
+      border-bottom: 1px solid #f1dddd;
+      background: #ffffff;
+      z-index: 10;
+    }
+
+    .top-nav {
+      display: grid;
+      grid-template-columns: 40px 1fr 40px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .nav-arrow {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      border: 1px solid #eadada;
+      background: #fff;
+      color: #d85f6f;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .couple-name {
+      text-align: center;
+      font-size: 21px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.1;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: center;
+      gap: 13px;
+      margin-bottom: 7px;
+      color: #7d6461;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dreams {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-bottom: 1px;
+    }
+
+    .dream-chip {
+      background: #f8e9ea;
+      border: 1px solid #efd2d5;
+      color: #a35d61;
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .chat-area {
+      min-height: 0;
+      padding: 12px 14px 14px;
+      background:
+        radial-gradient(circle at top left, rgba(248, 233, 234, .45), transparent 30%),
+        #fffaf9;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    .empty-chat {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #9f8a87;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+      padding: 20px;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .message-row.received {
+      justify-content: flex-start;
+    }
+
+    .message-row.sent {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 78%;
+      border-radius: 15px;
+      padding: 7px 10px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.04);
+    }
+
+    .received .bubble {
+      background: #ffffff;
+      border: 1px solid #eadada;
+      border-bottom-left-radius: 5px;
+    }
+
+    .sent .bubble {
+      background: #f5dfe2;
+      border: 1px solid #efc9ce;
+      border-bottom-right-radius: 5px;
+    }
+
+    .text {
+      font-size: 14px;
+      line-height: 1.25;
+      color: #2f2423;
+    }
+
+    .time {
+      text-align: right;
+      font-size: 9px;
+      color: #9f8a87;
+      margin-top: 3px;
+      font-weight: 700;
+    }
+
+    .composer {
+      width: 100%;
+      background: #ffffff;
+      border-top: 1px solid #f1dddd;
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: 1fr 40px 40px;
+      gap: 7px;
+      z-index: 20;
+    }
+
+    .ai-suggest-btn {
+      grid-column: 1 / -1;
+      min-height: 34px;
+      border: 1px solid #e6c9cc;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #fff8f6, #f8e9ea);
+      color: #9f5360;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .composer input {
+      border: 1px solid #eadada;
+      border-radius: 18px;
+      padding: 12px 14px;
+      outline: none;
+      font-size: 16px;
+      color: #2f2423;
+      background: #fffaf9;
+    }
+
+    .audio-btn,
+    .send-btn {
+      border: none;
+      border-radius: 15px;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .audio-btn {
+      background: #b98286;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #df6475, #d45167);
+    }
+
+    .composer input:disabled,
+    .ai-suggest-btn:disabled,
+    .audio-btn:disabled,
+    .send-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .bottom-nav {
+      width: 100%;
+      background: #ffffff;
+      border-top: 1px solid #eadada;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 9px 0 10px;
+      z-index: 20;
+    }
+
+    .nav-item {
+      text-align: center;
+      color: #8a8585;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: #e15f70;
+    }
+
+
+
+    .availability-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(47, 36, 35, 0.42);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 999;
+      padding: 0 12px 14px;
+    }
+
+    .availability-overlay.open {
+      display: flex;
+    }
+
+    .availability-modal {
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-radius: 24px 24px 22px 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.24);
+      border: 1px solid #eadada;
+      overflow: hidden;
+      animation: subirModal .18s ease-out;
+    }
+
+    @keyframes subirModal {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .availability-header {
+      padding: 15px 16px 10px;
+      border-bottom: 1px solid #f1dddd;
+      display: grid;
+      grid-template-columns: 1fr 34px;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .availability-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.15;
+    }
+
+    .availability-subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: #8a6f6c;
+    }
+
+    .availability-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 13px;
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      color: #b98286;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .availability-body {
+      padding: 14px 16px 16px;
+    }
+
+    .availability-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+      color: #5b4644;
+      margin-bottom: 6px;
+    }
+
+    .availability-input-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .availability-date,
+    .availability-guests,
+    .availability-name {
+      width: 100%;
+      border: 1px solid #eadada;
+      border-radius: 16px;
+      padding: 12px 13px;
+      outline: none;
+      font-size: 16px;
+      color: #2f2423;
+      background: #fffaf9;
+      font-weight: 800;
+    }
+
+    .availability-primary {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, #df6475, #d45167);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .availability-primary:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+
+    .availability-result {
+      display: none;
+      margin-top: 13px;
+      border: 1px solid #eadada;
+      background: #fffaf9;
+      border-radius: 18px;
+      padding: 12px;
+    }
+
+    .availability-result.show {
+      display: block;
+    }
+
+    .availability-summary {
+      font-size: 14px;
+      font-weight: 900;
+      color: #2f2423;
+      line-height: 1.28;
+      margin-bottom: 10px;
+    }
+
+    .period-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .period-card {
+      border-radius: 15px;
+      padding: 10px;
+      border: 1px solid #eadada;
+      background: #ffffff;
+    }
+
+    .period-name {
+      font-size: 12px;
+      font-weight: 900;
+      color: #5b4644;
+      margin-bottom: 4px;
+    }
+
+    .period-hour {
+      font-size: 11px;
+      font-weight: 800;
+      color: #8a6f6c;
+      margin-bottom: 7px;
+    }
+
+    .period-status {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 5px 7px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+
+    .period-status.available {
+      background: #e7f6ec;
+      color: #2d7d46;
+      border: 1px solid #bfe6cb;
+    }
+
+    .period-status.unavailable {
+      background: #f9e4e6;
+      color: #b63c4e;
+      border: 1px solid #efc4ca;
+    }
+
+    .availability-actions {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .availability-actions.show {
+      display: grid;
+    }
+
+    .availability-secondary {
+      width: 100%;
+      border: 1px solid #eadada;
+      border-radius: 15px;
+      padding: 11px 12px;
+      background: #ffffff;
+      color: #b4525f;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .proposal-primary {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 13px 14px;
+      background: linear-gradient(135deg, #7a4b35, #4d2e22);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .proposal-primary:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+
+    #generateProposalBtn {
+      margin-top: 10px;
+    }
+
+    .proposal-status {
+      display: none;
+      margin-top: 10px;
+      border-radius: 15px;
+      background: #f6eee8;
+      border: 1px solid #eadada;
+      padding: 10px 11px;
+      color: #5b4644;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .proposal-status.show {
+      display: block;
+    }
+
+    .availability-note {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #8a6f6c;
+    }
+
+    .training-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(41, 27, 26, 0.58);
+      padding: 18px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .training-overlay.show {
+      display: flex;
+    }
+
+    .training-modal {
+      width: min(100%, 520px);
+      max-height: calc(var(--app-height, 100dvh) - 36px);
+      overflow-y: auto;
+      border-radius: 22px;
+      background: #fffaf7;
+      box-shadow: 0 22px 70px rgba(0,0,0,0.28);
+      padding: 20px;
+      color: #4e3937;
+    }
+
+    .training-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .training-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .training-close {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border: 1px solid #e5d2cc;
+      border-radius: 50%;
+      background: #fff;
+      color: #765652;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .training-subtitle {
+      color: #806966;
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    .training-comparison {
+      display: grid;
+      gap: 9px;
+      margin-bottom: 13px;
+    }
+
+    .training-text {
+      border: 1px solid #eadbd5;
+      background: #fff;
+      border-radius: 13px;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .training-text strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #9c5f58;
+    }
+
+    .training-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+      margin: 10px 0 6px;
+    }
+
+    .training-select,
+    .training-note {
+      width: 100%;
+      border: 1px solid #dccac4;
+      border-radius: 12px;
+      background: #fff;
+      color: #4e3937;
+      font: inherit;
+      padding: 10px;
+    }
+
+    .training-note {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    .training-review {
+      width: 100%;
+      min-height: 210px;
+      max-height: 42vh;
+      resize: vertical;
+      border: 1px solid #d9c2bb;
+      border-radius: 14px;
+      background: #fff;
+      color: #3f302e;
+      padding: 13px;
+      font: 15px/1.5 inherit;
+      box-sizing: border-box;
+    }
+
+    .training-instruction-area.hidden {
+      display: none;
+    }
+
+    .training-actions {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .training-action {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .training-action.point { background: #eee7e3; color: #604b48; }
+    .training-action.example { background: #bf7c70; color: white; }
+    .training-action.rule { background: #6f4d49; color: white; }
+    .training-action.send { background: #d95773; color: white; font-size: 15px; }
+    .training-action.selected { outline: 3px solid #e7b7ad; outline-offset: 1px; }
+    .training-action:disabled { opacity: .55; cursor: wait; }
+
+    @media (min-width: 700px) {
+      .phone-frame {
+        top: 20px;
+        height: calc(var(--app-height, 100dvh) - 40px);
+        border-radius: 34px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      }
+
+      .bottom-nav {
+        border-radius: 0 0 34px 34px;
+      }
+    }
+  </style>
+</head>
+
+<body class="crm-validando">
+  <div class="phone-frame" id="phoneFrame">
+    <header class="header">
+      <div class="top-nav">
+        <button class="nav-arrow" onclick="voltarHome()">‹</button>
+        <div class="couple-name" id="nomeCasal">Carregando...</div>
+        <div></div>
+      </div>
+
+      <div class="info-row">
+        <div id="dataCasamento">📅 --/--/----</div>
+        <div id="qtdConvidados">👥 -- convidados</div>
+      </div>
+
+      <div class="dreams" id="sonhosCasal"></div>
+    </header>
+
+    <section class="chat-area" id="chatArea">
+      <div class="empty-chat" id="emptyChat">
+        Nenhuma mensagem registrada nesta conversa.
+      </div>
+    </section>
+
+    <div class="composer">
+      <button class="ai-suggest-btn" id="suggestResponseBtn" type="button" onclick="sugerirRespostaIA()">✨ Sugerir resposta com IA</button>
+      <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
+      <button class="send-btn" id="sendMessageBtn" type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">➤</button>
+    </div>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active" onclick="voltarHome()">
+        <span>🏠</span>
+        Início
+      </div>
+
+      <div class="nav-item" onclick="abrirDisponibilidade()">
+        <span>📅</span>
+        Consultar Data
+      </div>
+
+      <div class="nav-item" onclick="abrirConsultoria()">
+        <span>📝</span>
+        Agendar
+      </div>
+
+      <div class="nav-item" onclick="alert('Histórico do casal será ativado em breve.')">
+        <span>📜</span>
+        Histórico
+      </div>
+    </nav>
+  </div>
+
+  <div class="availability-overlay" id="availabilityOverlay" onclick="fecharDisponibilidadePeloFundo(event)">
+    <div class="availability-modal" role="dialog" aria-modal="true" aria-labelledby="availabilityTitle">
+      <div class="availability-header">
+        <div>
+          <div class="availability-title" id="availabilityTitle">Dados da proposta e data pretendida</div>
+          <div class="availability-subtitle">Complete os dados essenciais para gerar a proposta digital e consultar a disponibilidade.</div>
+        </div>
+        <button class="availability-close" onclick="fecharDisponibilidade()">×</button>
+      </div>
+
+      <div class="availability-body">
+        <label class="availability-label" for="availabilityNomeNoiva">Nome da noiva</label>
+        <div class="availability-input-row">
+          <input class="availability-name" id="availabilityNomeNoiva" type="text" placeholder="Ex.: Thais" autocomplete="off" />
+        </div>
+
+        <label class="availability-label" for="availabilityNomeNoivo" style="margin-top: 10px;">Nome do noivo</label>
+        <div class="availability-input-row">
+          <input class="availability-name" id="availabilityNomeNoivo" type="text" placeholder="Ex.: Gabriel" autocomplete="off" />
+        </div>
+
+        <label class="availability-label" for="availabilityDate" style="margin-top: 10px;">Data pretendida do casamento</label>
+        <div class="availability-input-row">
+          <input class="availability-date" id="availabilityDate" type="date" />
+        </div>
+
+        <label class="availability-label" for="availabilityGuests" style="margin-top: 10px;">Quantidade estimada de convidados</label>
+        <div class="availability-input-row">
+          <input class="availability-guests" id="availabilityGuests" type="number" min="1" inputmode="numeric" placeholder="Ex.: 150" />
+        </div>
+
+        <button class="availability-primary" id="availabilityCheckBtn" onclick="verificarDisponibilidade()">
+          Verificar disponibilidade
+        </button>
+
+        <div class="availability-result" id="availabilityResult">
+          <div class="availability-summary" id="availabilitySummary"></div>
+          <div class="period-grid">
+            <div class="period-card">
+              <div class="period-name">Manhã</div>
+              <div class="period-hour" id="manhaHorario">09:00 às 14:00</div>
+              <span class="period-status" id="manhaStatus">--</span>
+            </div>
+            <div class="period-card">
+              <div class="period-name">Tarde</div>
+              <div class="period-hour" id="tardeHorario">16:30 às 21:00</div>
+              <span class="period-status" id="tardeStatus">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="proposal-status" id="proposalStatus"></div>
+
+        <button class="proposal-primary" id="generateProposalBtn" onclick="gerarPropostaDigital()">
+          Gerar Proposta Digital
+        </button>
+
+        <div class="availability-actions" id="availabilityActions">
+          <button class="availability-secondary" id="availabilityWhatsappBtn" onclick="usarRespostaDisponibilidade()">
+            Chamar pelo WhatsApp
+          </button>
+          <button class="availability-secondary" id="availabilityContinueBtn" onclick="seguirAtendimentoDisponibilidade()">
+            Seguir atendimento
+          </button>
+        </div>
+
+        <div class="availability-note">
+          Se a data estiver indisponível, conduza a noiva com cuidado para datas alternativas antes de criar expectativa de visita.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="training-overlay" id="trainingOverlay">
+    <div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="trainingTitle">
+      <div class="training-header">
+        <div>
+          <div class="training-title" id="trainingTitle">✨ Revisar resposta da Milene</div>
+          <div class="training-subtitle">Leia, edite e escolha como esta resposta deve ensinar a IA antes de enviar.</div>
+        </div>
+        <button class="training-close" type="button" onclick="fecharRevisaoIA()" aria-label="Fechar">×</button>
+      </div>
+
+      <label class="training-label" for="aiReviewText">Resposta que será enviada</label>
+      <textarea class="training-review" id="aiReviewText"></textarea>
+
+      <div class="training-actions">
+        <button class="training-action point" id="trainingTypePontual" type="button" onclick="selecionarTipoTreinamentoIA('PONTUAL')">Correção Pontual</button>
+        <button class="training-action rule" id="trainingTypeRegra" type="button" onclick="selecionarTipoTreinamentoIA('REGRA')">Regra Permanente</button>
+        <button class="training-action example" id="trainingTypeExemplo" type="button" onclick="selecionarTipoTreinamentoIA('EXEMPLO')">Exemplo Aprovado</button>
+      </div>
+
+      <div class="training-instruction-area hidden" id="trainingInstructionArea">
+        <label class="training-label" for="trainingInstruction">O que a Milene deve aprender com esta regra?</label>
+        <textarea class="training-note" id="trainingInstruction" placeholder="Ex.: Quando perguntarem preço, responder o valor antes de fazer outra pergunta."></textarea>
+      </div>
+
+      <div class="training-actions">
+        <button class="training-action send" id="trainingSendBtn" type="button" onclick="enviarRespostaRevisadaIA()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
+    const API_CONVERSAS = "https://n8n.espacomargo.com.br/webhook/crm/conversas";
+    const API_ENVIAR_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-whatsapp";
+    const API_SUGERIR_RESPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/sugerir-resposta";
+    const API_TREINAMENTO_IA = "https://n8n.espacomargo.com.br/webhook/crm/treinamento-ia";
+    const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
+    const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
+    const API_GERAR_PROPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/gerar-proposta";
+    let casalAtualId = null;
+    let usuarioAtualId = null;
+    let casalAtual = {};
+    let atualizacaoConversasTimer = null;
+    let carregandoHistoricoConversas = false;
+    let assinaturaUltimoHistorico = "";
+    let enviandoMensagemManual = false;
+    let gerandoSugestaoIA = false;
+    let historicoConversasAtual = [];
+    let sugestaoIAAtual = null;
+    let tipoTreinamentoIASelecionado = "";
+
+    function travarAlturaDaTela() {
+      const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty("--app-height", altura + "px");
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    travarAlturaDaTela();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", travarAlturaDaTela);
+      window.visualViewport.addEventListener("scroll", travarAlturaDaTela);
+    }
+
+    window.addEventListener("resize", travarAlturaDaTela);
+    window.addEventListener("scroll", travarAlturaDaTela);
+
+    document.addEventListener("touchmove", function (event) {
+      if (!event.target.closest("#chatArea")) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
+    function pegarCasalIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("casal_id");
+    }
+
+    function pegarUsuarioIdDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("usuario_id");
+    }
+
+    function montarQueryUsuario() {
+      if (!usuarioAtualId) return "";
+      return "usuario_id=" + encodeURIComponent(usuarioAtualId);
+    }
+
+    function voltarHome() {
+      const query = montarQueryUsuario();
+      window.location.href = query ? "home.html?" + query : "home.html";
+    }
+
+    function nomeCasal(casal) {
+      const noiva = casal.nome_noiva || "";
+      const noivo = casal.nome_noivo || "";
+
+      if (noiva && noivo) {
+        return noiva + " ❤️ " + noivo;
+      }
+
+      return noiva || noivo || "Casal sem nome";
+    }
+
+    function formatarDataCasamento(data) {
+      if (!data) return "📅 Data não informada";
+      return "📅 " + data;
+    }
+
+    function formatarConvidados(qtd) {
+      if (!qtd) return "👥 Convidados não informados";
+      return "👥 " + qtd + " convidados";
+    }
+
+    function dadosObrigatoriosPropostaOK(casal) {
+      return Boolean(
+        String(casal.nome_noiva || "").trim() &&
+        String(casal.nome_noivo || "").trim() &&
+        String(casal.data_casamento || "").trim() &&
+        Number(casal.quantidade_convidados || 0) > 0
+      );
+    }
+
+    function textoObrigatorio(valor) {
+      return String(valor || "").trim();
+    }
+
+
+    function labelEncantamento(valor) {
+      const mapa = {
+        por_do_sol: "Pôr do sol",
+        lago: "Lago",
+        jardim: "Jardim",
+        cerimonia_externa: "Cerimônia externa",
+        gastronomia: "Gastronomia",
+        atendimento: "Atendimento",
+        estrutura: "Estrutura",
+        exclusividade: "Exclusividade",
+        familiar: "Familiar",
+        familia: "Família",
+        natureza: "Natureza",
+        festa_animada: "Festa animada",
+        intimista: "Intimista",
+        emocionante: "Emocionante"
+      };
+
+      return mapa[valor] || String(valor).replaceAll("_", " ");
+    }
+
+    function renderizarEncantamentos(texto) {
+      const container = document.getElementById("sonhosCasal");
+      container.innerHTML = "";
+
+      if (!texto) {
+        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        return;
+      }
+
+      const itens = String(texto)
+        .split("|")
+        .map(item => item.trim())
+        .filter(Boolean);
+
+      if (itens.length === 0) {
+        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        return;
+      }
+
+      itens.forEach(item => {
+        const chip = document.createElement("div");
+        chip.className = "dream-chip";
+        chip.textContent = "✨ " + labelEncantamento(item);
+        container.appendChild(chip);
+      });
+    }
+
+    async function carregarCasal() {
+      casalAtualId = pegarCasalIdDaUrl();
+      usuarioAtualId = pegarUsuarioIdDaUrl();
+
+      if (!casalAtualId) {
+        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        return;
+      }
+
+      try {
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId));
+        const casal = await resposta.json();
+
+        if (casal.erro) {
+          document.getElementById("nomeCasal").textContent = "Casal não encontrado";
+          return;
+        }
+
+        casalAtual = casal;
+
+        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+        document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
+        document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
+        renderizarEncantamentos(casal.encantamentos_principais);
+        await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        iniciarAtualizacaoAutomaticaConversas();
+
+        travarAlturaDaTela();
+
+      } catch (erro) {
+        console.error("Erro ao carregar casal:", erro);
+        document.getElementById("nomeCasal").textContent = "Erro ao carregar";
+      }
+    }
+
+    function abrirConsultoria() {
+      let url = "consultoria.html";
+
+      if (casalAtualId) {
+        url += "?casal_id=" + encodeURIComponent(casalAtualId);
+
+        if (usuarioAtualId) {
+          url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+        }
+      } else if (usuarioAtualId) {
+        url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
+      }
+
+      window.location.href = url;
+    }
+
+    function esconderMensagemVazia() {
+      const emptyChat = document.getElementById("emptyChat");
+      if (emptyChat) {
+        emptyChat.remove();
+      }
+    }
+
+    function limparChat() {
+      const chat = document.getElementById("chatArea");
+      chat.innerHTML = '<div class="empty-chat" id="emptyChat">Nenhuma mensagem registrada nesta conversa.</div>';
+    }
+
+    function adicionarMensagemHistorico(conversa) {
+      esconderMensagemVazia();
+
+      const chat = document.getElementById("chatArea");
+
+      const row = document.createElement("div");
+      row.className = conversa.direcao === "ENTRADA" ? "message-row received" : "message-row sent";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      const text = document.createElement("div");
+      text.className = "text";
+
+      if (conversa.tipo_mensagem === "AUDIO") {
+        text.textContent = conversa.transcricao_audio || "🎤 Áudio recebido";
+      } else {
+        text.textContent = conversa.mensagem || "";
+      }
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = conversa.data_hora || "";
+
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chat.appendChild(row);
+    }
+
+    function usuarioEstaNoFinalDoChat() {
+      const chat = document.getElementById("chatArea");
+      if (!chat) return true;
+      return chat.scrollHeight - chat.scrollTop - chat.clientHeight < 80;
+    }
+
+    function criarAssinaturaHistorico(conversas) {
+      return conversas
+        .map(conversa => [
+          conversa.conversa_id || "",
+          conversa.data_hora || "",
+          conversa.direcao || "",
+          conversa.tipo_mensagem || "",
+          conversa.mensagem || "",
+          conversa.transcricao_audio || ""
+        ].join("::"))
+        .join("||");
+    }
+
+    async function carregarHistoricoConversas(opcoes = {}) {
+      if (!casalAtualId || carregandoHistoricoConversas) return;
+
+      carregandoHistoricoConversas = true;
+
+      try {
+        const chat = document.getElementById("chatArea");
+        const deveManterNoFinal = opcoes.forcarScroll || usuarioEstaNoFinalDoChat();
+
+        const resposta = await fetch(API_CONVERSAS + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now(), {
+          cache: "no-store"
+        });
+
+        const retorno = await resposta.json();
+        const conversas = Array.isArray(retorno.conversas) ? retorno.conversas : [];
+        historicoConversasAtual = conversas;
+        const novaAssinatura = criarAssinaturaHistorico(conversas);
+
+        if (!opcoes.forcar && novaAssinatura === assinaturaUltimoHistorico) {
+          return;
+        }
+
+        assinaturaUltimoHistorico = novaAssinatura;
+        limparChat();
+
+        if (conversas.length === 0) {
+          return;
+        }
+
+        conversas.forEach(conversa => {
+          adicionarMensagemHistorico(conversa);
+        });
+
+        if (deveManterNoFinal && chat) {
+          chat.scrollTop = chat.scrollHeight;
+        }
+
+      } catch (erro) {
+        console.error("Erro ao carregar histórico de conversas:", erro);
+      } finally {
+        carregandoHistoricoConversas = false;
+      }
+    }
+
+    function iniciarAtualizacaoAutomaticaConversas() {
+      if (atualizacaoConversasTimer) {
+        clearInterval(atualizacaoConversasTimer);
+      }
+
+      atualizacaoConversasTimer = setInterval(() => {
+        carregarHistoricoConversas();
+      }, 5000);
+    }
+
+    window.addEventListener("beforeunload", function () {
+      if (atualizacaoConversasTimer) {
+        clearInterval(atualizacaoConversasTimer);
+      }
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) {
+        carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+      }
+    });
+
+    function adicionarMensagemNaTela(texto) {
+      esconderMensagemVazia();
+
+      const chat = document.getElementById("chatArea");
+
+      const row = document.createElement("div");
+      row.className = "message-row sent";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      const text = document.createElement("div");
+      text.className = "text";
+      text.textContent = texto;
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chat.appendChild(row);
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function registrarMensagem(texto) {
+      const payload = {
+        casal_id: casalAtualId || "",
+        telefone: casalAtual.telefone || "",
+        consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
+        direcao: "SAIDA",
+        tipo_mensagem: "TEXTO",
+        mensagem: texto,
+        audio_url: "",
+        transcricao_audio: "",
+        enviado_por: "CHO",
+        // O envio já foi confirmado diretamente antes deste registro.
+        // Esta origem evita que o workflow de conversas tente enviar novamente.
+        origem_mensagem: "APP_CRM_HISTORICO",
+        status_registro: "REGISTRADO"
+      };
+
+      const resposta = await fetch(API_CONVERSAS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao registrar conversa");
+      }
+
+      return await resposta.json();
+    }
+
+    function normalizarTelefoneWhatsApp(valor) {
+      let telefone = String(valor || "").replace(/\D/g, "");
+
+      if (telefone.length === 10 || telefone.length === 11) {
+        telefone = "55" + telefone;
+      }
+
+      return telefone;
+    }
+
+    async function enviarTextoParaWhatsApp(texto) {
+      const telefone = normalizarTelefoneWhatsApp(casalAtual.telefone);
+
+      if (telefone.length < 12 || telefone.length > 15) {
+        throw new Error("Telefone da noiva inválido ou não informado no CRM.");
+      }
+
+      const resposta = await fetch(API_ENVIAR_WHATSAPP, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          telefone,
+          mensagem: texto
+        })
+      });
+
+      let retorno = {};
+      try {
+        retorno = await resposta.json();
+      } catch (_) {
+        retorno = {};
+      }
+
+      if (!resposta.ok || retorno.sucesso === false || retorno.enviado === false) {
+        throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio.");
+      }
+
+      return retorno;
+    }
+
+    async function enviarMensagem(opcoes = {}) {
+      const input = document.getElementById("messageInput");
+      const botao = document.getElementById("sendMessageBtn");
+      const texto = String(opcoes.texto || input.value || "").trim();
+
+      if (!texto || enviandoMensagemManual) return false;
+
+      enviandoMensagemManual = true;
+      input.disabled = true;
+      botao.disabled = true;
+      botao.textContent = "…";
+
+      let enviadoComSucesso = false;
+
+      try {
+        const sugestaoUsada = opcoes.sugestaoUsada || (
+          sugestaoIAAtual && sugestaoIAAtual.casal_id === casalAtualId
+            ? { ...sugestaoIAAtual }
+            : null
+        );
+
+        await enviarTextoParaWhatsApp(texto);
+        enviadoComSucesso = true;
+
+        input.value = "";
+        adicionarMensagemNaTela(texto);
+
+        try {
+          await registrarMensagem(texto);
+          await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        } catch (erroRegistro) {
+          console.error("Mensagem enviada, mas não registrada:", erroRegistro);
+          alert("A mensagem foi enviada para a noiva, mas não foi registrada no histórico. Atualize a tela e confira o CRM.");
+        }
+
+        if (sugestaoUsada) {
+          sugestaoIAAtual = null;
+          const registroTreinamento = {
+            ...sugestaoUsada,
+            resposta_enviada: texto
+          };
+
+          const semEdicao = normalizarTextoComparacao(sugestaoUsada.resposta_sugerida) === normalizarTextoComparacao(texto);
+          const tipoEscolhido = String(sugestaoUsada.tipo_aprendizado || "").toUpperCase();
+          const tipoFinal = tipoEscolhido || (semEdicao ? "APROVACAO" : "PONTUAL");
+
+          try {
+            await enviarRegistroTreinamento({
+              ...registroTreinamento,
+              tipo_aprendizado: tipoFinal,
+              instrucao_treinador: sugestaoUsada.instrucao_treinador || "",
+              tema: sugestaoUsada.tema || "GERAL"
+            });
+          } catch (erroTreinamento) {
+            console.error("Mensagem enviada, mas treinamento não registrado:", erroTreinamento);
+            alert("A mensagem foi enviada, mas o aprendizado da Milene não foi salvo.");
+          }
+        }
+      } catch (erro) {
+        console.error("Erro ao enviar mensagem:", erro);
+        alert("A mensagem não foi enviada. " + (erro.message || "Verifique o WhatsApp e tente novamente."));
+      } finally {
+        enviandoMensagemManual = false;
+        input.disabled = false;
+        botao.disabled = false;
+        botao.textContent = "➤";
+        input.focus();
+      }
+
+      travarAlturaDaTela();
+      return enviadoComSucesso;
+    }
+
+    async function sugerirRespostaIA() {
+      const input = document.getElementById("messageInput");
+      const botao = document.getElementById("suggestResponseBtn");
+
+      if (gerandoSugestaoIA) return;
+
+      if (!casalAtualId) {
+        alert("Não foi possível identificar o casal.");
+        return;
+      }
+
+      if (!historicoConversasAtual.length) {
+        alert("Ainda não há conversa para a IA analisar.");
+        return;
+      }
+
+      const ultima = historicoConversasAtual[historicoConversasAtual.length - 1] || {};
+      if (String(ultima.direcao || "").toUpperCase() !== "ENTRADA") {
+        alert("A mensagem mais recente já é uma saída. Não há resposta pendente da noiva.");
+        return;
+      }
+
+      gerandoSugestaoIA = true;
+      botao.disabled = true;
+      botao.textContent = "✨ Analisando a conversa...";
+
+      try {
+        // Mantém contexto suficiente para a Milene sem enviar conversas ilimitadas.
+        const conversas = historicoConversasAtual.slice(-60).map(conversa => ({
+          direcao: conversa.direcao || "",
+          tipo_mensagem: conversa.tipo_mensagem || "TEXTO",
+          mensagem: conversa.mensagem || "",
+          transcricao_audio: conversa.transcricao_audio || "",
+          data_hora: conversa.data_hora || ""
+        }));
+
+        const resposta = await fetch(API_SUGERIR_RESPOSTA, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            usuario_id: usuarioAtualId || "",
+            casal: {
+              nome_noiva: casalAtual.nome_noiva || "",
+              nome_noivo: casalAtual.nome_noivo || "",
+              data_casamento: casalAtual.data_casamento || "",
+              quantidade_convidados: casalAtual.quantidade_convidados || "",
+              status_casal: casalAtual.status_casal || "",
+              origem: casalAtual.origem || "",
+              sonhos_do_casal: casalAtual.sonhos_do_casal || "",
+              encantamentos_principais: casalAtual.encantamentos_principais || "",
+              observacoes_gerais: casalAtual.observacoes_gerais || ""
+            },
+            conversas
+          })
+        });
+
+        let retorno = {};
+        try {
+          retorno = await resposta.json();
+        } catch (_) {
+          retorno = {};
+        }
+
+        if (!resposta.ok || retorno.sucesso !== true || !String(retorno.sugestao || "").trim()) {
+          throw new Error(retorno.erro || retorno.mensagem || "A IA não retornou uma sugestão.");
+        }
+
+        sugestaoIAAtual = {
+          casal_id: casalAtualId,
+          usuario_treinador: usuarioAtualId || casalAtual.consultora_responsavel || "",
+          mensagem_noiva: String(ultima.mensagem || ultima.transcricao_audio || "").trim(),
+          resposta_sugerida: String(retorno.sugestao).trim(),
+          response_id: retorno.response_id || "",
+          modelo_ia: retorno.modelo || "gpt-5.6-terra",
+          prompt_versao: "MILENE_V1_2026-07-20"
+        };
+        abrirRevisaoIA();
+      } catch (erro) {
+        console.error("Erro ao sugerir resposta:", erro);
+        alert("Não foi possível gerar a sugestão. Você pode continuar respondendo manualmente. " + (erro.message || ""));
+      } finally {
+        gerandoSugestaoIA = false;
+        botao.disabled = false;
+        botao.textContent = "✨ Sugerir resposta com IA";
+        travarAlturaDaTela();
+      }
+    }
+
+    function normalizarTextoComparacao(valor) {
+      return String(valor || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+    }
+
+    async function enviarRegistroTreinamento(payload) {
+      const resposta = await fetch(API_TREINAMENTO_IA, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      let retorno = {};
+      try { retorno = await resposta.json(); } catch (_) {}
+
+      if (!resposta.ok || retorno.sucesso !== true) {
+        throw new Error(retorno.erro || retorno.mensagem || "Não foi possível registrar o treinamento.");
+      }
+
+      return retorno;
+    }
+
+    function abrirRevisaoIA() {
+      if (!sugestaoIAAtual) return;
+
+      tipoTreinamentoIASelecionado = "";
+      document.getElementById("aiReviewText").value = sugestaoIAAtual.resposta_sugerida || "";
+      document.getElementById("trainingInstruction").value = "";
+      document.getElementById("trainingInstructionArea").classList.add("hidden");
+      document.querySelectorAll("#trainingOverlay .training-action").forEach(botao => botao.classList.remove("selected"));
+      document.getElementById("trainingOverlay").classList.add("show");
+      setTimeout(() => document.getElementById("aiReviewText").focus(), 80);
+    }
+
+    function fecharRevisaoIA() {
+      document.getElementById("trainingOverlay").classList.remove("show");
+      tipoTreinamentoIASelecionado = "";
+      sugestaoIAAtual = null;
+    }
+
+    function selecionarTipoTreinamentoIA(tipo) {
+      tipoTreinamentoIASelecionado = String(tipo || "").toUpperCase();
+
+      const mapaBotoes = {
+        PONTUAL: "trainingTypePontual",
+        REGRA: "trainingTypeRegra",
+        EXEMPLO: "trainingTypeExemplo"
+      };
+
+      Object.values(mapaBotoes).forEach(id => document.getElementById(id).classList.remove("selected"));
+      if (mapaBotoes[tipoTreinamentoIASelecionado]) {
+        document.getElementById(mapaBotoes[tipoTreinamentoIASelecionado]).classList.add("selected");
+      }
+
+      const areaRegra = document.getElementById("trainingInstructionArea");
+      areaRegra.classList.toggle("hidden", tipoTreinamentoIASelecionado !== "REGRA");
+
+      if (tipoTreinamentoIASelecionado === "REGRA") {
+        setTimeout(() => document.getElementById("trainingInstruction").focus(), 50);
+      }
+    }
+
+    async function enviarRespostaRevisadaIA() {
+      if (!sugestaoIAAtual || enviandoMensagemManual) return;
+
+      const textoRevisado = document.getElementById("aiReviewText").value.trim();
+      const instrucao = document.getElementById("trainingInstruction").value.trim();
+      const botaoEnviar = document.getElementById("trainingSendBtn");
+
+      if (!textoRevisado) {
+        alert("A resposta não pode ficar vazia.");
+        document.getElementById("aiReviewText").focus();
+        return;
+      }
+
+      if (tipoTreinamentoIASelecionado === "REGRA" && !instrucao) {
+        alert("Descreva o que a Milene deve aprender com esta regra permanente.");
+        document.getElementById("trainingInstruction").focus();
+        return;
+      }
+
+      const sugestaoParaEnvio = {
+        ...sugestaoIAAtual,
+        tipo_aprendizado: tipoTreinamentoIASelecionado,
+        instrucao_treinador: tipoTreinamentoIASelecionado === "REGRA" ? instrucao : "",
+        tema: "GERAL"
+      };
+
+      botaoEnviar.disabled = true;
+      botaoEnviar.textContent = "Enviando...";
+
+      const sucesso = await enviarMensagem({
+        texto: textoRevisado,
+        sugestaoUsada: sugestaoParaEnvio
+      });
+
+      botaoEnviar.disabled = false;
+      botaoEnviar.textContent = "Enviar";
+
+      if (sucesso) fecharRevisaoIA();
+    }
+
+
+    function abrirDisponibilidade() {
+      const overlay = document.getElementById("availabilityOverlay");
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
+      const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
+      const result = document.getElementById("availabilityResult");
+      const actions = document.getElementById("availabilityActions");
+      const proposalStatus = document.getElementById("proposalStatus");
+
+      result.classList.remove("show");
+      actions.classList.remove("show");
+      atualizarStatusPropostaNoPopup();
+
+      // O botão Gerar Proposta fica sempre visível.
+      // As ações abaixo continuam aparecendo somente depois da consulta/proposta.
+
+      inputNomeNoiva.value = casalAtual && casalAtual.nome_noiva ? casalAtual.nome_noiva : "";
+      inputNomeNoivo.value = casalAtual && casalAtual.nome_noivo ? casalAtual.nome_noivo : "";
+
+      if (casalAtual && casalAtual.data_casamento) {
+        const valorConvertido = converterDataParaInput(casalAtual.data_casamento);
+        if (valorConvertido) {
+          inputData.value = valorConvertido;
+        }
+      } else {
+        inputData.value = "";
+      }
+
+      if (casalAtual && casalAtual.quantidade_convidados) {
+        inputConvidados.value = casalAtual.quantidade_convidados;
+      } else {
+        inputConvidados.value = "";
+      }
+
+      overlay.classList.add("open");
+      setTimeout(() => inputNomeNoiva.focus(), 120);
+    }
+
+    function fecharDisponibilidade() {
+      document.getElementById("availabilityOverlay").classList.remove("open");
+      travarAlturaDaTela();
+    }
+
+    function fecharDisponibilidadePeloFundo(event) {
+      if (event.target.id === "availabilityOverlay") {
+        fecharDisponibilidade();
+      }
+    }
+
+    function converterDataParaInput(data) {
+      const texto = String(data || "").trim();
+      const partes = texto.split("/");
+
+      if (partes.length !== 3) return "";
+
+      const dia = partes[0].padStart(2, "0");
+      const mes = partes[1].padStart(2, "0");
+      const ano = partes[2];
+
+      if (!dia || !mes || !ano || ano.length !== 4) return "";
+
+      return ano + "-" + mes + "-" + dia;
+    }
+
+    function converterDataParaBR(dataInput) {
+      const texto = String(dataInput || "").trim();
+      const partes = texto.split("-");
+
+      if (partes.length !== 3) return "";
+
+      return partes[2] + "/" + partes[1] + "/" + partes[0];
+    }
+
+    function aplicarStatusPeriodo(elementoId, status) {
+      const elemento = document.getElementById(elementoId);
+      const statusNormalizado = String(status || "").toUpperCase();
+
+      elemento.textContent = statusNormalizado === "DISPONIVEL" ? "DISPONÍVEL" : "INDISPONÍVEL";
+      elemento.classList.remove("available", "unavailable");
+      elemento.classList.add(statusNormalizado === "DISPONIVEL" ? "available" : "unavailable");
+    }
+
+    async function verificarDisponibilidade() {
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
+      const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
+      const botao = document.getElementById("availabilityCheckBtn");
+
+      const nomeNoiva = textoObrigatorio(inputNomeNoiva.value);
+      const nomeNoivo = textoObrigatorio(inputNomeNoivo.value);
+      const dataEvento = converterDataParaBR(inputData.value);
+      const quantidadeConvidados = String(inputConvidados.value || "").trim();
+
+      if (!nomeNoiva) {
+        alert("Informe o nome da noiva.");
+        inputNomeNoiva.focus();
+        return;
+      }
+
+      if (!nomeNoivo) {
+        alert("Informe o nome do noivo.");
+        inputNomeNoivo.focus();
+        return;
+      }
+
+      if (!dataEvento) {
+        alert("Selecione a data pretendida do casamento.");
+        inputData.focus();
+        return;
+      }
+
+      if (!quantidadeConvidados || Number(quantidadeConvidados) <= 0) {
+        alert("Informe a quantidade estimada de convidados.");
+        inputConvidados.focus();
+        return;
+      }
+
+      botao.disabled = true;
+      botao.textContent = "Verificando...";
+
+      try {
+        const resposta = await fetch(API_DISPONIBILIDADE, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            data_evento: dataEvento
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao consultar disponibilidade");
+        }
+
+        const retorno = await resposta.json();
+
+        window.ultimaDisponibilidadeConsultada = {
+          nome_noiva: nomeNoiva,
+          nome_noivo: nomeNoivo,
+          data_evento: dataEvento,
+          quantidade_convidados: quantidadeConvidados,
+          resumo: retorno.resumo || "",
+          manha_status: retorno.manha_status || "",
+          tarde_status: retorno.tarde_status || ""
+        };
+
+        botao.textContent = "Salvando dados...";
+
+        const salvou = await salvarDadosEventoConsultados();
+
+        if (!salvou) {
+          return;
+        }
+
+        document.getElementById("availabilitySummary").textContent = retorno.resumo || "Consulta realizada.";
+        document.getElementById("manhaHorario").textContent = retorno.manha_horario || "09:00 às 14:00";
+        document.getElementById("tardeHorario").textContent = retorno.tarde_horario || "16:30 às 21:00";
+
+        aplicarStatusPeriodo("manhaStatus", retorno.manha_status);
+        aplicarStatusPeriodo("tardeStatus", retorno.tarde_status);
+
+        document.getElementById("availabilityResult").classList.add("show");
+        document.getElementById("availabilityActions").classList.add("show");
+
+      } catch (erro) {
+        console.error("Erro ao verificar disponibilidade:", erro);
+        alert("Não foi possível consultar a disponibilidade agora. Confira o workflow v16 ou tente novamente.");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Verificar disponibilidade";
+      }
+    }
+
+    function formatarDataHoraProposta(valor) {
+      if (!valor) return "";
+      const data = new Date(valor);
+      if (isNaN(data.getTime())) return String(valor);
+
+      return data.toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function atualizarStatusPropostaNoPopup() {
+      const status = document.getElementById("proposalStatus");
+      if (!status) return;
+
+      const dataProposta = casalAtual && casalAtual.proposta_ativa_data;
+      const urlProposta = casalAtual && casalAtual.proposta_ativa_url;
+
+      if (!dataProposta && !urlProposta) {
+        status.classList.remove("show");
+        status.textContent = "";
+        return;
+      }
+
+      const dataFormatada = formatarDataHoraProposta(dataProposta);
+      status.classList.add("show");
+      status.textContent = dataFormatada
+        ? "Última proposta gerada em " + dataFormatada + "."
+        : "Este casal já possui uma proposta gerada.";
+    }
+
+    function coletarDadosObrigatoriosDoPopup() {
+      const inputNomeNoiva = document.getElementById("availabilityNomeNoiva");
+      const inputNomeNoivo = document.getElementById("availabilityNomeNoivo");
+      const inputData = document.getElementById("availabilityDate");
+      const inputConvidados = document.getElementById("availabilityGuests");
+
+      return {
+        nome_noiva: textoObrigatorio(inputNomeNoiva.value),
+        nome_noivo: textoObrigatorio(inputNomeNoivo.value),
+        data_casamento: converterDataParaBR(inputData.value),
+        quantidade_convidados: String(inputConvidados.value || "").trim(),
+        inputNomeNoiva,
+        inputNomeNoivo,
+        inputData,
+        inputConvidados
+      };
+    }
+
+    function validarDadosObrigatoriosPopup(dados) {
+      if (!dados.nome_noiva) {
+        alert("Informe o nome da noiva.");
+        dados.inputNomeNoiva.focus();
+        return false;
+      }
+
+      if (!dados.nome_noivo) {
+        alert("Informe o nome do noivo.");
+        dados.inputNomeNoivo.focus();
+        return false;
+      }
+
+      if (!dados.data_casamento) {
+        alert("Selecione a data pretendida do casamento.");
+        dados.inputData.focus();
+        return false;
+      }
+
+      if (!dados.quantidade_convidados || Number(dados.quantidade_convidados) <= 0) {
+        alert("Informe a quantidade estimada de convidados.");
+        dados.inputConvidados.focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    async function salvarDadosObrigatoriosProposta(statusDisponibilidade = "") {
+      const dados = coletarDadosObrigatoriosDoPopup();
+
+      if (!validarDadosObrigatoriosPopup(dados)) {
+        return false;
+      }
+
+      if (!casalAtualId) {
+        alert("Casal não identificado para salvar os dados.");
+        return false;
+      }
+
+      const resposta = await fetch(API_ATUALIZAR_DADOS_EVENTO, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          casal_id: casalAtualId,
+          nome_noiva: dados.nome_noiva,
+          nome_noivo: dados.nome_noivo,
+          data_casamento: dados.data_casamento,
+          quantidade_convidados: dados.quantidade_convidados,
+          status_disponibilidade_data: statusDisponibilidade
+        })
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Erro ao salvar dados obrigatórios da proposta");
+      }
+
+      casalAtual.nome_noiva = dados.nome_noiva;
+      casalAtual.nome_noivo = dados.nome_noivo;
+      casalAtual.data_casamento = dados.data_casamento;
+      casalAtual.quantidade_convidados = dados.quantidade_convidados;
+      casalAtual.status_disponibilidade_data = statusDisponibilidade;
+
+      document.getElementById("nomeCasal").textContent = nomeCasal(casalAtual);
+      document.getElementById("dataCasamento").textContent = formatarDataCasamento(casalAtual.data_casamento);
+      document.getElementById("qtdConvidados").textContent = formatarConvidados(casalAtual.quantidade_convidados);
+
+      return true;
+    }
+
+
+    function abrirWhatsAppSeguro(url) {
+      const destino = String(url || "").trim();
+
+      if (!destino) {
+        throw new Error("URL do WhatsApp não foi gerada.");
+      }
+
+      // Navegação na mesma aba: funciona no Safari/iPhone mesmo após operações assíncronas.
+      // window.open(..., "_blank") pode ser bloqueado como pop-up depois de await/fetch.
+      window.location.assign(destino);
+    }
+
+    function montarMensagemPropostaWhatsApp(retorno) {
+      const nomeNoiva = String(casalAtual.nome_noiva || "").trim() || "Olá";
+      const url = retorno.proposta_url || casalAtual.proposta_ativa_url || "";
+
+      return `${nomeNoiva}, preparei a proposta digital do Espaço Margô para vocês visualizarem com carinho. 💛\n\nSegue o link:\n${url}\n\nQualquer dúvida, eu te ajudo por aqui.`;
+    }
+
+    async function gerarPropostaDigital() {
+      const botao = document.getElementById("generateProposalBtn");
+      const actions = document.getElementById("availabilityActions");
+
+      try {
+        botao.disabled = true;
+        botao.textContent = "Salvando dados...";
+
+        const salvou = await salvarDadosObrigatoriosProposta(casalAtual.status_disponibilidade_data || "");
+
+        if (!salvou) {
+          return;
+        }
+
+        botao.textContent = "Gerando proposta...";
+
+        const resposta = await fetch(API_GERAR_PROPOSTA, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            nome_noiva: casalAtual.nome_noiva,
+            nome_noivo: casalAtual.nome_noivo,
+            telefone: casalAtual.telefone || "",
+            data_casamento: casalAtual.data_casamento,
+            quantidade_convidados: casalAtual.quantidade_convidados,
+            consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
+            periodo: "Almoço/manhã",
+            validade_dias: 30,
+            tipo_proposta: "PADRAO",
+            motivo_geracao: casalAtual.proposta_ativa_id ? "NOVA_VERSAO" : "PRIMEIRA_PROPOSTA"
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao gerar proposta");
+        }
+
+        const retorno = await resposta.json();
+
+        if (!retorno.sucesso) {
+          throw new Error(retorno.mensagem || retorno.erro || "Erro ao gerar proposta");
+        }
+
+        const agora = new Date().toISOString();
+
+        casalAtual.proposta_ativa_url = retorno.proposta_url || "";
+        casalAtual.proposta_ativa_id = retorno.proposta_id || "";
+        casalAtual.proposta_ativa_data = agora;
+        casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || "";
+
+        atualizarStatusPropostaNoPopup();
+
+        botao.textContent = "Gerar Proposta Digital";
+        actions.classList.add("show");
+
+        const whatsappUrl = retorno.whatsapp_url || (
+          "https://wa.me/" +
+          String(casalAtual.telefone || "").replace(/\D/g, "") +
+          "?text=" +
+          encodeURIComponent(montarMensagemPropostaWhatsApp(retorno))
+        );
+
+        abrirWhatsAppSeguro(whatsappUrl);
+
+      } catch (erro) {
+        console.error("Erro ao gerar proposta:", erro);
+        alert("Não foi possível gerar a proposta agora. Confira o workflow V30 ou tente novamente.");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = "Gerar Proposta Digital";
+      }
+    }
+
+    function montarMensagemDisponibilidade(consulta) {
+      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível nos períodos da manhã e da tarde. Podemos seguir com carinho para entender melhor o casamento de vocês.";
+      }
+
+      if (consulta.manha_status === "DISPONIVEL" && consulta.tarde_status !== "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível no período da manhã. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      }
+
+      if (consulta.manha_status !== "DISPONIVEL" && consulta.tarde_status === "DISPONIVEL") {
+        return "Verifiquei aqui e essa data aparece disponível no período da tarde. Podemos seguir com essa possibilidade para entender melhor o casamento de vocês.";
+      }
+
+      return "Verifiquei aqui e essa data não aparece disponível nos nossos períodos de evento. Posso te ajudar a olhar uma alternativa próxima com carinho.";
+    }
+
+    async function salvarDadosEventoConsultados() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de seguir.");
+        return false;
+      }
+
+      if (!casalAtualId) {
+        alert("Casal não identificado para salvar os dados.");
+        return false;
+      }
+
+      if (!consulta.quantidade_convidados) {
+        alert("Informe a quantidade estimada de convidados.");
+        document.getElementById("availabilityGuests").focus();
+        return false;
+      }
+
+      try {
+        const resposta = await fetch(API_ATUALIZAR_DADOS_EVENTO, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            nome_noiva: consulta.nome_noiva,
+            nome_noivo: consulta.nome_noivo,
+            data_casamento: consulta.data_evento,
+            quantidade_convidados: consulta.quantidade_convidados,
+            status_disponibilidade_data: consulta.resumo
+          })
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao salvar dados do evento");
+        }
+
+        casalAtual.nome_noiva = consulta.nome_noiva;
+        casalAtual.nome_noivo = consulta.nome_noivo;
+        casalAtual.data_casamento = consulta.data_evento;
+        casalAtual.quantidade_convidados = consulta.quantidade_convidados;
+        casalAtual.status_disponibilidade_data = consulta.resumo;
+
+        document.getElementById("nomeCasal").textContent = nomeCasal(casalAtual);
+        document.getElementById("dataCasamento").textContent = formatarDataCasamento(casalAtual.data_casamento);
+        document.getElementById("qtdConvidados").textContent = formatarConvidados(casalAtual.quantidade_convidados);
+
+        return true;
+      } catch (erro) {
+        console.error("Erro ao salvar dados do evento:", erro);
+        alert("A disponibilidade foi consultada, mas não foi possível salvar data e convidados no casal. Confira o workflow v17.");
+        return false;
+      }
+    }
+
+    async function usarRespostaDisponibilidade() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de usar a resposta.");
+        return;
+      }
+
+      if (!dadosObrigatoriosPropostaOK(casalAtual)) {
+        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        abrirDisponibilidade();
+        return;
+      }
+
+      const botao = document.getElementById("availabilityWhatsappBtn");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      const salvou = await salvarDadosEventoConsultados();
+
+      botao.disabled = false;
+      botao.textContent = "Chamar pelo WhatsApp";
+
+      if (!salvou) return;
+
+      if (casalAtual.proposta_ativa_url) {
+        const mensagem = montarMensagemPropostaWhatsApp({
+          proposta_url: casalAtual.proposta_ativa_url
+        });
+        const telefone = String(casalAtual.telefone || "").replace(/\D/g, "");
+        if (telefone) {
+          abrirWhatsAppSeguro("https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem));
+        } else {
+          document.getElementById("messageInput").value = mensagem;
+          fecharDisponibilidade();
+          document.getElementById("messageInput").focus();
+        }
+        return;
+      }
+
+      document.getElementById("messageInput").value = montarMensagemDisponibilidade(consulta);
+      fecharDisponibilidade();
+      document.getElementById("messageInput").focus();
+    }
+
+    async function seguirAtendimentoDisponibilidade() {
+      const consulta = window.ultimaDisponibilidadeConsultada;
+
+      if (!consulta) {
+        alert("Consulte uma data antes de seguir.");
+        return;
+      }
+
+      if (!dadosObrigatoriosPropostaOK(casalAtual)) {
+        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        abrirDisponibilidade();
+        return;
+      }
+
+      const botao = document.getElementById("availabilityContinueBtn");
+      botao.disabled = true;
+      botao.textContent = "Salvando...";
+
+      const salvou = await salvarDadosEventoConsultados();
+
+      botao.disabled = false;
+      botao.textContent = "Seguir atendimento";
+
+      if (!salvou) return;
+
+      fecharDisponibilidade();
+      document.getElementById("messageInput").focus();
+    }
+
+    document.getElementById("messageInput").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        enviarMensagem();
+      }
+    });
+
+    document.getElementById("messageInput").addEventListener("focus", function () {
+      setTimeout(travarAlturaDaTela, 50);
+      setTimeout(travarAlturaDaTela, 250);
+      setTimeout(travarAlturaDaTela, 500);
+    });
+
+
+    const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
+
+    function bloquearAcessoCRM(mensagem, detalhe) {
+      document.body.className = "crm-bloqueado";
+      document.body.innerHTML = `
+        <div id="bloqueio-acesso-crm">
+          <div class="bloqueio-card-crm">
+            <h1>Acesso bloqueado</h1>
+            <p>${mensagem || "Você não tem permissão para acessar esta área do CRM."}</p>
+            <p>Entre em contato com a administração do Espaço Margô.</p>
+            ${detalhe ? `<div class="codigo">${detalhe}</div>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function lerSessaoUsuarioCRM() {
+      try {
+        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
+      } catch (erro) {
+        return null;
+      }
+    }
+
+    function textoLimpoCRM(valor) {
+      return String(valor || "").trim();
+    }
+
+    function simCRM(valor) {
+      return textoLimpoCRM(valor).toUpperCase() === "SIM";
+    }
+
+    function usuarioPodeAbrirAtendimento(usuario) {
+      if (!usuario) return { ok: false, motivo: "Sessão não encontrada." };
+
+      const tipoUsuario = textoLimpoCRM(usuario.tipo_usuario).toUpperCase();
+      const statusUsuario = textoLimpoCRM(usuario.status_usuario).toUpperCase();
+      const acessos = usuario.acessos || {};
+
+      if (statusUsuario && statusUsuario !== "ATIVO") {
+        return { ok: false, motivo: "Usuário inativo." };
+      }
+
+      if (tipoUsuario === "ADMIN") {
+        return { ok: true, motivo: "Administrador autorizado." };
+      }
+
+      if (tipoUsuario !== "CHO") {
+        return { ok: false, motivo: "Perfil sem acesso ao atendimento." };
+      }
+
+      const acessoAtendimento = textoLimpoCRM(acessos.atendimento || usuario.acesso_atendimento).toUpperCase();
+
+      if (acessoAtendimento === "NAO") {
+        return { ok: false, motivo: "Usuário sem permissão de atendimento." };
+      }
+
+      // Se a sessão foi criada antes de existir o campo de permissões, libera CHO ativo.
+      if (!acessoAtendimento || acessoAtendimento === "SIM") {
+        return { ok: true, motivo: "CHO autorizado." };
+      }
+
+      return { ok: false, motivo: "Permissão de atendimento inválida." };
+    }
+
+    async function validarUsuarioAntesDeAbrirAtendimento() {
+      const usuarioId = pegarUsuarioIdDaUrl();
+
+      if (!usuarioId) {
+        bloquearAcessoCRM(
+          "Link de acesso inválido. Usuário não informado.",
+          "Código: usuario_id ausente"
+        );
+        return false;
+      }
+
+      const sessao = lerSessaoUsuarioCRM();
+      const usuarioSessaoId = textoLimpoCRM(sessao && sessao.usuario_id);
+
+      // Caminho principal: usuário já fez login. Não exige senha novamente nesta tela.
+      if (sessao && usuarioSessaoId === usuarioId) {
+        const permissao = usuarioPodeAbrirAtendimento(sessao);
+
+        if (!permissao.ok) {
+          bloquearAcessoCRM(
+            permissao.motivo || "Você não tem permissão para acessar esta área do CRM.",
+            "Usuário: " + usuarioId
+          );
+          return false;
+        }
+
+        window.MARGO_USUARIO_VALIDADO = true;
+        window.MARGO_USUARIO_LOGADO = sessao;
+        document.body.classList.remove("crm-validando");
+        return true;
+      }
+
+      // Se a URL veio com outro usuário ou não existe sessão, volta para o login.
+      // Evita chamar validar-usuario sem senha e bloquear com "Informe a senha".
+      try {
+        localStorage.setItem("margo_redirect_after_login", window.location.href);
+      } catch (erro) {}
+
+      bloquearAcessoCRM(
+        "Faça login novamente para abrir este atendimento.",
+        "Usuário: " + usuarioId
+      );
+      return false;
+    }
+
+    async function iniciarAtendimentoComTrava() {
+      const acessoLiberado = await validarUsuarioAntesDeAbrirAtendimento();
+
+      if (!acessoLiberado) {
+        return;
+      }
+
+      carregarCasal();
+    }
+
+    iniciarAtendimentoComTrava();
+  </script>
+</body>
+</html>
