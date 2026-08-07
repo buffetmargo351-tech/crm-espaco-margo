@@ -899,7 +899,10 @@
 
     function iniciarAtualizacaoRevisoesHome() {
       if (timerRevisoesMileneHome) clearInterval(timerRevisoesMileneHome);
-      timerRevisoesMileneHome = setInterval(carregarRevisoesMileneHome, 5000);
+      timerRevisoesMileneHome = setInterval(() => {
+        if (document.visibilityState !== "visible") return;
+        carregarRevisoesMileneHome();
+      }, 30000);
     }
 
     function lerSessao() {

@@ -1657,8 +1657,9 @@
       if (atualizacaoRevisoesTimer) clearInterval(atualizacaoRevisoesTimer);
 
       atualizacaoRevisoesTimer = setInterval(() => {
+        if (document.visibilityState !== "visible") return;
         carregarRevisaoPendenteAtual({ tocarSom: true });
-      }, 4000);
+      }, 12000);
     }
 
     function setBotoesRevisaoBloqueados(bloqueado) {
