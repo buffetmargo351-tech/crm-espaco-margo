@@ -94,7 +94,7 @@
       background: #ffffff;
       overflow: hidden;
       display: grid;
-      grid-template-rows: auto 1fr auto auto;
+      grid-template-rows: auto 1fr auto auto auto;
       position: fixed;
       left: 50%;
       top: 0;
@@ -722,6 +722,216 @@
     .training-action.selected { outline: 3px solid #e7b7ad; outline-offset: 1px; }
     .training-action:disabled { opacity: .55; cursor: wait; }
 
+
+    /* ===== MODO ASSISTIDO MILENE ===== */
+    .review-dock {
+      display: none;
+      border-top: 1px solid #eadada;
+      border-bottom: 1px solid #eadada;
+      background: #fff8f6;
+      padding: 10px 12px 11px;
+      max-height: 48vh;
+      overflow-y: auto;
+      box-shadow: 0 -8px 22px rgba(63, 42, 40, 0.06);
+    }
+
+    .review-dock.show {
+      display: block;
+    }
+
+    .review-dock.urgent {
+      background: #fff3f0;
+      border-top-color: #e6a095;
+    }
+
+    .review-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    .review-title {
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 950;
+      color: #7a4b35;
+      letter-spacing: .2px;
+    }
+
+    .review-title.urgent {
+      color: #b33f35;
+    }
+
+    .review-action-chip {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 1px solid #e7cbc3;
+      background: #fff;
+      color: #8b5b55;
+      padding: 4px 7px;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .review-client-message {
+      background: #fff;
+      border: 1px solid #ecdcd6;
+      border-radius: 12px;
+      padding: 8px 9px;
+      margin-bottom: 7px;
+      color: #735c58;
+      font-size: 11px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      max-height: 74px;
+      overflow-y: auto;
+    }
+
+    .review-client-message strong {
+      color: #9a625b;
+    }
+
+    .review-textarea {
+      width: 100%;
+      min-height: 116px;
+      max-height: 28vh;
+      resize: vertical;
+      border: 1px solid #dcbfb7;
+      border-radius: 13px;
+      background: #fff;
+      color: #3f302e;
+      padding: 10px;
+      font: 13px/1.45 inherit;
+      outline: none;
+    }
+
+    .review-textarea:focus {
+      border-color: #cb7f76;
+      box-shadow: 0 0 0 3px rgba(203, 127, 118, .12);
+    }
+
+    .review-primary-actions,
+    .review-secondary-actions {
+      display: grid;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .review-primary-actions {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .review-secondary-actions {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .review-btn {
+      border: 0;
+      border-radius: 11px;
+      padding: 9px 8px;
+      font-size: 10px;
+      font-weight: 950;
+      line-height: 1.15;
+      cursor: pointer;
+    }
+
+    .review-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .review-btn.send { background: #d95773; color: #fff; }
+    .review-btn.edit { background: #7a4b35; color: #fff; }
+    .review-btn.secondary { background: #eee7e3; color: #604b48; }
+    .review-btn.learning { background: #fff; border: 1px solid #d9c3bd; color: #6b504c; }
+    .review-btn.learning.selected { outline: 2px solid #d69b91; background: #fcecea; }
+    .review-btn.human { background: #533a36; color: #fff; grid-column: 1 / -1; }
+
+    .review-instruction {
+      display: none;
+      margin-top: 7px;
+      border-top: 1px dashed #e2c9c2;
+      padding-top: 7px;
+    }
+
+    .review-instruction.show {
+      display: block;
+    }
+
+    .review-instruction label {
+      display: block;
+      margin-bottom: 5px;
+      color: #745954;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .review-instruction textarea {
+      width: 100%;
+      min-height: 62px;
+      resize: vertical;
+      border: 1px solid #decac4;
+      border-radius: 11px;
+      padding: 8px;
+      font: 12px/1.35 inherit;
+      color: #4c3835;
+      background: #fff;
+    }
+
+    .review-instruction-action {
+      display: none;
+      width: 100%;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 10px;
+      padding: 9px;
+      background: #a8645c;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .review-instruction-action.show {
+      display: block;
+    }
+
+    .human-mode-dock {
+      display: none;
+      border-top: 1px solid #eadada;
+      border-bottom: 1px solid #eadada;
+      padding: 9px 12px;
+      background: #f6eee9;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .human-mode-dock.show {
+      display: flex;
+    }
+
+    .human-mode-text {
+      font-size: 11px;
+      font-weight: 900;
+      color: #6b504c;
+      line-height: 1.25;
+    }
+
+    .human-mode-btn {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 9px;
+      background: #d95773;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
     @media (min-width: 700px) {
       .phone-frame {
         top: 20px;
@@ -758,6 +968,49 @@
       <div class="empty-chat" id="emptyChat">
         Nenhuma mensagem registrada nesta conversa.
       </div>
+    </section>
+
+
+    <section class="review-dock" id="reviewDock" aria-live="polite">
+      <div class="review-head">
+        <div class="review-title" id="reviewTitle">RESPOSTA SUGERIDA PELA MILENE</div>
+        <div class="review-action-chip" id="reviewActionChip">RESPONDER</div>
+      </div>
+
+      <div class="review-client-message" id="reviewClientMessage"></div>
+
+      <textarea
+        class="review-textarea"
+        id="reviewResponseText"
+        aria-label="Resposta sugerida pela Milene"
+      ></textarea>
+
+      <div class="review-primary-actions">
+        <button class="review-btn send" id="reviewSendBtn" type="button" onclick="enviarRevisaoPendente(false)">ENVIAR</button>
+        <button class="review-btn edit" id="reviewEditSendBtn" type="button" onclick="enviarRevisaoPendente(true)">EDITAR E ENVIAR</button>
+      </div>
+
+      <div class="review-secondary-actions">
+        <button class="review-btn secondary" type="button" onclick="gerarOutraRespostaPendente()">GERAR OUTRA</button>
+        <button class="review-btn learning" id="reviewPointBtn" type="button" onclick="selecionarAprendizadoPendente('CORRECAO')">CORREÇÃO PONTUAL</button>
+        <button class="review-btn learning" id="reviewRuleBtn" type="button" onclick="selecionarAprendizadoPendente('REGRA')">REGRA PERMANENTE</button>
+        <button class="review-btn learning" id="reviewExampleBtn" type="button" onclick="selecionarAprendizadoPendente('EXEMPLO')">EXEMPLO APROVADO</button>
+        <button class="review-btn human" type="button" onclick="assumirAtendimentoPendente()">ASSUMIR ATENDIMENTO</button>
+      </div>
+
+      <div class="review-instruction" id="reviewInstructionArea">
+        <label id="reviewInstructionLabel" for="reviewInstructionText">O que deve mudar nesta resposta?</label>
+        <textarea id="reviewInstructionText"></textarea>
+        <button class="review-instruction-action" id="reviewApplyCorrectionBtn" type="button" onclick="aplicarCorrecaoPontualPendente()">GERAR NOVA COM ESTA CORREÇÃO</button>
+      </div>
+    </section>
+
+    <section class="human-mode-dock" id="humanModeDock">
+      <div class="human-mode-text">
+        Atendimento assumido pelo humano.<br>
+        A Milene está pausada para este casal.
+      </div>
+      <button class="human-mode-btn" type="button" onclick="devolverAtendimentoParaMilene()">DEVOLVER PARA MILENE</button>
     </section>
 
     <div class="composer">
@@ -801,14 +1054,14 @@
       </div>
 
       <div class="availability-body">
-        <label class="availability-label" for="availabilityNomeNoiva">Nome da noiva</label>
+        <label class="availability-label" for="availabilityNomeNoiva">Primeiro nome na proposta</label>
         <div class="availability-input-row">
-          <input class="availability-name" id="availabilityNomeNoiva" type="text" placeholder="Ex.: Thais" autocomplete="off" />
+          <input class="availability-name" id="availabilityNomeNoiva" type="text" placeholder="Ex.: Maria" autocomplete="off" />
         </div>
 
-        <label class="availability-label" for="availabilityNomeNoivo" style="margin-top: 10px;">Nome do noivo</label>
+        <label class="availability-label" for="availabilityNomeNoivo" style="margin-top: 10px;">Segundo nome na proposta</label>
         <div class="availability-input-row">
-          <input class="availability-name" id="availabilityNomeNoivo" type="text" placeholder="Ex.: Gabriel" autocomplete="off" />
+          <input class="availability-name" id="availabilityNomeNoivo" type="text" placeholder="Ex.: João" autocomplete="off" />
         </div>
 
         <label class="availability-label" for="availabilityDate" style="margin-top: 10px;">Data pretendida do casamento</label>
@@ -902,6 +1155,9 @@
     const API_DISPONIBILIDADE = "https://n8n.espacomargo.com.br/webhook/crm/verificar-disponibilidade";
     const API_ATUALIZAR_DADOS_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/atualizar-dados-evento";
     const API_GERAR_PROPOSTA = "https://n8n.espacomargo.com.br/webhook/crm/gerar-proposta";
+    const API_REVISOES_PENDENTES = "https://n8n.espacomargo.com.br/webhook/crm/revisoes-milene-pendentes";
+    const API_REVISAO_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/revisao-milene";
+    const API_MODO_ATENDIMENTO_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/modo-atendimento-milene";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -913,6 +1169,12 @@
     let historicoConversasAtual = [];
     let sugestaoIAAtual = null;
     let tipoTreinamentoIASelecionado = "";
+    let revisaoPendenteAtual = null;
+    let atualizacaoRevisoesTimer = null;
+    let executandoAcaoRevisao = false;
+    let aprendizadoPendenteSelecionado = "";
+    let modoInstrucaoPendente = "";
+    let audioAlertasMileneLiberado = false;
 
     function travarAlturaDaTela() {
       const altura = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -933,7 +1195,7 @@
     window.addEventListener("scroll", travarAlturaDaTela);
 
     document.addEventListener("touchmove", function (event) {
-      if (!event.target.closest("#chatArea")) {
+      if (!event.target.closest("#chatArea, #reviewDock, #trainingOverlay, #availabilityOverlay")) {
         event.preventDefault();
       }
     }, { passive: false });
@@ -959,14 +1221,14 @@
     }
 
     function nomeCasal(casal) {
-      const noiva = casal.nome_noiva || "";
-      const noivo = casal.nome_noivo || "";
+      const pessoa1 = casal.nome_pessoa_1 || casal.nome_noiva || "";
+      const pessoa2 = casal.nome_pessoa_2 || casal.nome_noivo || "";
 
-      if (noiva && noivo) {
-        return noiva + " ❤️ " + noivo;
+      if (pessoa1 && pessoa2) {
+        return pessoa1 + " ❤️ " + pessoa2;
       }
 
-      return noiva || noivo || "Casal sem nome";
+      return pessoa1 || pessoa2 || casal.nome_contato || "Casal sem nome";
     }
 
     function formatarDataCasamento(data) {
@@ -980,9 +1242,13 @@
     }
 
     function dadosObrigatoriosPropostaOK(casal) {
+      const pessoa1 = casal.nome_pessoa_1 || casal.nome_noiva || "";
+      const pessoa2 = casal.nome_pessoa_2 || casal.nome_noivo || "";
+
       return Boolean(
-        String(casal.nome_noiva || "").trim() &&
-        String(casal.nome_noivo || "").trim() &&
+        String(pessoa1).trim() &&
+        String(pessoa2).trim() &&
+        String(pessoa1).trim().toLowerCase() !== String(pessoa2).trim().toLowerCase() &&
         String(casal.data_casamento || "").trim() &&
         Number(casal.quantidade_convidados || 0) > 0
       );
@@ -1067,6 +1333,8 @@
         renderizarEncantamentos(casal.encantamentos_principais);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         iniciarAtualizacaoAutomaticaConversas();
+        await carregarRevisaoPendenteAtual({ tocarSom: false });
+        iniciarAtualizacaoAutomaticaRevisoes();
 
         travarAlturaDaTela();
 
@@ -1211,13 +1479,440 @@
       if (atualizacaoConversasTimer) {
         clearInterval(atualizacaoConversasTimer);
       }
+      if (atualizacaoRevisoesTimer) {
+        clearInterval(atualizacaoRevisoesTimer);
+      }
     });
 
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden) {
         carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        carregarRevisaoPendenteAtual({ tocarSom: false });
       }
     });
+
+
+    function textoSeguroHTML(valor) {
+      return String(valor || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function normalizarAcaoVisual(valor) {
+      const acao = String(valor || "RESPONDER").toUpperCase();
+      const mapa = {
+        RESPONDER: "RESPONDER",
+        GERAR_PROPOSTA: "PROPOSTA",
+        ENVIAR_PROPOSTA_EXISTENTE: "PROPOSTA",
+        CONFIRMAR_VISITA: "VISITA",
+        TRANSFERIR_HUMANO: "PRECISA DE AJUDA"
+      };
+      return mapa[acao] || acao.replaceAll("_", " ");
+    }
+
+    function liberarSomAlertasMilene() {
+      audioAlertasMileneLiberado = true;
+    }
+
+    document.addEventListener("pointerdown", liberarSomAlertasMilene, { once: true });
+
+    function tocarSomRevisao(prioridade = "NORMAL") {
+      if (!audioAlertasMileneLiberado) return;
+
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        const ctx = new AudioCtx();
+        const urgente = String(prioridade || "").toUpperCase() === "URGENTE";
+        const tons = urgente ? [740, 920] : [720];
+
+        tons.forEach((freq, indice) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const inicio = ctx.currentTime + indice * 0.16;
+
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.0001, inicio);
+          gain.gain.exponentialRampToValueAtTime(0.16, inicio + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.12);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(inicio);
+          osc.stop(inicio + 0.13);
+        });
+
+        setTimeout(() => ctx.close().catch(() => {}), 700);
+      } catch (_) {}
+    }
+
+    function esconderRevisaoPendente() {
+      const dock = document.getElementById("reviewDock");
+      dock.classList.remove("show", "urgent");
+      revisaoPendenteAtual = null;
+      aprendizadoPendenteSelecionado = "";
+      modoInstrucaoPendente = "";
+      document.getElementById("reviewInstructionArea").classList.remove("show");
+      document.getElementById("reviewApplyCorrectionBtn").classList.remove("show");
+      document.querySelectorAll("#reviewDock .review-btn.learning")
+        .forEach(botao => botao.classList.remove("selected"));
+    }
+
+    function atualizarDockModoHumano() {
+      const humanDock = document.getElementById("humanModeDock");
+      const modo = String(casalAtual.modo_atendimento_ia || "").toUpperCase();
+      humanDock.classList.toggle("show", modo === "HUMANO");
+    }
+
+    function renderizarRevisaoPendente(revisao, opcoes = {}) {
+      if (!revisao) {
+        esconderRevisaoPendente();
+        atualizarDockModoHumano();
+        return;
+      }
+
+      const revisaoAnteriorId = revisaoPendenteAtual && revisaoPendenteAtual.revisao_id;
+      revisaoPendenteAtual = revisao;
+
+      const dock = document.getElementById("reviewDock");
+      const urgente = String(revisao.prioridade || "").toUpperCase() === "URGENTE";
+      dock.classList.add("show");
+      dock.classList.toggle("urgent", urgente);
+      document.getElementById("humanModeDock").classList.remove("show");
+
+      const title = document.getElementById("reviewTitle");
+      title.textContent = urgente ? "MILENE PRECISA DE AJUDA" : "RESPOSTA SUGERIDA PELA MILENE";
+      title.classList.toggle("urgent", urgente);
+
+      document.getElementById("reviewActionChip").textContent =
+        normalizarAcaoVisual(revisao.acao_sugerida);
+
+      const mensagem = String(revisao.mensagem_recebida || "").trim();
+      document.getElementById("reviewClientMessage").innerHTML =
+        "<strong>Última mensagem do casal</strong>" +
+        (mensagem ? "\n" + textoSeguroHTML(mensagem) : "\nSem texto disponível.");
+
+      const textarea = document.getElementById("reviewResponseText");
+      if (revisaoAnteriorId !== revisao.revisao_id || document.activeElement !== textarea) {
+        textarea.value = revisao.resposta_sugerida || "";
+      }
+
+      aprendizadoPendenteSelecionado = "";
+      modoInstrucaoPendente = "";
+      document.getElementById("reviewInstructionText").value = "";
+      document.getElementById("reviewInstructionArea").classList.remove("show");
+      document.getElementById("reviewApplyCorrectionBtn").classList.remove("show");
+      document.querySelectorAll("#reviewDock .review-btn.learning")
+        .forEach(botao => botao.classList.remove("selected"));
+
+      if (opcoes.tocarSom && revisao.revisao_id) {
+        const chave = "margo_revisao_som_" + revisao.revisao_id;
+        if (!sessionStorage.getItem(chave)) {
+          sessionStorage.setItem(chave, "1");
+          tocarSomRevisao(revisao.prioridade);
+        }
+      }
+    }
+
+    async function carregarRevisaoPendenteAtual(opcoes = {}) {
+      if (!casalAtualId) return;
+
+      try {
+        const resposta = await fetch(
+          API_REVISOES_PENDENTES + "?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (!resposta.ok) return;
+
+        const retorno = await resposta.json();
+        const revisoes = Array.isArray(retorno.revisoes) ? retorno.revisoes : [];
+
+        const doCasal = revisoes
+          .filter(item => String(item.casal_id || "") === String(casalAtualId))
+          .sort((a, b) =>
+            String(b.data_hora_criacao || "").localeCompare(String(a.data_hora_criacao || ""))
+          );
+
+        let vigente = null;
+        const idVigente = String(casalAtual.ultima_revisao_id || "").trim();
+
+        if (idVigente) {
+          vigente = doCasal.find(item => String(item.revisao_id || "") === idVigente) || null;
+        }
+
+        vigente = vigente || doCasal[0] || null;
+        renderizarRevisaoPendente(vigente, { tocarSom: opcoes.tocarSom !== false });
+
+      } catch (erro) {
+        // Enquanto o backend assistido ainda não estiver ativado, a interface
+        // simplesmente permanece escondida.
+        console.debug("Revisões da Milene ainda indisponíveis:", erro);
+      }
+    }
+
+    function iniciarAtualizacaoAutomaticaRevisoes() {
+      if (atualizacaoRevisoesTimer) clearInterval(atualizacaoRevisoesTimer);
+
+      atualizacaoRevisoesTimer = setInterval(() => {
+        carregarRevisaoPendenteAtual({ tocarSom: true });
+      }, 4000);
+    }
+
+    function setBotoesRevisaoBloqueados(bloqueado) {
+      document.querySelectorAll("#reviewDock button").forEach(botao => {
+        botao.disabled = Boolean(bloqueado);
+      });
+    }
+
+    async function postarAcaoRevisao(acao, extras = {}) {
+      if (!revisaoPendenteAtual || executandoAcaoRevisao) return null;
+
+      executandoAcaoRevisao = true;
+      setBotoesRevisaoBloqueados(true);
+
+      try {
+        const resposta = await fetch(API_REVISAO_MILENE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            revisao_id: revisaoPendenteAtual.revisao_id,
+            acao,
+            revisado_por: usuarioAtualId || "",
+            ...extras
+          })
+        });
+
+        let retorno = {};
+        try { retorno = await resposta.json(); } catch (_) {}
+
+        if (!resposta.ok || retorno.sucesso === false) {
+          throw new Error(retorno.erro || retorno.mensagem || "A ação de revisão não foi concluída.");
+        }
+
+        return retorno;
+      } finally {
+        executandoAcaoRevisao = false;
+        setBotoesRevisaoBloqueados(false);
+      }
+    }
+
+    async function sincronizarDepoisDaRevisao() {
+      await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+
+      try {
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now(), {
+          cache: "no-store"
+        });
+        if (resposta.ok) {
+          casalAtual = await resposta.json();
+        }
+      } catch (_) {}
+
+      await carregarRevisaoPendenteAtual({ tocarSom: false });
+      atualizarDockModoHumano();
+    }
+
+    async function enviarRevisaoPendente(forcarEdicao) {
+      if (!revisaoPendenteAtual) return;
+
+      const textarea = document.getElementById("reviewResponseText");
+      const texto = String(textarea.value || "").trim();
+      if (!texto) {
+        alert("A resposta não pode ficar vazia.");
+        textarea.focus();
+        return;
+      }
+
+      const original = normalizarTextoComparacao(revisaoPendenteAtual.resposta_sugerida);
+      const atual = normalizarTextoComparacao(texto);
+
+      if (!forcarEdicao && original !== atual) {
+        alert("A resposta foi editada. Use “EDITAR E ENVIAR” para registrar corretamente a alteração.");
+        return;
+      }
+
+      if (aprendizadoPendenteSelecionado === "REGRA") {
+        const instrucao = String(document.getElementById("reviewInstructionText").value || "").trim();
+        if (!instrucao) {
+          alert("Descreva a regra permanente antes de enviar.");
+          document.getElementById("reviewInstructionText").focus();
+          return;
+        }
+      }
+
+      try {
+        const instrucao = String(document.getElementById("reviewInstructionText").value || "").trim();
+        await postarAcaoRevisao(forcarEdicao ? "EDITAR_ENVIAR" : "APROVAR_ENVIAR", {
+          resposta_final: texto,
+          tipo_aprendizado: aprendizadoPendenteSelecionado,
+          instrucao_revisao: aprendizadoPendenteSelecionado === "REGRA" ? instrucao : "",
+          tema: "GERAL",
+          qualidade: "APROVADO"
+        });
+
+        esconderRevisaoPendente();
+        await sincronizarDepoisDaRevisao();
+      } catch (erro) {
+        alert("Não foi possível concluir a revisão. " + (erro.message || ""));
+      }
+    }
+
+    async function gerarOutraRespostaPendente() {
+      if (!revisaoPendenteAtual) return;
+
+      try {
+        await postarAcaoRevisao("GERAR_NOVA");
+        esconderRevisaoPendente();
+
+        setTimeout(() => carregarRevisaoPendenteAtual({ tocarSom: false }), 900);
+        setTimeout(() => carregarRevisaoPendenteAtual({ tocarSom: false }), 1800);
+      } catch (erro) {
+        alert("Não foi possível gerar outra resposta. " + (erro.message || ""));
+      }
+    }
+
+    function selecionarAprendizadoPendente(tipo) {
+      const normalizado = String(tipo || "").toUpperCase();
+      const area = document.getElementById("reviewInstructionArea");
+      const action = document.getElementById("reviewApplyCorrectionBtn");
+      const label = document.getElementById("reviewInstructionLabel");
+      const input = document.getElementById("reviewInstructionText");
+
+      document.querySelectorAll("#reviewDock .review-btn.learning")
+        .forEach(botao => botao.classList.remove("selected"));
+
+      if (normalizado === "CORRECAO") {
+        aprendizadoPendenteSelecionado = "";
+        modoInstrucaoPendente = "CORRECAO";
+        document.getElementById("reviewPointBtn").classList.add("selected");
+        label.textContent = "O que deve mudar somente nesta resposta?";
+        area.classList.add("show");
+        action.classList.add("show");
+        input.value = "";
+        setTimeout(() => input.focus(), 50);
+        return;
+      }
+
+      if (normalizado === "REGRA") {
+        aprendizadoPendenteSelecionado =
+          aprendizadoPendenteSelecionado === "REGRA" ? "" : "REGRA";
+        modoInstrucaoPendente = aprendizadoPendenteSelecionado ? "REGRA" : "";
+        document.getElementById("reviewRuleBtn").classList.toggle(
+          "selected",
+          aprendizadoPendenteSelecionado === "REGRA"
+        );
+        label.textContent = "Qual regra a Milene deve aprender permanentemente?";
+        action.classList.remove("show");
+        area.classList.toggle("show", aprendizadoPendenteSelecionado === "REGRA");
+        if (aprendizadoPendenteSelecionado === "REGRA") {
+          input.value = "";
+          setTimeout(() => input.focus(), 50);
+        }
+        return;
+      }
+
+      if (normalizado === "EXEMPLO") {
+        aprendizadoPendenteSelecionado =
+          aprendizadoPendenteSelecionado === "EXEMPLO" ? "" : "EXEMPLO";
+        modoInstrucaoPendente = "";
+        document.getElementById("reviewExampleBtn").classList.toggle(
+          "selected",
+          aprendizadoPendenteSelecionado === "EXEMPLO"
+        );
+        area.classList.remove("show");
+        action.classList.remove("show");
+        input.value = "";
+      }
+    }
+
+    async function aplicarCorrecaoPontualPendente() {
+      if (!revisaoPendenteAtual) return;
+
+      const instrucao = String(document.getElementById("reviewInstructionText").value || "").trim();
+      if (!instrucao) {
+        alert("Descreva o que deve ser corrigido nesta resposta.");
+        document.getElementById("reviewInstructionText").focus();
+        return;
+      }
+
+      try {
+        await postarAcaoRevisao("CORRECAO_PONTUAL", {
+          instrucao_revisao: instrucao
+        });
+
+        esconderRevisaoPendente();
+        setTimeout(() => carregarRevisaoPendenteAtual({ tocarSom: false }), 900);
+        setTimeout(() => carregarRevisaoPendenteAtual({ tocarSom: false }), 1800);
+      } catch (erro) {
+        alert("Não foi possível aplicar a correção pontual. " + (erro.message || ""));
+      }
+    }
+
+    async function assumirAtendimentoPendente() {
+      if (!revisaoPendenteAtual) return;
+      if (!confirm("Assumir este atendimento e pausar a Milene para este casal?")) return;
+
+      try {
+        await postarAcaoRevisao("ASSUMIR_ATENDIMENTO");
+        casalAtual.modo_atendimento_ia = "HUMANO";
+        esconderRevisaoPendente();
+        atualizarDockModoHumano();
+      } catch (erro) {
+        alert("Não foi possível assumir o atendimento. " + (erro.message || ""));
+      }
+    }
+
+    async function devolverAtendimentoParaMilene() {
+      if (!casalAtualId) return;
+      if (!confirm("Devolver este casal para a Milene em modo de revisão humana?")) return;
+
+      try {
+        const resposta = await fetch(API_MODO_ATENDIMENTO_MILENE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            modo_atendimento_ia: "REVISAO_HUMANA",
+            usuario_id: usuarioAtualId || ""
+          })
+        });
+
+        let retorno = {};
+        try { retorno = await resposta.json(); } catch (_) {}
+
+        if (!resposta.ok || retorno.sucesso === false) {
+          throw new Error(retorno.erro || retorno.mensagem || "Não foi possível devolver para a Milene.");
+        }
+
+        casalAtual.modo_atendimento_ia = "REVISAO_HUMANA";
+        atualizarDockModoHumano();
+      } catch (erro) {
+        alert("Não foi possível devolver o atendimento para a Milene. " + (erro.message || ""));
+      }
+    }
+
+    async function descartarRevisaoAntesDeEnvioManual() {
+      if (!revisaoPendenteAtual) return true;
+
+      const continuar = confirm(
+        "Existe uma resposta da Milene aguardando revisão. " +
+        "Ao enviar manualmente, essa sugestão será descartada. Continuar?"
+      );
+
+      if (!continuar) return false;
+
+      try {
+        await postarAcaoRevisao("DESCARTAR");
+        esconderRevisaoPendente();
+        return true;
+      } catch (erro) {
+        alert("Não foi possível descartar a sugestão pendente. " + (erro.message || ""));
+        return false;
+      }
+    }
 
     function adicionarMensagemNaTela(texto) {
       esconderMensagemVazia();
@@ -1295,7 +1990,7 @@
       const telefone = normalizarTelefoneWhatsApp(casalAtual.telefone);
 
       if (telefone.length < 12 || telefone.length > 15) {
-        throw new Error("Telefone da noiva inválido ou não informado no CRM.");
+        throw new Error("Telefone do casal inválido ou não informado no CRM.");
       }
 
       const resposta = await fetch(API_ENVIAR_WHATSAPP, {
@@ -1330,6 +2025,11 @@
 
       if (!texto || enviandoMensagemManual) return false;
 
+      if (!opcoes.sugestaoUsada && revisaoPendenteAtual) {
+        const podeEnviar = await descartarRevisaoAntesDeEnvioManual();
+        if (!podeEnviar) return false;
+      }
+
       enviandoMensagemManual = true;
       input.disabled = true;
       botao.disabled = true;
@@ -1355,7 +2055,7 @@
           await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         } catch (erroRegistro) {
           console.error("Mensagem enviada, mas não registrada:", erroRegistro);
-          alert("A mensagem foi enviada para a noiva, mas não foi registrada no histórico. Atualize a tela e confira o CRM.");
+          alert("A mensagem foi enviada para o casal, mas não foi registrada no histórico. Atualize a tela e confira o CRM.");
         }
 
         if (sugestaoUsada) {
@@ -1402,6 +2102,11 @@
 
       if (gerandoSugestaoIA) return;
 
+      if (revisaoPendenteAtual) {
+        await gerarOutraRespostaPendente();
+        return;
+      }
+
       if (!casalAtualId) {
         alert("Não foi possível identificar o casal.");
         return;
@@ -1414,7 +2119,7 @@
 
       const ultima = historicoConversasAtual[historicoConversasAtual.length - 1] || {};
       if (String(ultima.direcao || "").toUpperCase() !== "ENTRADA") {
-        alert("A mensagem mais recente já é uma saída. Não há resposta pendente da noiva.");
+        alert("A mensagem mais recente já é uma saída. Não há resposta pendente do casal.");
         return;
       }
 
@@ -1441,8 +2146,10 @@
             casal_id: casalAtualId,
             usuario_id: usuarioAtualId || "",
             casal: {
-              nome_noiva: casalAtual.nome_noiva || "",
-              nome_noivo: casalAtual.nome_noivo || "",
+              nome_pessoa_1: casalAtual.nome_pessoa_1 || casalAtual.nome_noiva || "",
+              nome_pessoa_2: casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "",
+              nome_noiva: casalAtual.nome_noiva || casalAtual.nome_pessoa_1 || "",
+              nome_noivo: casalAtual.nome_noivo || casalAtual.nome_pessoa_2 || "",
               data_casamento: casalAtual.data_casamento || "",
               quantidade_convidados: casalAtual.quantidade_convidados || "",
               status_casal: casalAtual.status_casal || "",
@@ -1609,8 +2316,8 @@
       // O botão Gerar Proposta fica sempre visível.
       // As ações abaixo continuam aparecendo somente depois da consulta/proposta.
 
-      inputNomeNoiva.value = casalAtual && casalAtual.nome_noiva ? casalAtual.nome_noiva : "";
-      inputNomeNoivo.value = casalAtual && casalAtual.nome_noivo ? casalAtual.nome_noivo : "";
+      inputNomeNoiva.value = casalAtual ? (casalAtual.nome_pessoa_1 || casalAtual.nome_noiva || "") : "";
+      inputNomeNoivo.value = casalAtual ? (casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "") : "";
 
       if (casalAtual && casalAtual.data_casamento) {
         const valorConvertido = converterDataParaInput(casalAtual.data_casamento);
@@ -1688,13 +2395,13 @@
       const quantidadeConvidados = String(inputConvidados.value || "").trim();
 
       if (!nomeNoiva) {
-        alert("Informe o nome da noiva.");
+        alert("Informe o primeiro nome do casal.");
         inputNomeNoiva.focus();
         return;
       }
 
       if (!nomeNoivo) {
-        alert("Informe o nome do noivo.");
+        alert("Informe o segundo nome do casal.");
         inputNomeNoivo.focus();
         return;
       }
@@ -1823,13 +2530,13 @@
 
     function validarDadosObrigatoriosPopup(dados) {
       if (!dados.nome_noiva) {
-        alert("Informe o nome da noiva.");
+        alert("Informe o primeiro nome do casal.");
         dados.inputNomeNoiva.focus();
         return false;
       }
 
       if (!dados.nome_noivo) {
-        alert("Informe o nome do noivo.");
+        alert("Informe o segundo nome do casal.");
         dados.inputNomeNoivo.focus();
         return false;
       }
@@ -1868,6 +2575,10 @@
         },
         body: JSON.stringify({
           casal_id: casalAtualId,
+          nome_pessoa_1: dados.nome_noiva,
+          nome_pessoa_2: dados.nome_noivo,
+          nome_casal: dados.nome_noiva + " & " + dados.nome_noivo,
+          // Compatibilidade temporária com endpoints/telas antigos.
           nome_noiva: dados.nome_noiva,
           nome_noivo: dados.nome_noivo,
           data_casamento: dados.data_casamento,
@@ -1880,6 +2591,9 @@
         throw new Error("Erro ao salvar dados obrigatórios da proposta");
       }
 
+      casalAtual.nome_pessoa_1 = dados.nome_noiva;
+      casalAtual.nome_pessoa_2 = dados.nome_noivo;
+      casalAtual.nome_casal = dados.nome_noiva + " & " + dados.nome_noivo;
       casalAtual.nome_noiva = dados.nome_noiva;
       casalAtual.nome_noivo = dados.nome_noivo;
       casalAtual.data_casamento = dados.data_casamento;
@@ -1907,10 +2621,18 @@
     }
 
     function montarMensagemPropostaWhatsApp(retorno) {
-      const nomeNoiva = String(casalAtual.nome_noiva || "").trim() || "Olá";
+      const pessoa1 = String(casalAtual.nome_pessoa_1 || casalAtual.nome_noiva || "").trim();
+      const pessoa2 = String(casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "").trim();
+      const nomes = [pessoa1, pessoa2].filter(Boolean).join(" e ");
       const url = retorno.proposta_url || casalAtual.proposta_ativa_url || "";
 
-      return `${nomeNoiva}, preparei a proposta digital do Espaço Margô para vocês visualizarem com carinho. 💛\n\nSegue o link:\n${url}\n\nQualquer dúvida, eu te ajudo por aqui.`;
+      return [
+        `${nomes ? nomes + ", p" : "P"}reparei uma proposta modelo para vocês.`,
+        "As quatro opções são referências iniciais para entenderem o investimento e algumas possibilidades. Elas não representam um evento fechado ou engessado.",
+        "No Margô temos mais de 15 opções de prato principal. Na visita presencial, conhecemos os sonhos do casal e construímos juntos o menu, o estilo e a experiência do casamento.",
+        url,
+        "Quer que eu verifique os próximos horários para vocês virem tomar um café conosco e conhecerem o Margô com calma?"
+      ].filter(Boolean).join("\n\n");
     }
 
     async function gerarPropostaDigital() {
@@ -1936,8 +2658,12 @@
           },
           body: JSON.stringify({
             casal_id: casalAtualId,
-            nome_noiva: casalAtual.nome_noiva,
-            nome_noivo: casalAtual.nome_noivo,
+            nome_contato: casalAtual.nome_contato || "",
+            nome_pessoa_1: casalAtual.nome_pessoa_1 || casalAtual.nome_noiva || "",
+            nome_pessoa_2: casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "",
+            // Compatibilidade temporária.
+            nome_noiva: casalAtual.nome_noiva || casalAtual.nome_pessoa_1 || "",
+            nome_noivo: casalAtual.nome_noivo || casalAtual.nome_pessoa_2 || "",
             telefone: casalAtual.telefone || "",
             data_casamento: casalAtual.data_casamento,
             quantidade_convidados: casalAtual.quantidade_convidados,
@@ -2032,6 +2758,9 @@
           },
           body: JSON.stringify({
             casal_id: casalAtualId,
+            nome_pessoa_1: consulta.nome_noiva,
+            nome_pessoa_2: consulta.nome_noivo,
+            nome_casal: consulta.nome_noiva + " & " + consulta.nome_noivo,
             nome_noiva: consulta.nome_noiva,
             nome_noivo: consulta.nome_noivo,
             data_casamento: consulta.data_evento,
@@ -2044,6 +2773,9 @@
           throw new Error("Erro ao salvar dados do evento");
         }
 
+        casalAtual.nome_pessoa_1 = consulta.nome_noiva;
+        casalAtual.nome_pessoa_2 = consulta.nome_noivo;
+        casalAtual.nome_casal = consulta.nome_noiva + " & " + consulta.nome_noivo;
         casalAtual.nome_noiva = consulta.nome_noiva;
         casalAtual.nome_noivo = consulta.nome_noivo;
         casalAtual.data_casamento = consulta.data_evento;
@@ -2071,7 +2803,7 @@
       }
 
       if (!dadosObrigatoriosPropostaOK(casalAtual)) {
-        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        alert("Complete e salve os dois nomes do casal, a data do casamento e a quantidade de convidados antes de continuar.");
         abrirDisponibilidade();
         return;
       }
@@ -2116,7 +2848,7 @@
       }
 
       if (!dadosObrigatoriosPropostaOK(casalAtual)) {
-        alert("Complete e salve nome da noiva, nome do noivo, data do casamento e quantidade de convidados antes de continuar.");
+        alert("Complete e salve os dois nomes do casal, a data do casamento e a quantidade de convidados antes de continuar.");
         abrirDisponibilidade();
         return;
       }

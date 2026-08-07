@@ -298,6 +298,108 @@
       line-height: 1.35;
     }
 
+
+    /* ===== FILA DE REVISÃO DA MILENE ===== */
+    .milene-review-section {
+      display: none;
+      margin: -8px 0 18px;
+      border: 1px solid #e4c9c3;
+      border-radius: 16px;
+      background: #fff8f5;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .milene-review-section.show {
+      display: block;
+    }
+
+    .milene-review-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border-bottom: 1px solid #ecd8d3;
+    }
+
+    .milene-review-title {
+      color: #7a4b35;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .milene-review-count {
+      min-width: 28px;
+      height: 24px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #d95773;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .milene-review-count.urgent {
+      background: #b33f35;
+    }
+
+    .milene-review-list {
+      display: grid;
+      gap: 1px;
+    }
+
+    .milene-review-card {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #f0ded9;
+      background: #fffdfc;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .milene-review-card:last-child {
+      border-bottom: 0;
+    }
+
+    .milene-review-card.urgent {
+      background: #fff1ee;
+    }
+
+    .milene-review-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 3px;
+    }
+
+    .milene-review-name {
+      color: #4b3734;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .milene-review-action {
+      color: #a35d61;
+      font-size: 9px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .milene-review-message {
+      color: #806966;
+      font-size: 10px;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
     @media (min-width: 700px) {
       body {
         padding: 20px 0;
@@ -355,6 +457,15 @@
         </div>
       </section>
 
+
+      <section class="milene-review-section" id="mileneReviewSection">
+        <div class="milene-review-header">
+          <div class="milene-review-title" id="mileneReviewTitle">MILENE • AGUARDANDO REVISÃO</div>
+          <div class="milene-review-count" id="mileneReviewCount">0</div>
+        </div>
+        <div class="milene-review-list" id="mileneReviewList"></div>
+      </section>
+
       <section id="novos">
         <div class="secao-titulo">
           <h2>📥 NOVOS CASAIS</h2>
@@ -375,6 +486,7 @@
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
+    const API_REVISOES_PENDENTES = "https://n8n.espacomargo.com.br/webhook/crm/revisoes-milene-pendentes";
 
     function limpar(valor) {
       return String(valor || "").trim();
@@ -507,14 +619,14 @@
     }
 
     function nomeCasal(casal) {
-      const noiva = casal.nome_noiva || "";
-      const noivo = casal.nome_noivo || "";
+      const pessoa1 = casal.nome_pessoa_1 || casal.nome_noiva || "";
+      const pessoa2 = casal.nome_pessoa_2 || casal.nome_noivo || "";
 
-      if (noiva && noivo) {
-        return noiva + " e " + noivo;
+      if (pessoa1 && pessoa2) {
+        return pessoa1 + " e " + pessoa2;
       }
 
-      return noiva || noivo || "Casal sem nome";
+      return pessoa1 || pessoa2 || casal.nome_contato || "Casal sem nome";
     }
 
     function formatarTelefoneCard(valor) {
@@ -611,7 +723,7 @@
 
         card.innerHTML = `
           <div class="linha-card">
-            <div class="avatar">${primeiraLetra(casal.nome_noiva)}</div>
+            <div class="avatar">${primeiraLetra(casal.nome_pessoa_1 || casal.nome_noiva || casal.nome_contato)}</div>
 
             <div class="info">
               <div class="nome">${nomeCasal(casal)}</div>
@@ -626,6 +738,168 @@
 
         lista.appendChild(card);
       });
+    }
+
+
+    let timerRevisoesMileneHome = null;
+    let audioRevisoesHomeLiberado = false;
+
+    document.addEventListener("pointerdown", function liberarSomHome() {
+      audioRevisoesHomeLiberado = true;
+    }, { once: true });
+
+    function parseJsonSeguro(valor) {
+      try { return JSON.parse(String(valor || "") || "{}"); }
+      catch (_) { return {}; }
+    }
+
+    function usuarioEhAdmin() {
+      const sessao = lerSessao();
+      return String((usuarioAtual && usuarioAtual.tipo_usuario) || (sessao && sessao.tipo_usuario) || "")
+        .trim()
+        .toUpperCase() === "ADMIN";
+    }
+
+    function revisaoPertenceAoUsuario(revisao) {
+      if (usuarioEhAdmin()) return true;
+      if (!usuarioAtualId) return true;
+
+      return limparConsultora(revisao.consultora_responsavel) === limparConsultora(usuarioAtualId);
+    }
+
+    function nomeCasalDaRevisao(revisao) {
+      const contexto = parseJsonSeguro(revisao.dados_contexto_json);
+      const nome = limpar(contexto.nome_casal);
+      if (nome) return nome.replace(" & ", " e ");
+
+      const pessoa1 = limpar(contexto.nome_pessoa_1);
+      const pessoa2 = limpar(contexto.nome_pessoa_2);
+      if (pessoa1 || pessoa2) return [pessoa1, pessoa2].filter(Boolean).join(" e ");
+
+      return "Casal " + limpar(revisao.casal_id).replace("CASAL_", "");
+    }
+
+    function acaoVisualRevisao(valor) {
+      const mapa = {
+        RESPONDER: "Responder",
+        GERAR_PROPOSTA: "Proposta",
+        ENVIAR_PROPOSTA_EXISTENTE: "Proposta",
+        CONFIRMAR_VISITA: "Visita",
+        TRANSFERIR_HUMANO: "Precisa de ajuda"
+      };
+      const chave = String(valor || "RESPONDER").toUpperCase();
+      return mapa[chave] || chave.replaceAll("_", " ");
+    }
+
+    function tocarSomRevisaoHome(prioridade) {
+      if (!audioRevisoesHomeLiberado) return;
+
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const urgente = String(prioridade || "").toUpperCase() === "URGENTE";
+        const frequencias = urgente ? [760, 930] : [710];
+
+        frequencias.forEach((freq, indice) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const inicio = ctx.currentTime + indice * .16;
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(.0001, inicio);
+          gain.gain.exponentialRampToValueAtTime(.14, inicio + .015);
+          gain.gain.exponentialRampToValueAtTime(.0001, inicio + .12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(inicio);
+          osc.stop(inicio + .13);
+        });
+
+        setTimeout(() => ctx.close().catch(() => {}), 700);
+      } catch (_) {}
+    }
+
+    function abrirRevisaoPendenteHome(casalId) {
+      window.location.href = montarUrlAtendimento(casalId);
+    }
+
+    function renderizarRevisoesMileneHome(revisoes) {
+      const section = document.getElementById("mileneReviewSection");
+      const list = document.getElementById("mileneReviewList");
+      const count = document.getElementById("mileneReviewCount");
+      const title = document.getElementById("mileneReviewTitle");
+
+      const filtradas = (Array.isArray(revisoes) ? revisoes : [])
+        .filter(revisaoPertenceAoUsuario);
+
+      if (!filtradas.length) {
+        section.classList.remove("show");
+        list.innerHTML = "";
+        count.textContent = "0";
+        return;
+      }
+
+      const urgentes = filtradas.filter(
+        item => String(item.prioridade || "").toUpperCase() === "URGENTE"
+      );
+
+      section.classList.add("show");
+      count.textContent = String(filtradas.length);
+      count.classList.toggle("urgent", urgentes.length > 0);
+      title.textContent = urgentes.length
+        ? "MILENE PRECISA DE AJUDA"
+        : "MILENE • AGUARDANDO REVISÃO";
+
+      list.innerHTML = "";
+
+      filtradas.slice(0, 6).forEach(revisao => {
+        const urgente = String(revisao.prioridade || "").toUpperCase() === "URGENTE";
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "milene-review-card" + (urgente ? " urgent" : "");
+        card.onclick = () => abrirRevisaoPendenteHome(revisao.casal_id);
+
+        const nome = nomeCasalDaRevisao(revisao);
+        const mensagem = String(revisao.mensagem_recebida || "").trim();
+
+        card.innerHTML = `
+          <div class="milene-review-card-top">
+            <div class="milene-review-name">${nome}</div>
+            <div class="milene-review-action">${acaoVisualRevisao(revisao.acao_sugerida)}</div>
+          </div>
+          <div class="milene-review-message">${mensagem || "Resposta aguardando revisão."}</div>
+        `;
+        list.appendChild(card);
+
+        if (revisao.revisao_id) {
+          const chave = "margo_home_revisao_som_" + revisao.revisao_id;
+          if (!sessionStorage.getItem(chave)) {
+            sessionStorage.setItem(chave, "1");
+            tocarSomRevisaoHome(revisao.prioridade);
+          }
+        }
+      });
+    }
+
+    async function carregarRevisoesMileneHome() {
+      try {
+        const resposta = await fetch(
+          API_REVISOES_PENDENTES + "?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
+        if (!resposta.ok) return;
+
+        const retorno = await resposta.json();
+        renderizarRevisoesMileneHome(retorno.revisoes || []);
+      } catch (erro) {
+        console.debug("Fila assistida ainda indisponível:", erro);
+      }
+    }
+
+    function iniciarAtualizacaoRevisoesHome() {
+      if (timerRevisoesMileneHome) clearInterval(timerRevisoesMileneHome);
+      timerRevisoesMileneHome = setInterval(carregarRevisoesMileneHome, 5000);
     }
 
     function lerSessao() {
@@ -877,14 +1151,18 @@
     async function iniciarHome() {
       await carregarUsuario();
       await carregarCasais();
+      await carregarRevisoesMileneHome();
+      iniciarAtualizacaoRevisoesHome();
 
       setTimeout(carregarCasais, 900);
       setTimeout(carregarCasais, 1800);
+      setTimeout(carregarRevisoesMileneHome, 1200);
     }
 
     window.addEventListener("pageshow", function () {
       if (garantirSessaoObrigatoria()) {
         carregarCasais();
+        carregarRevisoesMileneHome();
       }
     });
 

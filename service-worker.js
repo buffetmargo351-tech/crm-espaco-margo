@@ -1,7 +1,8 @@
-const CACHE_NAME = "crm-margo-pwa-v1";
+const CACHE_NAME = "crm-margo-pwa-v2-assistido";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
+  "atendimento.html",
   "manifest.json",
   "icons/icon-192.png",
   "icons/icon-512.png"
