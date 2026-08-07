@@ -484,7 +484,6 @@
     const API_USUARIOS = "https://n8n.espacomargo.com.br/webhook/crm/listar-usuarios";
     const API_USUARIOS_ALTERNATIVO = "https://n8n.espacomargo.com.br/webhook/crm/usuarios";
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
-    const API_INICIAR_ATENDIMENTO = "https://n8n.espacomargo.com.br/webhook/crm/iniciar-atendimento";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
     const API_REVISOES_PENDENTES = "https://n8n.espacomargo.com.br/webhook/crm/revisoes-milene-pendentes";
 
@@ -570,34 +569,8 @@
       return url;
     }
 
-    async function abrirAtendimento(casalId) {
-      if (!casalId) {
-        window.location.href = montarUrlAtendimento(casalId);
-        return;
-      }
-
-      if (!usuarioAtualId) {
-        alert("Usuário da consultora não identificado. Abra a Home com ?usuario_id=CHO_01 ou ?usuario_id=CHO_02.");
-        window.location.href = montarUrlAtendimento(casalId);
-        return;
-      }
-
-      try {
-        await fetch(API_INICIAR_ATENDIMENTO, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            casal_id: casalId,
-            usuario_id: usuarioAtualId
-          })
-        });
-      } catch (erro) {
-        console.error("Erro ao iniciar atendimento:", erro);
-        alert("O atendimento será aberto, mas não foi possível atualizar o status automaticamente agora.");
-      }
-
+    function abrirAtendimento(casalId) {
+      // Apenas abre a conversa. Não cria registro de sistema no histórico.
       window.location.href = montarUrlAtendimento(casalId);
     }
 
@@ -900,8 +873,7 @@
     function iniciarAtualizacaoRevisoesHome() {
       if (timerRevisoesMileneHome) clearInterval(timerRevisoesMileneHome);
       timerRevisoesMileneHome = setInterval(() => {
-        if (document.visibilityState !== "visible") return;
-        carregarRevisoesMileneHome();
+        if (!document.hidden) carregarRevisoesMileneHome();
       }, 30000);
     }
 
