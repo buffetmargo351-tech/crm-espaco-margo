@@ -719,6 +719,10 @@
     let revisoesPendentesHomeAtuais = [];
     let timerAlarmeRevisoesHome = null;
 
+    // V1.6: usado apenas em memória para não mostrar revisão de casal apagado.
+    let casalIdsExistentesHome = new Set();
+    let casaisHomeCarregados = false;
+
     document.addEventListener("pointerdown", function liberarSomHome() {
       audioRevisoesHomeLiberado = true;
     }, { once: true });
@@ -812,6 +816,12 @@
 
       const recebidas = (Array.isArray(revisoes) ? revisoes : [])
         .filter(revisaoPertenceAoUsuario)
+        .filter(revisao => {
+          // Se a lista de casais foi carregada com sucesso, revisão órfã não aparece.
+          if (!casaisHomeCarregados) return true;
+          const casalId = String(revisao.casal_id || "").trim();
+          return casalId && casalIdsExistentesHome.has(casalId);
+        })
         .sort((a, b) =>
           String(b.data_hora_criacao || "").localeCompare(String(a.data_hora_criacao || ""))
         );
@@ -1128,6 +1138,14 @@
       try {
         const dadosCasais = await fetchJsonComTimeout(API_CASAIS + "?t=" + Date.now(), 9000);
         const casais = extrairListaCasais(dadosCasais);
+
+        casalIdsExistentesHome = new Set(
+          casais
+            .map(casal => String(casal && casal.casal_id || "").trim())
+            .filter(Boolean)
+        );
+        casaisHomeCarregados = true;
+
         const casaisNovos = filtrarCasaisDaCHO(casais);
 
         let totalOportunidades = 0;
@@ -1149,6 +1167,7 @@
 
       } catch (erro) {
         console.error("Erro ao carregar casais:", erro);
+        casaisHomeCarregados = false;
 
         lista.innerHTML =
           '<div class="empty">Não foi possível carregar os casais agora.<br>Atualize a página ou confira o endpoint /crm/casais.</div>';
