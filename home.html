@@ -716,6 +716,8 @@
 
     let timerRevisoesMileneHome = null;
     let audioRevisoesHomeLiberado = false;
+    let revisoesPendentesHomeAtuais = [];
+    let timerAlarmeRevisoesHome = null;
 
     document.addEventListener("pointerdown", function liberarSomHome() {
       audioRevisoesHomeLiberado = true;
@@ -767,6 +769,12 @@
     function tocarSomRevisaoHome(prioridade) {
       if (!audioRevisoesHomeLiberado) return;
 
+      const agora = Date.now();
+      const chaveGlobal = "margo_alarme_pendente_ultimo";
+      const ultimo = Number(localStorage.getItem(chaveGlobal) || 0);
+      if (agora - ultimo < 20000) return;
+      localStorage.setItem(chaveGlobal, String(agora));
+
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -802,13 +810,27 @@
       const count = document.getElementById("mileneReviewCount");
       const title = document.getElementById("mileneReviewTitle");
 
-      const filtradas = (Array.isArray(revisoes) ? revisoes : [])
-        .filter(revisaoPertenceAoUsuario);
+      const recebidas = (Array.isArray(revisoes) ? revisoes : [])
+        .filter(revisaoPertenceAoUsuario)
+        .sort((a, b) =>
+          String(b.data_hora_criacao || "").localeCompare(String(a.data_hora_criacao || ""))
+        );
+
+      // 1 casal = 1 pendência. Mantém a revisão/mensagem mais recente.
+      const porCasal = new Map();
+      recebidas.forEach(revisao => {
+        const casalId = String(revisao.casal_id || "").trim();
+        if (casalId && !porCasal.has(casalId)) porCasal.set(casalId, revisao);
+      });
+
+      const filtradas = Array.from(porCasal.values());
+      revisoesPendentesHomeAtuais = filtradas;
 
       if (!filtradas.length) {
         section.classList.remove("show");
         list.innerHTML = "";
         count.textContent = "0";
+        revisoesPendentesHomeAtuais = [];
         return;
       }
 
@@ -852,6 +874,19 @@
           }
         }
       });
+    }
+
+    function iniciarAlarmeRevisoesHome() {
+      if (timerAlarmeRevisoesHome) clearInterval(timerAlarmeRevisoesHome);
+
+      timerAlarmeRevisoesHome = setInterval(() => {
+        if (document.hidden || !revisoesPendentesHomeAtuais.length) return;
+
+        const urgente = revisoesPendentesHomeAtuais.some(
+          item => String(item.prioridade || "").toUpperCase() === "URGENTE"
+        );
+        tocarSomRevisaoHome(urgente ? "URGENTE" : "NORMAL");
+      }, 300000);
     }
 
     async function carregarRevisoesMileneHome() {
@@ -1128,14 +1163,12 @@
       await carregarCasais();
       await carregarRevisoesMileneHome();
       iniciarAtualizacaoRevisoesHome();
+      iniciarAlarmeRevisoesHome();
 
-      setTimeout(carregarCasais, 900);
-      setTimeout(carregarCasais, 1800);
-      setTimeout(carregarRevisoesMileneHome, 1200);
     }
 
-    window.addEventListener("pageshow", function () {
-      if (garantirSessaoObrigatoria()) {
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted && garantirSessaoObrigatoria()) {
         carregarCasais();
         carregarRevisoesMileneHome();
       }
@@ -1150,6 +1183,10 @@
     if (garantirSessaoObrigatoria()) {
       iniciarHome();
     }
+    window.addEventListener("beforeunload", function () {
+      if (timerRevisoesMileneHome) clearInterval(timerRevisoesMileneHome);
+      if (timerAlarmeRevisoesHome) clearInterval(timerAlarmeRevisoesHome);
+    });
   </script>
 </body>
 </html>

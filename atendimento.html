@@ -1239,19 +1239,15 @@
       ></textarea>
 
       <div class="review-primary-actions">
-        <button class="review-btn send" id="reviewSendBtn" type="button" onclick="enviarRevisaoPendente(false)">ENVIAR</button>
-        <button class="review-btn edit" id="reviewEditSendBtn" type="button" onclick="enviarRevisaoPendente(true)">EDITAR E ENVIAR</button>
+        <button class="review-btn send" id="reviewSendBtn" type="button" onclick="enviarRevisaoPendente()">ENVIAR</button>
       </div>
 
       <div class="review-secondary-actions">
         <button class="review-btn secondary" type="button" onclick="gerarOutraRespostaPendente()">GERAR OUTRA</button>
-        <button class="review-btn learning" id="reviewPointBtn" type="button" onclick="selecionarAprendizadoPendente('CORRECAO')">CORREÇÃO PONTUAL</button>
-        <button class="review-btn learning" id="reviewRuleBtn" type="button" onclick="selecionarAprendizadoPendente('REGRA')">REGRA PERMANENTE</button>
-        <button class="review-btn learning" id="reviewExampleBtn" type="button" onclick="selecionarAprendizadoPendente('EXEMPLO')">EXEMPLO APROVADO</button>
         <button class="review-btn human" type="button" onclick="assumirAtendimentoPendente()">ASSUMIR ATENDIMENTO</button>
       </div>
 
-      <div class="review-instruction" id="reviewInstructionArea">
+      <div class="review-instruction" id="reviewInstructionArea" style="display:none !important;">
         <label id="reviewInstructionLabel" for="reviewInstructionText">O que deve mudar nesta resposta?</label>
         <textarea id="reviewInstructionText"></textarea>
         <button class="review-instruction-action" id="reviewApplyCorrectionBtn" type="button" onclick="aplicarCorrecaoPontualPendente()">GERAR NOVA COM ESTA CORREÇÃO</button>
@@ -1267,7 +1263,6 @@
     </section>
 
     <div class="composer">
-      <button class="ai-suggest-btn" id="suggestResponseBtn" type="button" onclick="sugerirRespostaIA()">✨ Sugerir resposta com IA</button>
       <button class="media-btn" id="mediaManualBtn" type="button" onclick="abrirBibliotecaMidia()" aria-label="Enviar foto ou vídeo">📎</button>
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
@@ -1467,6 +1462,7 @@
     let aprendizadoPendenteSelecionado = "";
     let modoInstrucaoPendente = "";
     let audioAlertasMileneLiberado = false;
+    let timerAlarmeRevisaoAtendimento = null;
     let bibliotecaMidiasManual = [];
     let filtroMidiaManual = "VIDEO";
     let midiaManualSelecionada = null;
@@ -1631,6 +1627,7 @@
         iniciarAtualizacaoAutomaticaConversas();
         await carregarRevisaoPendenteAtual({ tocarSom: false });
         iniciarAtualizacaoAutomaticaRevisoes();
+        iniciarAlarmeRevisaoAtendimento();
 
         travarAlturaDaTela();
 
@@ -1768,7 +1765,7 @@
 
       atualizacaoConversasTimer = setInterval(() => {
         if (!document.hidden) carregarHistoricoConversas();
-      }, 12000);
+      }, 30000);
     }
 
     window.addEventListener("beforeunload", function () {
@@ -1777,6 +1774,9 @@
       }
       if (atualizacaoRevisoesTimer) {
         clearInterval(atualizacaoRevisoesTimer);
+      }
+      if (timerAlarmeRevisaoAtendimento) {
+        clearInterval(timerAlarmeRevisaoAtendimento);
       }
     });
 
@@ -1816,6 +1816,12 @@
     function tocarSomRevisao(prioridade = "NORMAL") {
       if (!audioAlertasMileneLiberado) return;
 
+      const agora = Date.now();
+      const chaveGlobal = "margo_alarme_pendente_ultimo";
+      const ultimo = Number(localStorage.getItem(chaveGlobal) || 0);
+      if (agora - ultimo < 20000) return;
+      localStorage.setItem(chaveGlobal, String(agora));
+
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -1842,6 +1848,16 @@
 
         setTimeout(() => ctx.close().catch(() => {}), 700);
       } catch (_) {}
+    }
+
+    function iniciarAlarmeRevisaoAtendimento() {
+      if (timerAlarmeRevisaoAtendimento) clearInterval(timerAlarmeRevisaoAtendimento);
+
+      timerAlarmeRevisaoAtendimento = setInterval(() => {
+        if (!document.hidden && revisaoPendenteAtual) {
+          tocarSomRevisao(revisaoPendenteAtual.prioridade || "NORMAL");
+        }
+      }, 300000);
     }
 
     function esconderRevisaoPendente() {
@@ -1932,14 +1948,9 @@
             String(b.data_hora_criacao || "").localeCompare(String(a.data_hora_criacao || ""))
           );
 
-        let vigente = null;
-        const idVigente = String(casalAtual.ultima_revisao_id || "").trim();
-
-        if (idVigente) {
-          vigente = doCasal.find(item => String(item.revisao_id || "") === idVigente) || null;
-        }
-
-        vigente = vigente || doCasal[0] || null;
+        // V1.5: a revisão mais recente SEMPRE prevalece.
+        // Não fica presa em ultima_revisao_id antiga do cadastro.
+        const vigente = doCasal[0] || null;
         renderizarRevisaoPendente(vigente, { tocarSom: opcoes.tocarSom !== false });
 
       } catch (erro) {
@@ -1954,7 +1965,7 @@
 
       atualizacaoRevisoesTimer = setInterval(() => {
         if (!document.hidden) carregarRevisaoPendenteAtual({ tocarSom: true });
-      }, 12000);
+      }, 30000);
     }
 
     function setBotoesRevisaoBloqueados(bloqueado) {
@@ -2011,7 +2022,7 @@
       atualizarDockModoHumano();
     }
 
-    async function enviarRevisaoPendente(forcarEdicao) {
+    async function enviarRevisaoPendente() {
       if (!revisaoPendenteAtual) return;
 
       const textarea = document.getElementById("reviewResponseText");
@@ -2024,27 +2035,13 @@
 
       const original = normalizarTextoComparacao(revisaoPendenteAtual.resposta_sugerida);
       const atual = normalizarTextoComparacao(texto);
-
-      if (!forcarEdicao && original !== atual) {
-        alert("A resposta foi editada. Use “EDITAR E ENVIAR” para registrar corretamente a alteração.");
-        return;
-      }
-
-      if (aprendizadoPendenteSelecionado === "REGRA") {
-        const instrucao = String(document.getElementById("reviewInstructionText").value || "").trim();
-        if (!instrucao) {
-          alert("Descreva a regra permanente antes de enviar.");
-          document.getElementById("reviewInstructionText").focus();
-          return;
-        }
-      }
+      const houveEdicao = original !== atual;
 
       try {
-        const instrucao = String(document.getElementById("reviewInstructionText").value || "").trim();
-        await postarAcaoRevisao(forcarEdicao ? "EDITAR_ENVIAR" : "APROVAR_ENVIAR", {
+        await postarAcaoRevisao(houveEdicao ? "EDITAR_ENVIAR" : "APROVAR_ENVIAR", {
           resposta_final: texto,
-          tipo_aprendizado: aprendizadoPendenteSelecionado,
-          instrucao_revisao: aprendizadoPendenteSelecionado === "REGRA" ? instrucao : "",
+          tipo_aprendizado: "",
+          instrucao_revisao: "",
           tema: "GERAL",
           qualidade: "APROVADO"
         });
