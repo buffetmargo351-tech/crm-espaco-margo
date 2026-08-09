@@ -1992,11 +1992,13 @@
           })
         });
 
+        const corpoBruto = await resposta.text();
         let retorno = {};
-        try { retorno = await resposta.json(); } catch (_) {}
+        try { retorno = corpoBruto ? JSON.parse(corpoBruto) : {}; } catch (_) { retorno = {}; }
 
         if (!resposta.ok || retorno.sucesso === false) {
-          throw new Error(retorno.erro || retorno.mensagem || "A ação de revisão não foi concluída.");
+          const detalhe = retorno.erro || retorno.mensagem || corpoBruto || "Sem corpo de resposta";
+          throw new Error(`REVISÃO HTTP ${resposta.status}: ${detalhe}`);
         }
 
         return retorno;
@@ -2297,15 +2299,17 @@
         })
       });
 
+      const corpoBruto = await resposta.text();
       let retorno = {};
       try {
-        retorno = await resposta.json();
+        retorno = corpoBruto ? JSON.parse(corpoBruto) : {};
       } catch (_) {
         retorno = {};
       }
 
       if (!resposta.ok || retorno.sucesso === false || retorno.enviado === false) {
-        throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio.");
+        const detalhe = retorno.erro || retorno.mensagem || corpoBruto || "Sem corpo de resposta";
+        throw new Error(`WHATSAPP HTTP ${resposta.status}: ${detalhe}`);
       }
 
       return retorno;
@@ -2318,9 +2322,14 @@
 
       if (!texto || enviandoMensagemManual) return false;
 
+      let deveDescartarRevisaoDepois = false;
       if (!opcoes.sugestaoUsada && revisaoPendenteAtual) {
-        const podeEnviar = await descartarRevisaoAntesDeEnvioManual();
-        if (!podeEnviar) return false;
+        const continuar = confirm(
+          "Existe uma resposta da Milene aguardando revisão. " +
+          "Sua mensagem manual será enviada primeiro e, depois, a sugestão antiga será descartada. Continuar?"
+        );
+        if (!continuar) return false;
+        deveDescartarRevisaoDepois = true;
       }
 
       enviandoMensagemManual = true;
@@ -2337,11 +2346,22 @@
             : null
         );
 
+        // O envio ao WhatsApp vem PRIMEIRO. Limpeza de revisão nunca bloqueia mensagem manual.
         await enviarTextoParaWhatsApp(texto);
         enviadoComSucesso = true;
 
         input.value = "";
         adicionarMensagemNaTela(texto);
+
+        if (deveDescartarRevisaoDepois && revisaoPendenteAtual) {
+          try {
+            await postarAcaoRevisao("DESCARTAR");
+            esconderRevisaoPendente();
+          } catch (erroDescarte) {
+            console.warn("Mensagem enviada, mas revisão antiga não foi descartada:", erroDescarte);
+            // Não transformar falha administrativa em falha de envio.
+          }
+        }
 
         try {
           await registrarMensagem(texto);

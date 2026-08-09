@@ -644,7 +644,10 @@
     }
 
     function primeiraRespostaJaEnviada(casal) {
-      return String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
+      const primeiraIA = String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
+      const statusMilene = String(casal && casal.ultimo_status_milene || "").trim().toUpperCase();
+      const temDataResposta = Boolean(String(casal && casal.data_ultima_resposta_ia || "").trim());
+      return primeiraIA || statusMilene === "RESPONDIDO" || temDataResposta;
     }
 
     function filtrarCasaisDaCHO(casais) {
