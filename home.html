@@ -729,7 +729,7 @@
     let timerAlarmeRevisoesHome = null;
 
     // V1.6: usado apenas em memória para não mostrar revisão de casal apagado.
-    let casalIdsExistentesHome = new Set();
+    let casalIdsValidosHome = new Set();
     let casaisHomeCarregados = false;
 
     document.addEventListener("pointerdown", function liberarSomHome() {
@@ -826,10 +826,10 @@
       const recebidas = (Array.isArray(revisoes) ? revisoes : [])
         .filter(revisaoPertenceAoUsuario)
         .filter(revisao => {
-          // Se a lista de casais foi carregada com sucesso, revisão órfã não aparece.
+          // Depois de carregar NOVOS + OPORTUNIDADES, revisão órfã não aparece.
           if (!casaisHomeCarregados) return true;
           const casalId = String(revisao.casal_id || "").trim();
-          return casalId && casalIdsExistentesHome.has(casalId);
+          return casalId && casalIdsValidosHome.has(casalId);
         })
         .sort((a, b) =>
           String(b.data_hora_criacao || "").localeCompare(String(a.data_hora_criacao || ""))
@@ -1148,12 +1148,11 @@
         const dadosCasais = await fetchJsonComTimeout(API_CASAIS + "?t=" + Date.now(), 9000);
         const casais = extrairListaCasais(dadosCasais);
 
-        casalIdsExistentesHome = new Set(
+        casalIdsValidosHome = new Set(
           casais
             .map(casal => String(casal && casal.casal_id || "").trim())
             .filter(Boolean)
         );
-        casaisHomeCarregados = true;
 
         const casaisNovos = filtrarCasaisDaCHO(casais);
 
@@ -1161,9 +1160,27 @@
         try {
           const dadosOportunidades = await fetchJsonComTimeout(API_OPORTUNIDADES + "?t=" + Date.now(), 7000);
           totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
+
+          // V1.9: oportunidade também é um casal válido.
+          // /crm/casais retorna apenas NOVOS; portanto não pode ser usado sozinho
+          // para decidir se uma revisão é "órfã".
+          const agendar = Array.isArray(dadosOportunidades && dadosOportunidades.agendar)
+            ? dadosOportunidades.agendar
+            : [];
+          const resgatar = Array.isArray(dadosOportunidades && dadosOportunidades.resgatar)
+            ? dadosOportunidades.resgatar
+            : [];
+
+          [...agendar, ...resgatar].forEach(casal => {
+            const casalId = String(casal && casal.casal_id || "").trim();
+            if (casalId) casalIdsValidosHome.add(casalId);
+          });
         } catch (erroOportunidades) {
           console.warn("Não foi possível carregar oportunidades. Novos casais serão exibidos mesmo assim.", erroOportunidades);
         }
+
+        // Só depois de NOVOS + OPORTUNIDADES carregados o filtro anti-fantasma fica ativo.
+        casaisHomeCarregados = true;
 
         console.log("Home CHO", {
           usuarioAtualId,
