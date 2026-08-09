@@ -643,10 +643,16 @@
       return consultoraCasal === usuarioAtual;
     }
 
+    function primeiraRespostaJaEnviada(casal) {
+      return String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
+    }
+
     function filtrarCasaisDaCHO(casais) {
       return casais.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        return status === "NOVO" && pertenceAoUsuario(casal);
+        return status === "NOVO" &&
+          !primeiraRespostaJaEnviada(casal) &&
+          pertenceAoUsuario(casal);
       });
     }
 
@@ -666,9 +672,9 @@
       return Array.from(mapa.values()).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         return (
-          status === "NOVO" ||
           status === "EM_ATENDIMENTO" ||
-          status === "VISITOU_NAO_FECHOU"
+          status === "VISITOU_NAO_FECHOU" ||
+          (status === "NOVO" && primeiraRespostaJaEnviada(casal))
         );
       }).length;
     }

@@ -348,6 +348,10 @@
       return String(status || "").trim().toUpperCase();
     }
 
+    function primeiraRespostaJaEnviada(casal) {
+      return String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
+    }
+
     function organizarDadosPorStatus(retorno) {
       const todos = [
         ...(retorno.agendar || []),
@@ -367,7 +371,8 @@
 
       const agendar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        return status === "NOVO" || status === "EM_ATENDIMENTO";
+        return status === "EM_ATENDIMENTO" ||
+          (status === "NOVO" && primeiraRespostaJaEnviada(casal));
       });
 
       const resgatar = unicos.filter(casal => {
@@ -507,7 +512,10 @@
         let infoExtra = "";
 
         if (tipo === "agendar") {
-          statusTexto = casal.status_casal === "NOVO" ? "Novo casal" : "Em atendimento";
+          statusTexto =
+            (normalizarStatus(casal.status_casal) === "NOVO" && !primeiraRespostaJaEnviada(casal))
+              ? "Novo casal"
+              : "Em atendimento";
           alerta = "Próxima ação: conduzir para agendamento.";
         }
 
