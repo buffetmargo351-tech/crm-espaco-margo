@@ -725,6 +725,9 @@
 
     let timerRevisoesMileneHome = null;
     let audioRevisoesHomeLiberado = false;
+    let audioContextRevisoesHome = null;
+    let audioConfirmacaoExecutadaHome = false;
+    const revisoesSomEmProcessamentoHome = new Set();
     let revisoesPendentesHomeAtuais = [];
     let timerAlarmeRevisoesHome = null;
 
@@ -732,9 +735,80 @@
     let casalIdsValidosHome = new Set();
     let casaisHomeCarregados = false;
 
-    document.addEventListener("pointerdown", function liberarSomHome() {
-      audioRevisoesHomeLiberado = true;
-    }, { once: true });
+    function emitirTomHome(ctx, frequencias, ganhoMaximo = 0.22, duracao = 0.16) {
+      if (!ctx || ctx.state !== "running") return false;
+
+      frequencias.forEach((freq, indice) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const inicio = ctx.currentTime + indice * 0.20;
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, inicio);
+
+        gain.gain.setValueAtTime(0.0001, inicio);
+        gain.gain.exponentialRampToValueAtTime(ganhoMaximo, inicio + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(inicio);
+        osc.stop(inicio + duracao + 0.02);
+      });
+
+      return true;
+    }
+
+    function desbloquearSomHomePeloUsuario() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        if (!audioContextRevisoesHome || audioContextRevisoesHome.state === "closed") {
+          audioContextRevisoesHome = new AudioCtx();
+        }
+
+        const concluirDesbloqueio = () => {
+          const ativo = audioContextRevisoesHome &&
+            audioContextRevisoesHome.state === "running";
+
+          audioRevisoesHomeLiberado = Boolean(ativo);
+          if (!ativo) return;
+
+          // Primeiro toque: confirmação audível de que o celular liberou o som.
+          if (!audioConfirmacaoExecutadaHome) {
+            emitirTomHome(audioContextRevisoesHome, [660, 820], 0.16, 0.11);
+            audioConfirmacaoExecutadaHome = true;
+          }
+
+          // Se uma revisão já estiver na tela e o primeiro alarme havia sido bloqueado,
+          // tenta novamente imediatamente após o desbloqueio real do áudio.
+          if (revisoesPendentesHomeAtuais.length) {
+            const urgente = revisoesPendentesHomeAtuais.some(
+              item => String(item.prioridade || "").toUpperCase() === "URGENTE"
+            );
+            setTimeout(() => tocarSomRevisaoHome(urgente ? "URGENTE" : "NORMAL"), 250);
+          }
+        };
+
+        if (audioContextRevisoesHome.state === "suspended") {
+          audioContextRevisoesHome.resume()
+            .then(concluirDesbloqueio)
+            .catch(() => {
+              audioRevisoesHomeLiberado = false;
+            });
+        } else {
+          concluirDesbloqueio();
+        }
+      } catch (erro) {
+        console.warn("Não foi possível desbloquear o áudio da Home:", erro);
+        audioRevisoesHomeLiberado = false;
+      }
+    }
+
+    // Não usamos once:true: alguns celulares suspendem o AudioContext ao sair do App.
+    // Um novo toque ao voltar pode reativá-lo.
+    document.addEventListener("pointerdown", desbloquearSomHomePeloUsuario, { passive: true });
 
     function parseJsonSeguro(valor) {
       try { return JSON.parse(String(valor || "") || "{}"); }
@@ -779,38 +853,52 @@
       return mapa[chave] || chave.replaceAll("_", " ");
     }
 
-    function tocarSomRevisaoHome(prioridade) {
-      if (!audioRevisoesHomeLiberado) return;
-
-      const agora = Date.now();
-      const chaveGlobal = "margo_alarme_pendente_ultimo";
-      const ultimo = Number(localStorage.getItem(chaveGlobal) || 0);
-      if (agora - ultimo < 20000) return;
-      localStorage.setItem(chaveGlobal, String(agora));
+    async function tocarSomRevisaoHome(prioridade) {
+      if (!audioRevisoesHomeLiberado || !audioContextRevisoesHome) return false;
 
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
+        if (audioContextRevisoesHome.state === "suspended") {
+          await audioContextRevisoesHome.resume();
+        }
+
+        if (audioContextRevisoesHome.state !== "running") {
+          audioRevisoesHomeLiberado = false;
+          return false;
+        }
+
+        const agora = Date.now();
+        const chaveGlobal = "margo_alarme_pendente_ultimo_v2";
+        const ultimo = Number(localStorage.getItem(chaveGlobal) || 0);
+        if (agora - ultimo < 20000) return false;
+
         const urgente = String(prioridade || "").toUpperCase() === "URGENTE";
-        const frequencias = urgente ? [760, 930] : [710];
+        const frequencias = urgente ? [760, 930, 1080] : [710, 860];
 
-        frequencias.forEach((freq, indice) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const inicio = ctx.currentTime + indice * .16;
-          osc.frequency.value = freq;
-          gain.gain.setValueAtTime(.0001, inicio);
-          gain.gain.exponentialRampToValueAtTime(.14, inicio + .015);
-          gain.gain.exponentialRampToValueAtTime(.0001, inicio + .12);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(inicio);
-          osc.stop(inicio + .13);
-        });
+        const tocou = emitirTomHome(
+          audioContextRevisoesHome,
+          frequencias,
+          urgente ? 0.30 : 0.24,
+          urgente ? 0.18 : 0.16
+        );
 
-        setTimeout(() => ctx.close().catch(() => {}), 700);
-      } catch (_) {}
+        if (!tocou) return false;
+
+        // Só registra o throttle DEPOIS que o áudio realmente foi disparado.
+        localStorage.setItem(chaveGlobal, String(agora));
+
+        // Backup tátil onde o navegador suportar.
+        try {
+          if (navigator.vibrate) {
+            navigator.vibrate(urgente ? [180, 100, 180, 100, 180] : [180, 100, 180]);
+          }
+        } catch (_) {}
+
+        return true;
+      } catch (erro) {
+        console.warn("Falha ao tocar alarme da revisão:", erro);
+        audioRevisoesHomeLiberado = false;
+        return false;
+      }
     }
 
     function abrirRevisaoPendenteHome(casalId) {
@@ -887,9 +975,20 @@
 
         if (revisao.revisao_id) {
           const chave = "margo_home_revisao_som_" + revisao.revisao_id;
-          if (!sessionStorage.getItem(chave)) {
-            sessionStorage.setItem(chave, "1");
-            tocarSomRevisaoHome(revisao.prioridade);
+
+          if (
+            !sessionStorage.getItem(chave) &&
+            !revisoesSomEmProcessamentoHome.has(revisao.revisao_id)
+          ) {
+            revisoesSomEmProcessamentoHome.add(revisao.revisao_id);
+
+            tocarSomRevisaoHome(revisao.prioridade)
+              .then(tocou => {
+                if (tocou) sessionStorage.setItem(chave, "1");
+              })
+              .finally(() => {
+                revisoesSomEmProcessamentoHome.delete(revisao.revisao_id);
+              });
           }
         }
       });
@@ -1219,9 +1318,25 @@
       }
     });
 
-    document.addEventListener("visibilitychange", function () {
+    document.addEventListener("visibilitychange", async function () {
       if (!document.hidden && garantirSessaoObrigatoria()) {
-        carregarCasais();
+        // Ao voltar para o CRM, não esperar o próximo ciclo de 30 segundos.
+        await carregarCasais();
+        await carregarRevisoesMileneHome();
+
+        // Alguns celulares suspendem o contexto de áudio em segundo plano.
+        // A tentativa automática é segura; se o sistema exigir novo gesto,
+        // o próximo toque na Home reativa pelo listener pointerdown.
+        if (audioContextRevisoesHome && audioContextRevisoesHome.state === "suspended") {
+          audioContextRevisoesHome.resume()
+            .then(() => {
+              audioRevisoesHomeLiberado =
+                audioContextRevisoesHome.state === "running";
+            })
+            .catch(() => {
+              audioRevisoesHomeLiberado = false;
+            });
+        }
       }
     });
 
