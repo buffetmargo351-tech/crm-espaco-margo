@@ -3230,6 +3230,41 @@
       ].filter(Boolean).join("\n\n");
     }
 
+    async function enviarPropostaManualViaApi(retorno = {}) {
+      // Preserva a mensagem gerada pelo workflow atual quando disponível.
+      // O fallback mantém o texto já existente no CRM.
+      const mensagem = String(
+        retorno.whatsapp_mensagem ||
+        montarMensagemPropostaWhatsApp(retorno)
+      ).trim();
+
+      if (!mensagem) {
+        throw new Error("Mensagem da proposta ficou vazia.");
+      }
+
+      // Envio real pelo número oficial da API/Meta.
+      const envio = await enviarTextoParaWhatsApp(mensagem);
+
+      // Só mostra no CRM depois que o endpoint confirmou o envio.
+      adicionarMensagemNaTela(mensagem);
+
+      // Falha de histórico não pode transformar um envio real em "não enviado".
+      try {
+        await registrarMensagem(mensagem);
+      } catch (erroRegistro) {
+        console.warn(
+          "Proposta enviada pela API, mas houve falha ao registrar no histórico:",
+          erroRegistro
+        );
+      }
+
+      return {
+        sucesso: true,
+        mensagem,
+        envio
+      };
+    }
+
     async function gerarPropostaDigital() {
       const botao = document.getElementById("generateProposalBtn");
       const actions = document.getElementById("availabilityActions");
@@ -3285,21 +3320,15 @@
         casalAtual.proposta_ativa_url = retorno.proposta_url || "";
         casalAtual.proposta_ativa_id = retorno.proposta_id || "";
         casalAtual.proposta_ativa_data = agora;
-        casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || "";
+        casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || ""; // legado; envio manual agora usa API Meta
 
         atualizarStatusPropostaNoPopup();
 
         botao.textContent = "Gerar Proposta Digital";
         actions.classList.add("show");
 
-        const whatsappUrl = retorno.whatsapp_url || (
-          "https://wa.me/" +
-          String(casalAtual.telefone || "").replace(/\D/g, "") +
-          "?text=" +
-          encodeURIComponent(montarMensagemPropostaWhatsApp(retorno))
-        );
-
-        abrirWhatsAppSeguro(whatsappUrl);
+        botao.textContent = "Enviando proposta...";
+        await enviarPropostaManualViaApi(retorno);
 
       } catch (erro) {
         console.error("Erro ao gerar proposta:", erro);
@@ -3418,13 +3447,22 @@
         const mensagem = montarMensagemPropostaWhatsApp({
           proposta_url: casalAtual.proposta_ativa_url
         });
-        const telefone = String(casalAtual.telefone || "").replace(/\D/g, "");
-        if (telefone) {
-          abrirWhatsAppSeguro("https://wa.me/" + telefone + "?text=" + encodeURIComponent(mensagem));
-        } else {
-          document.getElementById("messageInput").value = mensagem;
+
+        botao.disabled = true;
+        botao.textContent = "Enviando proposta...";
+
+        try {
+          await enviarPropostaManualViaApi({
+            proposta_url: casalAtual.proposta_ativa_url,
+            whatsapp_mensagem: mensagem
+          });
           fecharDisponibilidade();
-          document.getElementById("messageInput").focus();
+        } catch (erro) {
+          console.error("Erro ao enviar proposta existente pela API:", erro);
+          alert("A proposta existe, mas não foi possível enviá-la pela API do WhatsApp agora.");
+        } finally {
+          botao.disabled = false;
+          botao.textContent = "Chamar pelo WhatsApp";
         }
         return;
       }
