@@ -1,0 +1,16 @@
+V1.12.2 — 13/08/2026
+
+CORREÇÕES
+1. Home > AGENDADOS abre uma visão real de VISITAS AGENDADAS dentro de oportunidades.html?aba=agendados.
+2. Removida a linha "Próxima ação: conduzir para agendamento" dos cards AGENDAR.
+3. Cabeçalho do atendimento: proposta mostra data + valor de referência.
+   - se houver valor_escolhido: mostra o valor exato;
+   - caso contrário: mostra "a partir de" usando o menor valor das 4 opções da proposta.
+4. Oportunidades também recebe resumo de proposta (data + valor) pelo endpoint /crm/resumo-propostas.
+5. "Sem encantamentos" não é mais exibido no cabeçalho quando não houver encantamentos.
+6. Cache do service worker atualizado.
+
+DEPENDÊNCIA
+Importar e ativar:
+COMERCIAL.05 | RESUMO PROPOSTAS | v1.0
+Endpoint GET /crm/resumo-propostas

@@ -1450,6 +1450,7 @@
     const API_LISTAR_MIDIAS_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/midias-milene";
     const API_ENVIAR_MIDIA_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-midia-whatsapp";
     const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
+    const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -1582,7 +1583,8 @@
       container.innerHTML = "";
 
       if (!texto) {
-        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        container.innerHTML = "";
+        container.style.display = "none";
         return;
       }
 
@@ -1592,9 +1594,12 @@
         .filter(Boolean);
 
       if (itens.length === 0) {
-        container.innerHTML = '<div class="dream-chip">✨ Sem encantamentos</div>';
+        container.innerHTML = "";
+        container.style.display = "none";
         return;
       }
+
+      container.style.display = "";
 
       itens.forEach(item => {
         const chip = document.createElement("div");
@@ -1611,11 +1616,39 @@
     function dataPropostaCurta(valor){if(!valor)return "";const d=new Date(valor);return !Number.isNaN(d.getTime())?d.toLocaleDateString("pt-BR"):String(valor);}
     function atualizarResumoPropostaCabecalho(casal){
       const el=document.getElementById("propostaResumo"); if(!el)return;
-      const data=casal.proposta_ativa_data||casal.data_ultima_proposta||casal.proposta_data_envio||"";
-      const valor=casal.proposta_ativa_valor||casal.valor_proposta||casal.proposta_valor||casal.valor_total_proposta||"";
-      if(!data&&!valor&&!casal.proposta_ativa_id&&!casal.proposta_ativa_url){el.textContent="📄 Proposta: não enviada";return;}
-      const p=[];if(data)p.push(dataPropostaCurta(data));if(valor)p.push(moedaProposta(valor)||String(valor));
+      const data=casal.proposta_resumo_data||casal.proposta_ativa_data||casal.data_ultima_proposta||casal.proposta_data_envio||"";
+      const valor=casal.proposta_resumo_valor||casal.proposta_ativa_valor||casal.valor_proposta||casal.proposta_valor||casal.valor_total_proposta||"";
+      const tipoValor=String(casal.proposta_resumo_tipo||"").toUpperCase();
+
+      if(!data&&!valor&&!casal.proposta_ativa_id&&!casal.proposta_ativa_url){
+        el.textContent="📄 Proposta: não enviada";
+        return;
+      }
+
+      const p=[];
+      if(data)p.push(dataPropostaCurta(data));
+      if(valor){
+        const moeda=moedaProposta(valor)||String(valor);
+        p.push(tipoValor==="ESCOLHIDO"?moeda:"a partir de "+moeda);
+      }
       el.textContent="📄 Proposta: "+(p.length?p.join(" • "):"enviada");
+    }
+
+    async function carregarResumoPropostaCasal(casalId){
+      if(!casalId)return;
+      try{
+        const r=await fetch(API_RESUMO_PROPOSTAS+"?casal_id="+encodeURIComponent(casalId)+"&t="+Date.now());
+        const j=await r.json();
+        const resumo=j.resumo || (Array.isArray(j.resumos)?j.resumos[0]:null);
+        if(resumo && casalAtual){
+          casalAtual.proposta_resumo_data=resumo.data_proposta||"";
+          casalAtual.proposta_resumo_valor=resumo.valor_referencia||"";
+          casalAtual.proposta_resumo_tipo=resumo.valor_tipo||"";
+          atualizarResumoPropostaCabecalho(casalAtual);
+        }
+      }catch(e){
+        console.warn("Resumo de proposta indisponível:",e);
+      }
     }
     async function encerrarOportunidade(){
       if(!casalAtualId)return;
@@ -1655,6 +1688,7 @@
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
         atualizarResumoPropostaCabecalho(casal);
+        carregarResumoPropostaCasal(casalAtualId);
         renderizarEncantamentos(casal.encantamentos_principais);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         iniciarAtualizacaoAutomaticaConversas();
@@ -3460,6 +3494,15 @@
         casalAtual.proposta_ativa_id = retorno.proposta_id || "";
         casalAtual.proposta_ativa_data = agora;
         casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || ""; // legado; envio manual agora usa API Meta
+
+        const valorEscolhido = Number(retorno.valor_escolhido || 0);
+        const valoresProposta = [retorno.valor_opcao_1, retorno.valor_opcao_2, retorno.valor_opcao_3, retorno.valor_opcao_4]
+          .map(v => Number(v || 0)).filter(v => Number.isFinite(v) && v > 0);
+        casalAtual.proposta_resumo_data = agora;
+        casalAtual.proposta_resumo_valor = valorEscolhido > 0
+          ? valorEscolhido
+          : (valoresProposta.length ? Math.min(...valoresProposta) : "");
+        casalAtual.proposta_resumo_tipo = valorEscolhido > 0 ? "ESCOLHIDO" : "A_PARTIR";
 
         atualizarStatusPropostaNoPopup();
         atualizarResumoPropostaCabecalho(casalAtual);

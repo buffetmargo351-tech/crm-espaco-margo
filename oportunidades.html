@@ -287,14 +287,17 @@
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_ENCERRADOS = "https://n8n.espacomargo.com.br/webhook/crm/encerrados";
     const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
+    const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
 
     let dados = {
       agendar: [],
       resgatar: [],
+      agendados: [],
       encerrados: [],
       totais: {
         agendar: 0,
         resgatar: 0,
+        agendados: 0,
         encerrados: 0
       }
     };
@@ -305,6 +308,7 @@
     const titulos = {
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
+      agendados: "Visitas agendadas",
       encerrados: "Oportunidades encerradas"
     };
 
@@ -312,7 +316,7 @@
       const params = new URLSearchParams(window.location.search);
       const aba = params.get("aba");
 
-      if (aba === "resgatar" || aba === "encerrados" || aba === "agendar") {
+      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "agendar") {
         return aba;
       }
 
@@ -361,6 +365,7 @@
       const todos = [
         ...(retorno.agendar || []),
         ...(retorno.resgatar || []),
+        ...(retorno.agendados || []),
         ...(retorno.encerrados || [])
       ];
 
@@ -385,6 +390,13 @@
         return status === "VISITOU_NAO_FECHOU";
       });
 
+      const agendados = unicos
+        .filter(casal => {
+          const status = normalizarStatus(casal.status_casal);
+          return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal.agenda_id || "").trim());
+        })
+        .sort((a, b) => chaveVisita(a).localeCompare(chaveVisita(b)));
+
       const encerrados = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         return status === "PERDIDO";
@@ -393,13 +405,45 @@
       return {
         agendar,
         resgatar,
+        agendados,
         encerrados,
         totais: {
           agendar: agendar.length,
           resgatar: resgatar.length,
+          agendados: agendados.length,
           encerrados: encerrados.length
         }
       };
+    }
+
+    function chaveVisita(casal) {
+      const data = String(casal.data_consultoria || "").trim();
+      const hora = String(casal.hora_consultoria || "00:00").trim();
+      const p = data.split("/");
+      if (p.length !== 3) return "9999-99-99T99:99";
+      return `${p[2]}-${String(p[1]).padStart(2,"0")}-${String(p[0]).padStart(2,"0")}T${hora}`;
+    }
+
+    async function carregarResumosPropostas() {
+      try {
+        const r = await fetch(API_RESUMO_PROPOSTAS + "?t=" + Date.now());
+        const j = await r.json();
+        const lista = Array.isArray(j) ? j : (j.resumos || []);
+        const mapa = new Map(lista.map(x => [String(x.casal_id || ""), x]));
+
+        ["agendar", "resgatar", "agendados", "encerrados"].forEach(grupo => {
+          (dados[grupo] || []).forEach(casal => {
+            const resumo = mapa.get(String(casal.casal_id || ""));
+            if (resumo) {
+              casal.proposta_resumo_data = resumo.data_proposta || "";
+              casal.proposta_resumo_valor = resumo.valor_referencia || "";
+              casal.proposta_resumo_tipo = resumo.valor_tipo || "";
+            }
+          });
+        });
+      } catch (e) {
+        console.warn("Resumo de propostas indisponível:", e);
+      }
     }
 
     function primeiraLetra(nome) {
@@ -481,8 +525,9 @@
         card.classList.remove("active");
       });
 
-      document.getElementById("card-" + tipo).classList.add("active");
-      document.getElementById("tituloLista").textContent = titulos[tipo];
+      const cardAtivo = document.getElementById("card-" + tipo);
+      if (cardAtivo) cardAtivo.classList.add("active");
+      document.getElementById("tituloLista").textContent = titulos[tipo] || titulos.agendar;
 
       renderizarLista(tipo);
     }
@@ -497,11 +542,21 @@
       return !Number.isNaN(d.getTime()) ? d.toLocaleDateString("pt-BR") : String(valor);
     }
     function linhaProposta(casal) {
-      const data = casal.proposta_ativa_data || casal.data_ultima_proposta || casal.proposta_data_envio || "";
-      const valor = casal.proposta_ativa_valor || casal.valor_proposta || casal.proposta_valor || casal.valor_total_proposta || "";
-      if (!data && !valor && !casal.proposta_ativa_id && !casal.proposta_ativa_url) return "📄 Proposta: não enviada";
-      const p=[]; if(data)p.push("enviada em "+dataCurta(data)); if(valor)p.push(formatarMoeda(valor)||String(valor));
-      return "📄 Proposta: "+(p.length?p.join(" • "):"enviada");
+      const data = casal.proposta_resumo_data || casal.proposta_ativa_data || casal.data_ultima_proposta || casal.proposta_data_envio || "";
+      const valor = casal.proposta_resumo_valor || casal.proposta_ativa_valor || casal.valor_proposta || casal.proposta_valor || casal.valor_total_proposta || "";
+      const tipoValor = String(casal.proposta_resumo_tipo || "").toUpperCase();
+
+      if (!data && !valor && !casal.proposta_ativa_id && !casal.proposta_ativa_url) {
+        return "📄 Proposta: não enviada";
+      }
+
+      const p = [];
+      if (data) p.push("enviada em " + dataCurta(data));
+      if (valor) {
+        const moeda = formatarMoeda(valor) || String(valor);
+        p.push(tipoValor === "ESCOLHIDO" ? moeda : "a partir de " + moeda);
+      }
+      return "📄 Proposta: " + (p.length ? p.join(" • ") : "enviada");
     }
     async function reabrirOportunidade(casalId,event) {
       if(event)event.stopPropagation();
@@ -534,7 +589,7 @@
         const sonhos = formatarEncantamentos(casal.encantamentos_principais);
 
         let statusTexto = "Oportunidade";
-        let alerta = "Próxima ação: conduzir para agendamento.";
+        let alerta = "";
         let infoExtra = "";
 
         if (tipo === "agendar") {
@@ -542,12 +597,20 @@
             (normalizarStatus(casal.status_casal) === "NOVO" && !primeiraRespostaJaEnviada(casal))
               ? "Novo casal"
               : "Em atendimento";
-          alerta = "Próxima ação: conduzir para agendamento.";
+          alerta = "";
         }
 
         if (tipo === "resgatar") {
           statusTexto = "Visitou e não fechou";
           alerta = "Atenção: retomar contato e tentar resgatar.";
+        }
+
+        if (tipo === "agendados") {
+          statusTexto = "Visita agendada";
+          alerta = "";
+          const visita = [casal.data_consultoria || "", casal.hora_consultoria ? "às " + casal.hora_consultoria : ""]
+            .filter(Boolean).join(" ");
+          infoExtra = `<div class="linha-info">🗓 Visita: ${visita || "Horário não informado"}</div>`;
         }
 
         if (tipo === "encerrados") {
@@ -592,6 +655,7 @@
           retorno.encerrados=Array.isArray(je)?je:(je.encerrados||je.casais||[]);
         } catch(e) { retorno.encerrados=[]; console.warn("Não foi possível carregar encerrados:",e); }
         dados = organizarDadosPorStatus(retorno);
+        await carregarResumosPropostas();
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
