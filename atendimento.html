@@ -1214,6 +1214,7 @@
         <div id="qtdConvidados">👥 -- convidados</div>
       </div>
 
+      <div id="propostaResumo" style="font-size:11px;font-weight:800;color:#6d4b4b;text-align:center;margin-top:5px;">📄 Proposta: carregando...</div>
       <div class="dreams" id="sonhosCasal"></div>
     </header>
 
@@ -1262,6 +1263,9 @@
       <button class="human-mode-btn" type="button" onclick="devolverAtendimentoParaMilene()">DEVOLVER PARA MILENE</button>
     </section>
 
+    <div id="opportunityActions" style="padding:5px 14px;background:#fff8f8;border-top:1px solid #efdada;text-align:right;">
+      <button type="button" onclick="encerrarOportunidade()" style="border:0;background:transparent;color:#9a5555;font-size:10px;font-weight:900;cursor:pointer;">ENCERRAR OPORTUNIDADE</button>
+    </div>
     <div class="composer">
       <button class="media-btn" id="mediaManualBtn" type="button" onclick="abrirBibliotecaMidia()" aria-label="Enviar foto ou vídeo">📎</button>
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
@@ -1445,6 +1449,7 @@
     const API_MODO_ATENDIMENTO_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/modo-atendimento-milene";
     const API_LISTAR_MIDIAS_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/midias-milene";
     const API_ENVIAR_MIDIA_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-midia-whatsapp";
+    const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
@@ -1599,6 +1604,33 @@
       });
     }
 
+    function moedaProposta(valor) {
+      const n=Number(String(valor||"").replace(/\./g,"").replace(",",".").replace(/[^\d.-]/g,""));
+      return Number.isFinite(n)&&n>0?n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"";
+    }
+    function dataPropostaCurta(valor){if(!valor)return "";const d=new Date(valor);return !Number.isNaN(d.getTime())?d.toLocaleDateString("pt-BR"):String(valor);}
+    function atualizarResumoPropostaCabecalho(casal){
+      const el=document.getElementById("propostaResumo"); if(!el)return;
+      const data=casal.proposta_ativa_data||casal.data_ultima_proposta||casal.proposta_data_envio||"";
+      const valor=casal.proposta_ativa_valor||casal.valor_proposta||casal.proposta_valor||casal.valor_total_proposta||"";
+      if(!data&&!valor&&!casal.proposta_ativa_id&&!casal.proposta_ativa_url){el.textContent="📄 Proposta: não enviada";return;}
+      const p=[];if(data)p.push(dataPropostaCurta(data));if(valor)p.push(moedaProposta(valor)||String(valor));
+      el.textContent="📄 Proposta: "+(p.length?p.join(" • "):"enviada");
+    }
+    async function encerrarOportunidade(){
+      if(!casalAtualId)return;
+      const op=["ORCAMENTO_INCOMPATIVEL","PRECO","FECHOU_COM_OUTRO_ESPACO","DATA_INDISPONIVEL","ADIAMENTO","CASAMENTO_CANCELADO","SEM_INTERESSE","OUTRO"];
+      const e=prompt("Motivo do encerramento:\n\n"+op.map((x,i)=>`${i+1} - ${x}`).join("\n")+"\n\nDigite o número:");
+      if(e===null)return;const idx=Number(e)-1;if(!Number.isInteger(idx)||idx<0||idx>=op.length){alert("Selecione um motivo válido.");return;}
+      const motivo=op[idx];const obs=String(prompt(motivo==="OUTRO"?"Descreva brevemente o motivo:":"Contexto/observação da perda (obrigatório):")||"").trim();
+      if(!obs){alert("Informe brevemente o contexto da perda.");return;}
+      if(!confirm("Encerrar esta oportunidade? O casal ficará fora das automações ativas."))return;
+      const r=await fetch(API_STATUS_OPORTUNIDADE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({casal_id:casalAtualId,acao:"ENCERRAR",motivo_perda:motivo,usuario_id:usuarioAtualId||"APP",observacoes_fechamento:obs})});
+      const j=await r.json();if(!r.ok||!j.sucesso){alert("Não foi possível encerrar a oportunidade.");return;}
+      alert("Oportunidade encerrada com sucesso.");
+      window.location.href=usuarioAtualId?"oportunidades.html?aba=encerrados&usuario_id="+encodeURIComponent(usuarioAtualId):"oportunidades.html?aba=encerrados";
+    }
+
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
       usuarioAtualId = pegarUsuarioIdDaUrl();
@@ -1622,6 +1654,7 @@
         document.getElementById("nomeCasal").textContent = nomeCasal(casal);
         document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
         document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
+        atualizarResumoPropostaCabecalho(casal);
         renderizarEncantamentos(casal.encantamentos_principais);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         iniciarAtualizacaoAutomaticaConversas();
@@ -3429,6 +3462,7 @@
         casalAtual.ultima_proposta_whatsapp_url = retorno.whatsapp_url || ""; // legado; envio manual agora usa API Meta
 
         atualizarStatusPropostaNoPopup();
+        atualizarResumoPropostaCabecalho(casalAtual);
 
         botao.textContent = "Gerar Proposta Digital";
         actions.classList.add("show");

@@ -112,12 +112,12 @@
       border-color: #e0ae56;
     }
 
-    .card-resumo.agendados .numero,
-    .card-resumo.agendados .texto {
+    .card-resumo.encerrados .numero,
+    .card-resumo.encerrados .texto {
       color: #4f8f5a;
     }
 
-    .card-resumo.agendados.active {
+    .card-resumo.encerrados.active {
       background: #eef7e9;
       border-color: #b9ddb5;
     }
@@ -264,9 +264,9 @@
           <div class="texto">Resgatar</div>
         </div>
 
-        <div class="card-resumo agendados" id="card-agendados" onclick="trocarAba('agendados')">
-          <div class="numero" id="totalAgendados">0</div>
-          <div class="texto">Agendados</div>
+        <div class="card-resumo agendados" id="card-encerrados" onclick="trocarAba('encerrados')">
+          <div class="numero" id="totalEncerrados">0</div>
+          <div class="texto">Encerrados</div>
         </div>
       </section>
 
@@ -285,15 +285,17 @@
 
   <script>
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
+    const API_ENCERRADOS = "https://n8n.espacomargo.com.br/webhook/crm/encerrados";
+    const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
 
     let dados = {
       agendar: [],
       resgatar: [],
-      agendados: [],
+      encerrados: [],
       totais: {
         agendar: 0,
         resgatar: 0,
-        agendados: 0
+        encerrados: 0
       }
     };
 
@@ -303,14 +305,14 @@
     const titulos = {
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
-      agendados: "Consultorias agendadas"
+      encerrados: "Oportunidades encerradas"
     };
 
     function pegarAbaInicial() {
       const params = new URLSearchParams(window.location.search);
       const aba = params.get("aba");
 
-      if (aba === "resgatar" || aba === "agendados" || aba === "agendar") {
+      if (aba === "resgatar" || aba === "encerrados" || aba === "agendar") {
         return aba;
       }
 
@@ -359,7 +361,7 @@
       const todos = [
         ...(retorno.agendar || []),
         ...(retorno.resgatar || []),
-        ...(retorno.agendados || [])
+        ...(retorno.encerrados || [])
       ];
 
       const mapa = new Map();
@@ -383,19 +385,19 @@
         return status === "VISITOU_NAO_FECHOU";
       });
 
-      const agendados = unicos.filter(casal => {
+      const encerrados = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        return status === "CONSULTORIA_AGENDADA";
+        return status === "PERDIDO";
       });
 
       return {
         agendar,
         resgatar,
-        agendados,
+        encerrados,
         totais: {
           agendar: agendar.length,
           resgatar: resgatar.length,
-          agendados: agendados.length
+          encerrados: encerrados.length
         }
       };
     }
@@ -406,14 +408,15 @@
     }
 
     function nomeCasal(casal) {
-      const noiva = casal.nome_noiva || "";
-      const noivo = casal.nome_noivo || "";
+      const pessoa1 = casal.nome_pessoa_1 || casal.nome_noiva || "";
+      const pessoa2 = casal.nome_pessoa_2 || casal.nome_noivo || "";
+      const contato = casal.nome_contato || "";
 
-      if (noiva && noivo) {
-        return noiva + " ❤️ " + noivo;
+      if (pessoa1 && pessoa2) {
+        return pessoa1 + " ❤️ " + pessoa2;
       }
 
-      return noiva || noivo || "Casal sem nome";
+      return pessoa1 || pessoa2 || contato || "Casal sem nome";
     }
 
     function formatarTelefoneCard(valor) {
@@ -484,6 +487,30 @@
       renderizarLista(tipo);
     }
 
+    function formatarMoeda(valor) {
+      const n = Number(String(valor || "").replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, ""));
+      return Number.isFinite(n) && n > 0 ? n.toLocaleString("pt-BR", { style:"currency", currency:"BRL" }) : "";
+    }
+    function dataCurta(valor) {
+      if (!valor) return "";
+      const d = new Date(valor);
+      return !Number.isNaN(d.getTime()) ? d.toLocaleDateString("pt-BR") : String(valor);
+    }
+    function linhaProposta(casal) {
+      const data = casal.proposta_ativa_data || casal.data_ultima_proposta || casal.proposta_data_envio || "";
+      const valor = casal.proposta_ativa_valor || casal.valor_proposta || casal.proposta_valor || casal.valor_total_proposta || "";
+      if (!data && !valor && !casal.proposta_ativa_id && !casal.proposta_ativa_url) return "📄 Proposta: não enviada";
+      const p=[]; if(data)p.push("enviada em "+dataCurta(data)); if(valor)p.push(formatarMoeda(valor)||String(valor));
+      return "📄 Proposta: "+(p.length?p.join(" • "):"enviada");
+    }
+    async function reabrirOportunidade(casalId,event) {
+      if(event)event.stopPropagation();
+      if(!confirm("Reabrir esta oportunidade e devolvê-la ao atendimento ativo?"))return;
+      const r=await fetch(API_STATUS_OPORTUNIDADE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({casal_id:casalId,acao:"REABRIR",usuario_id:usuarioAtualId||"APP"})});
+      const j=await r.json(); if(!r.ok||!j.sucesso)throw new Error(j.erro||"Falha ao reabrir");
+      await carregarOportunidades();
+    }
+
     function renderizarLista(tipo) {
       const lista = document.getElementById("listaCasais");
       const empty = document.getElementById("emptyState");
@@ -501,11 +528,7 @@
         const card = document.createElement("div");
         card.className = "card-casal";
 
-        if (tipo === "agendados") {
-          card.onclick = () => window.location.href = urlComUsuario("consultoria.html?casal_id=" + encodeURIComponent(casal.casal_id));
-        } else {
-          card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id));
-        }
+        card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id));
 
         const nome = nomeCasal(casal);
         const sonhos = formatarEncantamentos(casal.encantamentos_principais);
@@ -527,18 +550,15 @@
           alerta = "Atenção: retomar contato e tentar resgatar.";
         }
 
-        if (tipo === "agendados") {
-          statusTexto = "Consultoria agendada";
-          alerta = "Preparar visita presencial.";
-          infoExtra = `
-            <div class="linha-info">📍 Localização enviada automaticamente</div>
-            <div class="linha-info">📝 Obs: ${casal.observacoes_gerais || "Sem observações"}</div>
-          `;
+        if (tipo === "encerrados") {
+          statusTexto = "Oportunidade encerrada"; alerta = "";
+          infoExtra = `<div class="linha-info">⛔ Motivo: ${casal.motivo_perda || "Não informado"}</div>
+          <button type="button" onclick="reabrirOportunidade('${casal.casal_id}', event)" style="margin-top:8px;border:1px solid #d9b9b9;background:#fff;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;">REABRIR OPORTUNIDADE</button>`;
         }
 
         card.innerHTML = `
           <div class="casal-top">
-            <div class="avatar">${primeiraLetra(casal.nome_noiva)}</div>
+            <div class="avatar">${primeiraLetra(nome)}</div>
 
             <div class="info-principal">
               <div class="nome">${nome}</div>
@@ -551,14 +571,12 @@
 
           <div class="linha-info">📅 ${casal.data_casamento || "Data não informada"} &nbsp; | &nbsp; 👥 ${casal.quantidade_convidados || "--"} convidados</div>
 
-          ${tipo === "agendados"
-            ? `<div class="linha-info">🗓 Consultoria: ${casal.data_consultoria || "--"} às ${casal.hora_consultoria || "--"}</div>`
-            : `<div class="linha-info">⏱ ${formatarContato(casal)}</div>`
-          }
+          <div class="linha-info">⏱ ${formatarContato(casal)}</div>
 
           <div class="sonhos">✨ Sonhos: ${sonhos}</div>
+          <div class="linha-info">${linhaProposta(casal)}</div>
           ${infoExtra}
-          <div class="alerta">⚠️ ${alerta}</div>
+          ${alerta ? `<div class="alerta">⚠️ ${alerta}</div>` : ""}
         `;
 
         lista.appendChild(card);
@@ -569,12 +587,15 @@
       try {
         const resposta = await fetch(API_OPORTUNIDADES + "?t=" + Date.now());
         const retorno = await resposta.json();
-
+        try {
+          const re=await fetch(API_ENCERRADOS+"?t="+Date.now()); const je=await re.json();
+          retorno.encerrados=Array.isArray(je)?je:(je.encerrados||je.casais||[]);
+        } catch(e) { retorno.encerrados=[]; console.warn("Não foi possível carregar encerrados:",e); }
         dados = organizarDadosPorStatus(retorno);
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
-        document.getElementById("totalAgendados").textContent = dados.totais.agendados;
+        document.getElementById("totalEncerrados").textContent = dados.totais.encerrados;
 
         trocarAba(abaAtual);
 
@@ -588,7 +609,7 @@
 
     carregarOportunidades();
 
-    if (abaAtual === "agendados") {
+    if (abaAtual === "encerrados") {
       setTimeout(carregarOportunidades, 900);
       setTimeout(carregarOportunidades, 1800);
     }

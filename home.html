@@ -162,7 +162,7 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 9px;
       margin-bottom: 22px;
     }
@@ -451,9 +451,13 @@
           <div class="texto">Oportunidades</div>
         </div>
 
-        <div class="card-resumo" onclick="alert('Tela Resultados será ativada em breve.')">
-          <div class="numero">0</div>
-          <div class="texto">Resultados</div>
+        <div class="card-resumo" onclick="abrirAgendados()">
+          <div class="numero" id="totalAgendadosHome">0</div>
+          <div class="texto">Agendados</div>
+        </div>
+        <div class="card-resumo" onclick="abrirAtencao()">
+          <div class="numero" id="totalAtencaoHome">0</div>
+          <div class="texto">Atenção</div>
         </div>
       </section>
 
@@ -486,6 +490,14 @@
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
     const API_REVISOES_PENDENTES = "https://n8n.espacomargo.com.br/webhook/crm/revisoes-milene-pendentes";
+    function abrirAgendados() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=agendados" + q;
+    }
+    function abrirAtencao() {
+      const secao = document.getElementById("mileneReviewSection");
+      if (secao) secao.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 
     function limpar(valor) {
       return String(valor || "").trim();
@@ -909,6 +921,7 @@
       const section = document.getElementById("mileneReviewSection");
       const list = document.getElementById("mileneReviewList");
       const count = document.getElementById("mileneReviewCount");
+      const countHome = document.getElementById("totalAtencaoHome");
       const title = document.getElementById("mileneReviewTitle");
 
       const recebidas = (Array.isArray(revisoes) ? revisoes : [])
@@ -937,6 +950,7 @@
         section.classList.remove("show");
         list.innerHTML = "";
         count.textContent = "0";
+        if (countHome) countHome.textContent = "0";
         revisoesPendentesHomeAtuais = [];
         return;
       }
@@ -947,6 +961,7 @@
 
       section.classList.add("show");
       count.textContent = String(filtradas.length);
+      if (countHome) countHome.textContent = String(filtradas.length);
       count.classList.toggle("urgent", urgentes.length > 0);
       title.textContent = urgentes.length
         ? "MILENE PRECISA DE AJUDA"
@@ -1259,6 +1274,10 @@
         try {
           const dadosOportunidades = await fetchJsonComTimeout(API_OPORTUNIDADES + "?t=" + Date.now(), 7000);
           totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
+          const agendadosHome = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
+            ? dadosOportunidades.agendados.filter(pertenceAoUsuario) : [];
+          const totalAgendadosHome = document.getElementById("totalAgendadosHome");
+          if (totalAgendadosHome) totalAgendadosHome.textContent = String(agendadosHome.length);
 
           // V1.9: oportunidade também é um casal válido.
           // /crm/casais retorna apenas NOVOS; portanto não pode ser usado sozinho
