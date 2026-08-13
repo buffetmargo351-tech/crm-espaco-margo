@@ -1714,26 +1714,65 @@
         .join("||");
     }
 
-    function parseDataHoraConversa(valor) {
-      const s = String(valor || "").trim();
-      if (!s) return null;
+    function parseDataHoraConversa(valor, conversaId = "") {
+      let s = String(valor || "")
+        .replace(/\u00A0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-      // Formatos usados atualmente no CRM:
-      // dd/mm/aaaa HH:mm
-      // dd/mm/aaaa HH:mm:ss
-      let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      // 1) Histórico antigo:
+      //    13/08/2026, 09:08:00
+      // 2) Formato atual:
+      //    13/08/2026 10:23
+      // Aceita vírgula opcional, segundos opcionais e espaços variados.
+      let m = s.match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s*,?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+      );
+
       if (m) {
         const [, dia, mes, ano, hora, minuto, segundo = "00"] = m;
         const d = new Date(
           `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}` +
           `T${String(hora).padStart(2, "0")}:${minuto}:${segundo}-03:00`
         );
-        return Number.isNaN(d.getTime()) ? null : d;
+        if (!Number.isNaN(d.getTime())) return d;
       }
 
-      // Compatibilidade com eventuais datas ISO.
-      const d = new Date(s);
-      return Number.isNaN(d.getTime()) ? null : d;
+      // 3) Formato que já apareceu em exports/linhas antigas:
+      //    2026-08-04 10:53:13
+      m = s.match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/
+      );
+
+      if (m) {
+        const [, ano, mes, dia, hora, minuto, segundo = "00"] = m;
+        const d = new Date(
+          `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}` +
+          `T${String(hora).padStart(2, "0")}:${minuto}:${segundo}-03:00`
+        );
+        if (!Number.isNaN(d.getTime())) return d;
+      }
+
+      // 4) ISO verdadeiro, quando existir.
+      if (s) {
+        const d = new Date(s);
+        if (!Number.isNaN(d.getTime())) return d;
+      }
+
+      // 5) Segurança histórica:
+      // conversa_id normalmente contém o timestamp em milissegundos:
+      // CONV_1786622924829_XXXX
+      const id = String(conversaId || "");
+      const idMatch = id.match(/CONV_(\d{13})/i);
+      if (idMatch) {
+        const ms = Number(idMatch[1]);
+        if (Number.isFinite(ms)) {
+          const d = new Date(ms);
+          if (!Number.isNaN(d.getTime())) return d;
+        }
+      }
+
+      return null;
     }
 
     function ordenarConversasCronologicamente(conversas) {
@@ -1741,10 +1780,12 @@
         .map((conversa, indiceOriginal) => ({
           conversa,
           indiceOriginal,
-          data: parseDataHoraConversa(conversa.data_hora)
+          data: parseDataHoraConversa(
+            conversa.data_hora,
+            conversa.conversa_id
+          )
         }))
         .sort((a, b) => {
-          // Datas válidas vêm primeiro e em ordem cronológica.
           if (a.data && b.data) {
             const diferenca = a.data.getTime() - b.data.getTime();
             if (diferenca !== 0) return diferenca;
@@ -1754,7 +1795,7 @@
             return 1;
           }
 
-          // Em empate/ausência de data, preserva a ordem original da API.
+          // Último fallback: preserva a ordem original da API.
           return a.indiceOriginal - b.indiceOriginal;
         })
         .map(item => item.conversa);
