@@ -495,8 +495,8 @@
       window.location.href = "oportunidades.html?aba=agendados" + q;
     }
     function abrirAtencao() {
-      const secao = document.getElementById("mileneReviewSection");
-      if (secao) secao.scrollIntoView({ behavior: "smooth", block: "start" });
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=atencao" + q;
     }
 
     function limpar(valor) {
@@ -671,21 +671,46 @@
       });
     }
 
-    function contarOportunidadesDaCHO(retornoOportunidades) {
-      const agendar = retornoOportunidades.agendar || [];
-      const resgatar = retornoOportunidades.resgatar || [];
-      const todos = [...agendar, ...resgatar];
+    function modoAtendimentoHumano(casal) {
+      return String(casal && casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO";
+    }
 
+    function temVisitaAgendada(casal) {
+      const status = normalizarStatus(casal && casal.status_casal);
+      return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
+    }
+
+    function unificarOportunidadesHome(retornoOportunidades) {
+      const grupos = [
+        ...(retornoOportunidades.agendar || []),
+        ...(retornoOportunidades.resgatar || []),
+        ...(retornoOportunidades.agendados || [])
+      ];
       const mapa = new Map();
-
-      todos.forEach(casal => {
-        if (casal && casal.casal_id && pertenceAoUsuario(casal)) {
-          mapa.set(casal.casal_id, casal);
-        }
+      grupos.forEach(casal => {
+        if (casal && casal.casal_id && pertenceAoUsuario(casal)) mapa.set(casal.casal_id, casal);
       });
+      return Array.from(mapa.values());
+    }
 
-      return Array.from(mapa.values()).filter(casal => {
+    function contarAtencaoDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (status === "PERDIDO" || status === "GANHO") return false;
+        return modoAtendimentoHumano(casal);
+      }).length;
+    }
+
+    function contarAgendadosDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(temVisitaAgendada).length;
+    }
+
+    function contarOportunidadesDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (modoAtendimentoHumano(casal)) return false;
         return (
           status === "EM_ATENDIMENTO" ||
           status === "VISITOU_NAO_FECHOU" ||
@@ -921,7 +946,6 @@
       const section = document.getElementById("mileneReviewSection");
       const list = document.getElementById("mileneReviewList");
       const count = document.getElementById("mileneReviewCount");
-      const countHome = document.getElementById("totalAtencaoHome");
       const title = document.getElementById("mileneReviewTitle");
 
       const recebidas = (Array.isArray(revisoes) ? revisoes : [])
@@ -950,7 +974,6 @@
         section.classList.remove("show");
         list.innerHTML = "";
         count.textContent = "0";
-        if (countHome) countHome.textContent = "0";
         revisoesPendentesHomeAtuais = [];
         return;
       }
@@ -961,7 +984,6 @@
 
       section.classList.add("show");
       count.textContent = String(filtradas.length);
-      if (countHome) countHome.textContent = String(filtradas.length);
       count.classList.toggle("urgent", urgentes.length > 0);
       title.textContent = urgentes.length
         ? "MILENE PRECISA DE AJUDA"
@@ -1274,10 +1296,10 @@
         try {
           const dadosOportunidades = await fetchJsonComTimeout(API_OPORTUNIDADES + "?t=" + Date.now(), 7000);
           totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
-          const agendadosHome = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
-            ? dadosOportunidades.agendados.filter(pertenceAoUsuario) : [];
           const totalAgendadosHome = document.getElementById("totalAgendadosHome");
-          if (totalAgendadosHome) totalAgendadosHome.textContent = String(agendadosHome.length);
+          const totalAtencaoHome = document.getElementById("totalAtencaoHome");
+          if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
+          if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));
 
           // V1.9: oportunidade também é um casal válido.
           // /crm/casais retorna apenas NOVOS; portanto não pode ser usado sozinho
@@ -1288,8 +1310,11 @@
           const resgatar = Array.isArray(dadosOportunidades && dadosOportunidades.resgatar)
             ? dadosOportunidades.resgatar
             : [];
+          const agendados = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
+            ? dadosOportunidades.agendados
+            : [];
 
-          [...agendar, ...resgatar].forEach(casal => {
+          [...agendar, ...resgatar, ...agendados].forEach(casal => {
             const casalId = String(casal && casal.casal_id || "").trim();
             if (casalId) casalIdsValidosHome.add(casalId);
           });

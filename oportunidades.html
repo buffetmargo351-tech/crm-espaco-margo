@@ -61,7 +61,7 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
       margin-bottom: 16px;
     }
@@ -120,6 +120,16 @@
     .card-resumo.encerrados.active {
       background: #eef7e9;
       border-color: #b9ddb5;
+    }
+
+    .card-resumo.atencao .numero,
+    .card-resumo.atencao .texto {
+      color: #b66a31;
+    }
+
+    .card-resumo.atencao.active {
+      background: #fff3e8;
+      border-color: #e3b489;
     }
 
     .section-title {
@@ -264,6 +274,11 @@
           <div class="texto">Resgatar</div>
         </div>
 
+        <div class="card-resumo atencao" id="card-atencao" onclick="trocarAba('atencao')">
+          <div class="numero" id="totalAtencao">0</div>
+          <div class="texto">Atenção</div>
+        </div>
+
         <div class="card-resumo agendados" id="card-encerrados" onclick="trocarAba('encerrados')">
           <div class="numero" id="totalEncerrados">0</div>
           <div class="texto">Encerrados</div>
@@ -293,11 +308,13 @@
       agendar: [],
       resgatar: [],
       agendados: [],
+      atencao: [],
       encerrados: [],
       totais: {
         agendar: 0,
         resgatar: 0,
         agendados: 0,
+        atencao: 0,
         encerrados: 0
       }
     };
@@ -309,6 +326,7 @@
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
       agendados: "Visitas agendadas",
+      atencao: "Atendimentos assumidos por você",
       encerrados: "Oportunidades encerradas"
     };
 
@@ -316,7 +334,7 @@
       const params = new URLSearchParams(window.location.search);
       const aba = params.get("aba");
 
-      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "agendar") {
+      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "atencao" || aba === "agendar") {
         return aba;
       }
 
@@ -361,6 +379,15 @@
       return primeiraIA || statusMilene === "RESPONDIDO" || temDataResposta;
     }
 
+    function modoAtendimentoHumano(casal) {
+      return String(casal && casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO";
+    }
+
+    function temVisitaAgendada(casal) {
+      const status = normalizarStatus(casal && casal.status_casal);
+      return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
+    }
+
     function organizarDadosPorStatus(retorno) {
       const todos = [
         ...(retorno.agendar || []),
@@ -370,47 +397,49 @@
       ];
 
       const mapa = new Map();
-
       todos.forEach(casal => {
-        if (casal && casal.casal_id) {
-          mapa.set(casal.casal_id, casal);
-        }
+        if (casal && casal.casal_id) mapa.set(casal.casal_id, casal);
       });
 
       const unicos = Array.from(mapa.values()).filter(pertenceAoUsuario);
 
+      const agendados = unicos
+        .filter(temVisitaAgendada)
+        .sort((a, b) => chaveVisita(a).localeCompare(chaveVisita(b)));
+
+      const encerrados = unicos.filter(casal => normalizarStatus(casal.status_casal) === "PERDIDO");
+
+      const atencao = unicos.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (status === "PERDIDO" || status === "GANHO") return false;
+        return modoAtendimentoHumano(casal);
+      });
+
       const agendar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;
         return status === "EM_ATENDIMENTO" ||
           (status === "NOVO" && primeiraRespostaJaEnviada(casal));
       });
 
       const resgatar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;
         return status === "VISITOU_NAO_FECHOU";
-      });
-
-      const agendados = unicos
-        .filter(casal => {
-          const status = normalizarStatus(casal.status_casal);
-          return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal.agenda_id || "").trim());
-        })
-        .sort((a, b) => chaveVisita(a).localeCompare(chaveVisita(b)));
-
-      const encerrados = unicos.filter(casal => {
-        const status = normalizarStatus(casal.status_casal);
-        return status === "PERDIDO";
       });
 
       return {
         agendar,
         resgatar,
         agendados,
+        atencao,
         encerrados,
         totais: {
           agendar: agendar.length,
           resgatar: resgatar.length,
           agendados: agendados.length,
+          atencao: atencao.length,
           encerrados: encerrados.length
         }
       };
@@ -431,7 +460,7 @@
         const lista = Array.isArray(j) ? j : (j.resumos || []);
         const mapa = new Map(lista.map(x => [String(x.casal_id || ""), x]));
 
-        ["agendar", "resgatar", "agendados", "encerrados"].forEach(grupo => {
+        ["agendar", "resgatar", "agendados", "atencao", "encerrados"].forEach(grupo => {
           (dados[grupo] || []).forEach(casal => {
             const resumo = mapa.get(String(casal.casal_id || ""));
             if (resumo) {
@@ -613,6 +642,11 @@
           infoExtra = `<div class="linha-info">🗓 Visita: ${visita || "Horário não informado"}</div>`;
         }
 
+        if (tipo === "atencao") {
+          statusTexto = "Atendimento humano";
+          alerta = "A Milene está pausada. Este atendimento está sob sua responsabilidade.";
+        }
+
         if (tipo === "encerrados") {
           statusTexto = "Oportunidade encerrada"; alerta = "";
           infoExtra = `<div class="linha-info">⛔ Motivo: ${casal.motivo_perda || "Não informado"}</div>
@@ -659,6 +693,7 @@
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
+        document.getElementById("totalAtencao").textContent = dados.totais.atencao;
         document.getElementById("totalEncerrados").textContent = dados.totais.encerrados;
 
         trocarAba(abaAtual);
