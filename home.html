@@ -162,7 +162,7 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 9px;
       margin-bottom: 22px;
     }
@@ -451,6 +451,11 @@
           <div class="texto">Oportunidades</div>
         </div>
 
+        <div class="card-resumo" onclick="abrirEmpresas()">
+          <div class="numero" id="totalEmpresasHome">0</div>
+          <div class="texto">Empresas</div>
+        </div>
+
         <div class="card-resumo" onclick="abrirAgendados()">
           <div class="numero" id="totalAgendadosHome">0</div>
           <div class="texto">Agendados</div>
@@ -497,6 +502,10 @@
     function abrirAtencao() {
       const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
       window.location.href = "oportunidades.html?aba=atencao" + q;
+    }
+    function abrirEmpresas() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=empresas" + q;
     }
 
     function limpar(valor) {
@@ -666,6 +675,7 @@
       return casais.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         return status === "NOVO" &&
+          !ehCorporativo(casal) &&
           !primeiraRespostaJaEnviada(casal) &&
           pertenceAoUsuario(casal);
       });
@@ -675,12 +685,18 @@
       return String(casal && casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO";
     }
 
+    function ehCorporativo(casal) {
+      const tipo = String(casal && casal.tipo_evento || "").trim().toUpperCase();
+      const origem = String(casal && casal.origem || "").trim().toUpperCase();
+      return tipo === "CORPORATIVO" || origem === "META_CORPORATIVO";
+    }
+
     function temVisitaAgendada(casal) {
       const status = normalizarStatus(casal && casal.status_casal);
       return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
     }
 
-    function unificarOportunidadesHome(retornoOportunidades) {
+    function unificarTodasOportunidadesHome(retornoOportunidades) {
       const grupos = [
         ...(retornoOportunidades.agendar || []),
         ...(retornoOportunidades.resgatar || []),
@@ -688,17 +704,31 @@
       ];
       const mapa = new Map();
       grupos.forEach(casal => {
-        if (casal && casal.casal_id && pertenceAoUsuario(casal)) mapa.set(casal.casal_id, casal);
+        if (casal && casal.casal_id) mapa.set(casal.casal_id, casal);
       });
       return Array.from(mapa.values());
+    }
+
+    function unificarOportunidadesHome(retornoOportunidades) {
+      return unificarTodasOportunidadesHome(retornoOportunidades).filter(pertenceAoUsuario);
     }
 
     function contarAtencaoDaCHO(retornoOportunidades) {
       return unificarOportunidadesHome(retornoOportunidades).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         if (temVisitaAgendada(casal)) return false;
+        if (ehCorporativo(casal)) return false;
         if (status === "PERDIDO" || status === "GANHO") return false;
         return modoAtendimentoHumano(casal);
+      }).length;
+    }
+
+    function contarEmpresasDaCHO(retornoOportunidades) {
+      return unificarTodasOportunidadesHome(retornoOportunidades).filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (status === "PERDIDO" || status === "GANHO") return false;
+        return ehCorporativo(casal);
       }).length;
     }
 
@@ -710,6 +740,7 @@
       return unificarOportunidadesHome(retornoOportunidades).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         if (temVisitaAgendada(casal)) return false;
+        if (ehCorporativo(casal)) return false;
         if (modoAtendimentoHumano(casal)) return false;
         return (
           status === "EM_ATENDIMENTO" ||
@@ -1296,8 +1327,10 @@
         try {
           const dadosOportunidades = await fetchJsonComTimeout(API_OPORTUNIDADES + "?t=" + Date.now(), 7000);
           totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
+          const totalEmpresasHome = document.getElementById("totalEmpresasHome");
           const totalAgendadosHome = document.getElementById("totalAgendadosHome");
           const totalAtencaoHome = document.getElementById("totalAtencaoHome");
+          if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO(dadosOportunidades));
           if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
           if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));
 
@@ -1343,6 +1376,8 @@
 
         totalNovos.textContent = "0";
         totalOportunidadesEl.textContent = "0";
+        const totalEmpresasHome = document.getElementById("totalEmpresasHome");
+        if (totalEmpresasHome) totalEmpresasHome.textContent = "0";
       }
     }
 

@@ -61,7 +61,7 @@
 
     .cards-resumo {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       margin-bottom: 16px;
     }
@@ -130,6 +130,16 @@
     .card-resumo.atencao.active {
       background: #fff3e8;
       border-color: #e3b489;
+    }
+
+    .card-resumo.empresas .numero,
+    .card-resumo.empresas .texto {
+      color: #4e7772;
+    }
+
+    .card-resumo.empresas.active {
+      background: #edf7f5;
+      border-color: #9ec9c2;
     }
 
     .section-title {
@@ -269,6 +279,11 @@
           <div class="texto">Agendar</div>
         </div>
 
+        <div class="card-resumo empresas" id="card-empresas" onclick="trocarAba('empresas')">
+          <div class="numero" id="totalEmpresas">0</div>
+          <div class="texto">Empresas</div>
+        </div>
+
         <div class="card-resumo resgatar" id="card-resgatar" onclick="trocarAba('resgatar')">
           <div class="numero" id="totalResgatar">0</div>
           <div class="texto">Resgatar</div>
@@ -308,12 +323,14 @@
       agendar: [],
       resgatar: [],
       agendados: [],
+      empresas: [],
       atencao: [],
       encerrados: [],
       totais: {
         agendar: 0,
         resgatar: 0,
         agendados: 0,
+        empresas: 0,
         atencao: 0,
         encerrados: 0
       }
@@ -326,6 +343,7 @@
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
       agendados: "Visitas agendadas",
+      empresas: "Empresas para atendimento",
       atencao: "Atendimentos assumidos por você",
       encerrados: "Oportunidades encerradas"
     };
@@ -334,7 +352,7 @@
       const params = new URLSearchParams(window.location.search);
       const aba = params.get("aba");
 
-      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "atencao" || aba === "agendar") {
+      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "empresas" || aba === "atencao" || aba === "agendar") {
         return aba;
       }
 
@@ -383,6 +401,12 @@
       return String(casal && casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO";
     }
 
+    function ehCorporativo(casal) {
+      const tipo = String(casal && casal.tipo_evento || "").trim().toUpperCase();
+      const origem = String(casal && casal.origem || "").trim().toUpperCase();
+      return tipo === "CORPORATIVO" || origem === "META_CORPORATIVO";
+    }
+
     function temVisitaAgendada(casal) {
       const status = normalizarStatus(casal && casal.status_casal);
       return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
@@ -401,7 +425,8 @@
         if (casal && casal.casal_id) mapa.set(casal.casal_id, casal);
       });
 
-      const unicos = Array.from(mapa.values()).filter(pertenceAoUsuario);
+      const todosUnicos = Array.from(mapa.values());
+      const unicos = todosUnicos.filter(pertenceAoUsuario);
 
       const agendados = unicos
         .filter(temVisitaAgendada)
@@ -409,23 +434,33 @@
 
       const encerrados = unicos.filter(casal => normalizarStatus(casal.status_casal) === "PERDIDO");
 
+      // EMPRESAS e uma fila compartilhada entre usuarios autenticados.
+      // A responsabilidade continua registrada em consultora_responsavel, mas nao limita a visualizacao.
+      const empresas = todosUnicos.filter(casal => {
+        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (status === "PERDIDO" || status === "GANHO") return false;
+        return ehCorporativo(casal);
+      });
+
       const atencao = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         if (temVisitaAgendada(casal)) return false;
+        if (ehCorporativo(casal)) return false;
         if (status === "PERDIDO" || status === "GANHO") return false;
         return modoAtendimentoHumano(casal);
       });
 
       const agendar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        if (temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;
+        if (temVisitaAgendada(casal) || ehCorporativo(casal) || modoAtendimentoHumano(casal)) return false;
         return status === "EM_ATENDIMENTO" ||
           (status === "NOVO" && primeiraRespostaJaEnviada(casal));
       });
 
       const resgatar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        if (temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;
+        if (temVisitaAgendada(casal) || ehCorporativo(casal) || modoAtendimentoHumano(casal)) return false;
         return status === "VISITOU_NAO_FECHOU";
       });
 
@@ -433,12 +468,14 @@
         agendar,
         resgatar,
         agendados,
+        empresas,
         atencao,
         encerrados,
         totais: {
           agendar: agendar.length,
           resgatar: resgatar.length,
           agendados: agendados.length,
+          empresas: empresas.length,
           atencao: atencao.length,
           encerrados: encerrados.length
         }
@@ -460,7 +497,7 @@
         const lista = Array.isArray(j) ? j : (j.resumos || []);
         const mapa = new Map(lista.map(x => [String(x.casal_id || ""), x]));
 
-        ["agendar", "resgatar", "agendados", "atencao", "encerrados"].forEach(grupo => {
+        ["agendar", "resgatar", "agendados", "empresas", "atencao", "encerrados"].forEach(grupo => {
           (dados[grupo] || []).forEach(casal => {
             const resumo = mapa.get(String(casal.casal_id || ""));
             if (resumo) {
@@ -614,8 +651,11 @@
 
         card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id));
 
-        const nome = nomeCasal(casal);
-        const sonhos = formatarEncantamentos(casal.encantamentos_principais);
+        const corporativo = tipo === "empresas" || ehCorporativo(casal);
+        const nome = corporativo
+          ? (casal.nome_empresa || casal.nome_contato || "Empresa sem nome")
+          : nomeCasal(casal);
+        const sonhos = corporativo ? "" : formatarEncantamentos(casal.encantamentos_principais);
 
         let statusTexto = "Oportunidade";
         let alerta = "";
@@ -642,6 +682,11 @@
           infoExtra = `<div class="linha-info">🗓 Visita: ${visita || "Horário não informado"}</div>`;
         }
 
+        if (tipo === "empresas") {
+          statusTexto = "Evento corporativo";
+          alerta = "Atendimento humano. Lead corporativo fora da fila de casamentos.";
+        }
+
         if (tipo === "atencao") {
           statusTexto = "Atendimento humano";
           alerta = "A Milene está pausada. Este atendimento está sob sua responsabilidade.";
@@ -652,6 +697,14 @@
           infoExtra = `<div class="linha-info">⛔ Motivo: ${casal.motivo_perda || "Não informado"}</div>
           <button type="button" onclick="reabrirOportunidade('${casal.casal_id}', event)" style="margin-top:8px;border:1px solid #d9b9b9;background:#fff;border-radius:10px;padding:7px 10px;font-weight:800;cursor:pointer;">REABRIR OPORTUNIDADE</button>`;
         }
+
+        const linhaEvento = corporativo
+          ? `<div class="linha-info">📅 ${casal.data_evento || "Data não informada"} &nbsp; | &nbsp; 👥 ${casal.quantidade_pessoas || "--"} pessoas</div>`
+          : `<div class="linha-info">📅 ${casal.data_casamento || "Data não informada"} &nbsp; | &nbsp; 👥 ${casal.quantidade_convidados || "--"} convidados</div>`;
+        const contatoEmpresa = corporativo && casal.nome_contato
+          ? `<div class="linha-info">👤 Contato: ${casal.nome_contato}</div>`
+          : "";
+        const sonhosHtml = corporativo ? "" : `<div class="sonhos">✨ Sonhos: ${sonhos}</div>`;
 
         card.innerHTML = `
           <div class="casal-top">
@@ -666,11 +719,11 @@
             <div class="seta">›</div>
           </div>
 
-          <div class="linha-info">📅 ${casal.data_casamento || "Data não informada"} &nbsp; | &nbsp; 👥 ${casal.quantidade_convidados || "--"} convidados</div>
-
+          ${linhaEvento}
+          ${contatoEmpresa}
           <div class="linha-info">⏱ ${formatarContato(casal)}</div>
 
-          <div class="sonhos">✨ Sonhos: ${sonhos}</div>
+          ${sonhosHtml}
           <div class="linha-info">${linhaProposta(casal)}</div>
           ${infoExtra}
           ${alerta ? `<div class="alerta">⚠️ ${alerta}</div>` : ""}
@@ -693,6 +746,7 @@
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
+        document.getElementById("totalEmpresas").textContent = dados.totais.empresas;
         document.getElementById("totalAtencao").textContent = dados.totais.atencao;
         document.getElementById("totalEncerrados").textContent = dados.totais.encerrados;
 
