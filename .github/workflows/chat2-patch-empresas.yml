@@ -1,0 +1,262 @@
+name: CHAT2 Patch Empresas
+
+on:
+  push:
+    branches:
+      - chat2/meta-corporativo-empresas
+    paths:
+      - .github/workflows/chat2-patch-empresas.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chat2/meta-corporativo-empresas
+          fetch-depth: 0
+      - name: Aplicar patch do card Empresas
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          def rd(p): return Path(p).read_text(encoding='utf-8')
+          def wr(p,t): Path(p).write_text(t,encoding='utf-8')
+          def one(t,a,b,label):
+              n=t.count(a)
+              if n!=1: raise RuntimeError(f'{label}: esperado 1, encontrado {n}')
+              return t.replace(a,b,1)
+
+          # HOME
+          h=rd('home.html')
+          h=one(h,'grid-template-columns: repeat(4, 1fr);','grid-template-columns: repeat(5, 1fr);','home grid')
+          h=one(h,
+          '''        <div class="card-resumo" onclick="abrirAtencao()">
+          <div class="numero" id="totalAtencaoHome">0</div>
+          <div class="texto">Atenção</div>
+        </div>
+      </section>''',
+          '''        <div class="card-resumo" onclick="abrirAtencao()">
+          <div class="numero" id="totalAtencaoHome">0</div>
+          <div class="texto">Atenção</div>
+        </div>
+        <div class="card-resumo" onclick="abrirEmpresas()">
+          <div class="numero" id="totalEmpresasHome">0</div>
+          <div class="texto">Empresas</div>
+        </div>
+      </section>''','home card empresas')
+          h=one(h,
+          '''    function abrirAtencao() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=atencao" + q;
+    }
+''',
+          '''    function abrirAtencao() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=atencao" + q;
+    }
+    function abrirEmpresas() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=empresas" + q;
+    }
+''','home abrir empresas')
+          marker='''    function modoAtendimentoHumano(casal) {'''
+          helper='''    function ehCorporativo(casal) {
+      return String(casal && casal.tipo_evento || "").trim().toUpperCase() === "CORPORATIVO" ||
+        String(casal && casal.origem || "").trim().toUpperCase() === "META_CORPORATIVO";
+    }
+
+'''
+          if h.count(marker)!=1: raise RuntimeError('home marker modo')
+          h=h.replace(marker,helper+marker,1)
+          h=one(h,
+          '''        return status === "NOVO" &&
+          !primeiraRespostaJaEnviada(casal) &&
+          pertenceAoUsuario(casal);''',
+          '''        return status === "NOVO" &&
+          !ehCorporativo(casal) &&
+          !primeiraRespostaJaEnviada(casal) &&
+          pertenceAoUsuario(casal);''','home novos exclui empresa')
+          h=one(h,
+          '''        ...(retornoOportunidades.agendados || [])
+      ];''',
+          '''        ...(retornoOportunidades.agendados || []),
+        ...(retornoOportunidades.empresas || [])
+      ];''','home unifica empresas')
+          h=one(h,
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;''',
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (ehCorporativo(casal)) return false;
+        if (temVisitaAgendada(casal)) return false;''','home atencao exclui empresa')
+          h=one(h,
+          '''    function contarAgendadosDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(temVisitaAgendada).length;
+    }''',
+          '''    function contarAgendadosDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(casal => !ehCorporativo(casal) && temVisitaAgendada(casal)).length;
+    }
+
+    function contarEmpresasDaCHO(retornoOportunidades) {
+      return unificarOportunidadesHome(retornoOportunidades).filter(ehCorporativo).length;
+    }''','home conta empresas')
+          h=one(h,
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;
+        if (modoAtendimentoHumano(casal)) return false;''',
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (ehCorporativo(casal)) return false;
+        if (temVisitaAgendada(casal)) return false;
+        if (modoAtendimentoHumano(casal)) return false;''','home oportunidades exclui empresa')
+          h=one(h,
+          '''          const totalAgendadosHome = document.getElementById("totalAgendadosHome");
+          const totalAtencaoHome = document.getElementById("totalAtencaoHome");
+          if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
+          if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));''',
+          '''          const totalAgendadosHome = document.getElementById("totalAgendadosHome");
+          const totalAtencaoHome = document.getElementById("totalAtencaoHome");
+          const totalEmpresasHome = document.getElementById("totalEmpresasHome");
+          if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
+          if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));
+          if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO(dadosOportunidades));''','home load empresas')
+          wr('home.html',h)
+
+          # OPORTUNIDADES
+          o=rd('oportunidades.html')
+          o=one(o,'grid-template-columns: repeat(4, 1fr);','grid-template-columns: repeat(5, 1fr);','opp grid')
+          css='''    .card-resumo.atencao.active {
+      background: #fff3e8;
+      border-color: #e3b489;
+    }
+'''
+          o=one(o,css,css+'''\n    .card-resumo.empresas .numero,\n    .card-resumo.empresas .texto {\n      color: #397a68;\n    }\n\n    .card-resumo.empresas.active {\n      background: #edf8f4;\n      border-color: #9bcbbb;\n    }\n''','opp css empresas')
+          o=one(o,
+          '''        <div class="card-resumo atencao" id="card-atencao" onclick="trocarAba('atencao')">
+          <div class="numero" id="totalAtencao">0</div>
+          <div class="texto">Atenção</div>
+        </div>
+
+        <div class="card-resumo agendados" id="card-encerrados" onclick="trocarAba('encerrados')">''',
+          '''        <div class="card-resumo atencao" id="card-atencao" onclick="trocarAba('atencao')">
+          <div class="numero" id="totalAtencao">0</div>
+          <div class="texto">Atenção</div>
+        </div>
+
+        <div class="card-resumo empresas" id="card-empresas" onclick="trocarAba('empresas')">
+          <div class="numero" id="totalEmpresas">0</div>
+          <div class="texto">Empresas</div>
+        </div>
+
+        <div class="card-resumo agendados" id="card-encerrados" onclick="trocarAba('encerrados')">''','opp card empresas')
+          o=one(o,
+          '''      atencao: [],
+      encerrados: [],''',
+          '''      atencao: [],
+      empresas: [],
+      encerrados: [],''','opp dados empresas')
+          o=one(o,
+          '''        atencao: 0,
+        encerrados: 0''',
+          '''        atencao: 0,
+        empresas: 0,
+        encerrados: 0''','opp total empresas')
+          o=one(o,
+          '''      atencao: "Atendimentos assumidos por você",
+      encerrados: "Oportunidades encerradas"''',
+          '''      atencao: "Atendimentos assumidos por você",
+      empresas: "Eventos corporativos / empresas",
+      encerrados: "Oportunidades encerradas"''','opp titulo empresas')
+          o=one(o,
+          '''      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "atencao" || aba === "agendar") {''',
+          '''      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "atencao" || aba === "empresas" || aba === "agendar") {''','opp aba empresas')
+          marker='''    function modoAtendimentoHumano(casal) {'''
+          helper='''    function ehCorporativo(casal) {
+      return String(casal && casal.tipo_evento || "").trim().toUpperCase() === "CORPORATIVO" ||
+        String(casal && casal.origem || "").trim().toUpperCase() === "META_CORPORATIVO";
+    }
+
+'''
+          if o.count(marker)!=1: raise RuntimeError('opp marker modo')
+          o=o.replace(marker,helper+marker,1)
+          o=one(o,
+          '''        ...(retorno.encerrados || [])
+      ];''',
+          '''        ...(retorno.encerrados || []),
+        ...(retorno.empresas || [])
+      ];''','opp unifica empresas')
+          o=one(o,
+          '''      const agendados = unicos
+        .filter(temVisitaAgendada)''',
+          '''      const empresas = unicos.filter(ehCorporativo);
+
+      const agendados = unicos
+        .filter(casal => !ehCorporativo(casal) && temVisitaAgendada(casal))''','opp empresas e agendados')
+          o=one(o,
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (temVisitaAgendada(casal)) return false;''',
+          '''        const status = normalizarStatus(casal.status_casal);
+        if (ehCorporativo(casal)) return false;
+        if (temVisitaAgendada(casal)) return false;''','opp atencao exclui empresa')
+          o=o.replace('''        if (temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;''','''        if (ehCorporativo(casal) || temVisitaAgendada(casal) || modoAtendimentoHumano(casal)) return false;''',2)
+          o=one(o,
+          '''        agendados,
+        atencao,
+        encerrados,''',
+          '''        agendados,
+        atencao,
+        empresas,
+        encerrados,''','opp return empresas')
+          o=one(o,
+          '''          agendados: agendados.length,
+          atencao: atencao.length,
+          encerrados: encerrados.length''',
+          '''          agendados: agendados.length,
+          atencao: atencao.length,
+          empresas: empresas.length,
+          encerrados: encerrados.length''','opp total return empresas')
+          o=one(o,
+          '''        ["agendar", "resgatar", "agendados", "atencao", "encerrados"].forEach(grupo => {''',
+          '''        ["agendar", "resgatar", "agendados", "atencao", "empresas", "encerrados"].forEach(grupo => {''','opp resumos empresas')
+          anchor='''        if (tipo === "atencao") {
+          statusTexto = "Atendimento humano";
+          alerta = "A Milene está pausada. Este atendimento está sob sua responsabilidade.";
+        }
+'''
+          o=one(o,anchor,anchor+'''\n        if (tipo === "empresas") {\n          statusTexto = "Evento corporativo";\n          alerta = "Atendimento humano • origem corporativa";\n          const dataEvento = casal.data_evento || casal.data_casamento || "Não informada";\n          const qtd = casal.quantidade_pessoas || casal.quantidade_convidados || "Não informada";\n          infoExtra = `<div class="linha-info">🏢 Data: ${dataEvento} • Pessoas: ${qtd}</div>`;\n        }\n''','opp render empresas')
+          o=one(o,
+          '''        document.getElementById("totalAtencao").textContent = dados.totais.atencao;
+        document.getElementById("totalEncerrados").textContent = dados.totais.encerrados;''',
+          '''        document.getElementById("totalAtencao").textContent = dados.totais.atencao;
+        document.getElementById("totalEmpresas").textContent = dados.totais.empresas;
+        document.getElementById("totalEncerrados").textContent = dados.totais.encerrados;''','opp count empresas')
+          wr('oportunidades.html',o)
+
+          # cache
+          s=rd('service-worker.js')
+          s=re.sub(r'const CACHE_NAME = "[^"]+";', 'const CACHE_NAME = "crm-margo-pwa-v14-empresas-draft-20260825";', s, count=1)
+          wr('service-worker.js',s)
+
+          # remove workflow temporário para deixar branch limpa
+          Path('.github/workflows/chat2-patch-empresas.yml').unlink()
+
+          for f,needles in {
+            'home.html':['totalEmpresasHome','abrirEmpresas','contarEmpresasDaCHO','ehCorporativo'],
+            'oportunidades.html':['card-empresas','totalEmpresas','empresas: []','Eventos corporativos / empresas'],
+            'service-worker.js':['v14-empresas-draft']
+          }.items():
+            t=rd(f)
+            for n in needles:
+              if n not in t: raise RuntimeError(f'{f}: ausente {n}')
+
+      - name: Commit
+        run: |
+          git config user.name "chat2-margo"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat: preparar card Empresas para leads corporativos"
+          git push origin HEAD:chat2/meta-corporativo-empresas
