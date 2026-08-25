@@ -1256,11 +1256,11 @@
     </section>
 
     <section class="human-mode-dock" id="humanModeDock">
-      <div class="human-mode-text">
+      <div class="human-mode-text" id="humanModeText">
         Atendimento assumido pelo humano.<br>
         A Milene está pausada para este casal.
       </div>
-      <button class="human-mode-btn" type="button" onclick="devolverAtendimentoParaMilene()">DEVOLVER PARA MILENE</button>
+      <button class="human-mode-btn" id="humanModeBtn" type="button" onclick="devolverAtendimentoParaMilene()">DEVOLVER PARA MILENE</button>
     </section>
 
     <div id="opportunityActions" style="padding:5px 14px;background:#fff8f8;border-top:1px solid #efdada;text-align:right;">
@@ -1279,7 +1279,7 @@
         Início
       </div>
 
-      <div class="nav-item" onclick="abrirDisponibilidade()">
+      <div class="nav-item" id="navDisponibilidade" onclick="abrirDisponibilidade()">
         <span>📅</span>
         Consultar Data
       </div>
@@ -1534,6 +1534,42 @@
       return pessoa1 || pessoa2 || casal.nome_contato || "Casal sem nome";
     }
 
+    function ehCorporativo(casal) {
+      const tipo = String(casal && casal.tipo_evento || "").trim().toUpperCase();
+      const origem = String(casal && casal.origem || "").trim().toUpperCase();
+      return tipo === "CORPORATIVO" || origem === "META_CORPORATIVO";
+    }
+
+    function nomeRegistro(casal) {
+      if (ehCorporativo(casal)) return casal.nome_empresa || casal.nome_contato || "Empresa sem nome";
+      return nomeCasal(casal);
+    }
+
+    function formatarDataEvento(casal) {
+      if (ehCorporativo(casal)) return casal.data_evento ? "📅 " + casal.data_evento : "📅 Data não informada";
+      return formatarDataCasamento(casal.data_casamento);
+    }
+
+    function formatarQuantidadeEvento(casal) {
+      if (ehCorporativo(casal)) return casal.quantidade_pessoas ? "👥 " + casal.quantidade_pessoas + " pessoas" : "👥 Quantidade não informada";
+      return formatarConvidados(casal.quantidade_convidados);
+    }
+
+    function configurarAtendimentoPorTipo(casal) {
+      const corporativo = ehCorporativo(casal);
+      const navAtencao = document.getElementById("navAtencao");
+      const navDisponibilidade = document.getElementById("navDisponibilidade");
+      const propostaResumo = document.getElementById("propostaResumo");
+      if (navAtencao) navAtencao.style.display = corporativo ? "none" : "";
+      if (navDisponibilidade) navDisponibilidade.style.display = corporativo ? "none" : "";
+      if (propostaResumo) propostaResumo.style.display = corporativo ? "none" : "";
+      if (corporativo) {
+        const reviewDock = document.getElementById("reviewDock");
+        if (reviewDock) reviewDock.classList.remove("show", "urgent");
+      }
+      atualizarDockModoHumano();
+    }
+
     function formatarDataCasamento(data) {
       if (!data) return "📅 Data não informada";
       return "📅 " + data;
@@ -1689,17 +1725,23 @@
 
         casalAtual = casal;
 
-        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
-        document.getElementById("dataCasamento").textContent = formatarDataCasamento(casal.data_casamento);
-        document.getElementById("qtdConvidados").textContent = formatarConvidados(casal.quantidade_convidados);
+        const corporativo = ehCorporativo(casal);
+        document.getElementById("nomeCasal").textContent = nomeRegistro(casal);
+        document.getElementById("dataCasamento").textContent = formatarDataEvento(casal);
+        document.getElementById("qtdConvidados").textContent = formatarQuantidadeEvento(casal);
         atualizarResumoPropostaCabecalho(casal);
-        carregarResumoPropostaCasal(casalAtualId);
-        renderizarEncantamentos(casal.encantamentos_principais);
+        if (!corporativo) carregarResumoPropostaCasal(casalAtualId);
+        renderizarEncantamentos(corporativo ? "" : casal.encantamentos_principais);
+        configurarAtendimentoPorTipo(casal);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         iniciarAtualizacaoAutomaticaConversas();
-        await carregarRevisaoPendenteAtual({ tocarSom: false });
-        iniciarAtualizacaoAutomaticaRevisoes();
-        iniciarAlarmeRevisaoAtendimento();
+        if (!corporativo) {
+          await carregarRevisaoPendenteAtual({ tocarSom: false });
+          iniciarAtualizacaoAutomaticaRevisoes();
+          iniciarAlarmeRevisaoAtendimento();
+        } else {
+          esconderRevisaoPendente();
+        }
 
         travarAlturaDaTela();
 
@@ -1956,7 +1998,7 @@
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden) {
         carregarHistoricoConversas({ forcar: true, forcarScroll: true });
-        carregarRevisaoPendenteAtual({ tocarSom: false });
+        if (!ehCorporativo(casalAtual)) carregarRevisaoPendenteAtual({ tocarSom: false });
       }
     });
 
@@ -2047,8 +2089,18 @@
 
     function atualizarDockModoHumano() {
       const humanDock = document.getElementById("humanModeDock");
+      const humanText = document.getElementById("humanModeText");
+      const humanBtn = document.getElementById("humanModeBtn");
       const modo = String(casalAtual.modo_atendimento_ia || "").toUpperCase();
+      const corporativo = ehCorporativo(casalAtual);
       humanDock.classList.toggle("show", modo === "HUMANO");
+      if (corporativo) {
+        if (humanText) humanText.innerHTML = "Atendimento corporativo sob responsabilidade humana.<br>A Milene não participa desta rota.";
+        if (humanBtn) humanBtn.style.display = "none";
+      } else {
+        if (humanText) humanText.innerHTML = "Atendimento assumido pelo humano.<br>A Milene está pausada para este casal.";
+        if (humanBtn) humanBtn.style.display = "";
+      }
     }
 
     function renderizarRevisaoPendente(revisao, opcoes = {}) {
@@ -2339,6 +2391,10 @@
     }
 
     async function devolverAtendimentoParaMilene() {
+      if (ehCorporativo(casalAtual)) {
+        alert("Atendimentos corporativos permanecem em modo humano.");
+        return;
+      }
       if (!casalAtualId) return;
       if (!confirm("Devolver este casal para a Milene em modo de revisão humana?")) return;
 
@@ -2369,6 +2425,10 @@
 
     async function marcarAtencao() {
       if (!casalAtualId) return;
+      if (ehCorporativo(casalAtual)) {
+        alert("Este atendimento corporativo permanece na fila EMPRESAS ate o agendamento.");
+        return;
+      }
 
       const status = String(casalAtual && casalAtual.status_casal || "").trim().toUpperCase();
       const agendaId = String(casalAtual && casalAtual.agenda_id || "").trim();
