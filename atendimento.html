@@ -305,7 +305,7 @@
       background: #ffffff;
       border-top: 1px solid #eadada;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       padding: 9px 0 10px;
       z-index: 20;
     }
@@ -1287,6 +1287,11 @@
       <div class="nav-item" onclick="abrirConsultoria()">
         <span>📝</span>
         Agendar
+      </div>
+
+      <div class="nav-item" id="navAtencao" onclick="marcarAtencao()">
+        <span>⚠️</span>
+        Atenção
       </div>
 
       <div class="nav-item" onclick="alert('Histórico do casal será ativado em breve.')">
@@ -2359,6 +2364,51 @@
         atualizarDockModoHumano();
       } catch (erro) {
         alert("Não foi possível devolver o atendimento para a Milene. " + (erro.message || ""));
+      }
+    }
+
+    async function marcarAtencao() {
+      if (!casalAtualId) return;
+
+      const status = String(casalAtual && casalAtual.status_casal || "").trim().toUpperCase();
+      const agendaId = String(casalAtual && casalAtual.agenda_id || "").trim();
+      if (status === "CONSULTORIA_AGENDADA" || agendaId) {
+        alert("Este casal já está em AGENDADOS. Não é necessário movê-lo também para ATENÇÃO.");
+        return;
+      }
+
+      const modoAtual = String(casalAtual && casalAtual.modo_atendimento_ia || "").trim().toUpperCase();
+      if (modoAtual === "HUMANO") {
+        alert("Este casal já está em ATENÇÃO e permanece sob atendimento humano.");
+        return;
+      }
+
+      if (!confirm("Mover este atendimento para ATENÇÃO e pausar a Milene para este casal?")) return;
+
+      try {
+        const resposta = await fetch(API_MODO_ATENDIMENTO_MILENE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            casal_id: casalAtualId,
+            modo_atendimento_ia: "HUMANO",
+            usuario_id: usuarioAtualId || ""
+          })
+        });
+
+        let retorno = {};
+        try { retorno = await resposta.json(); } catch (_) {}
+
+        if (!resposta.ok || retorno.sucesso === false) {
+          throw new Error(retorno.erro || retorno.mensagem || "Não foi possível mover para ATENÇÃO.");
+        }
+
+        casalAtual.modo_atendimento_ia = "HUMANO";
+        esconderRevisaoPendente();
+        atualizarDockModoHumano();
+        alert("Casal movido para ATENÇÃO. A Milene está pausada para este atendimento.");
+      } catch (erro) {
+        alert("Não foi possível mover o casal para ATENÇÃO. " + (erro.message || ""));
       }
     }
 
