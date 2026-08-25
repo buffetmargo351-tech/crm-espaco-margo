@@ -1,0 +1,54 @@
+{
+  "version": "7.0",
+  "screens": [
+    {
+      "id": "DADOS_EVENTO",
+      "title": "Dados do evento",
+      "terminal": true,
+      "success": true,
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form_evento",
+            "children": [
+              {
+                "type": "TextHeading",
+                "text": "Só precisamos de duas informações"
+              },
+              {
+                "type": "DatePicker",
+                "name": "data_evento",
+                "label": "Data do evento",
+                "helper-text": "Selecione a data pretendida",
+                "required": true
+              },
+              {
+                "type": "TextInput",
+                "name": "quantidade_pessoas",
+                "label": "Quantidade estimada de pessoas",
+                "helper-text": "Informe somente números",
+                "input-type": "number",
+                "required": true
+              },
+              {
+                "type": "Footer",
+                "label": "Enviar",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "data_evento": "${form_evento.data_evento}",
+                    "quantidade_pessoas": "${form_evento.quantidade_pessoas}",
+                    "tipo_evento": "CORPORATIVO",
+                    "origem": "META_CORPORATIVO"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
