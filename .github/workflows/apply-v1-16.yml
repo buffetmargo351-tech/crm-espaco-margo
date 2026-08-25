@@ -6,6 +6,7 @@ on:
       - chat2/app-empresas-v1-15
     paths:
       - tools/patch_v1_16_empresas_novos.py
+      - .github/workflows/apply-v1-16.yml
 
 permissions:
   contents: write
