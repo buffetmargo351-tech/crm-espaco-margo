@@ -1560,9 +1560,11 @@
       const navAtencao = document.getElementById("navAtencao");
       const navDisponibilidade = document.getElementById("navDisponibilidade");
       const propostaResumo = document.getElementById("propostaResumo");
+      const bottomNav = document.querySelector(".bottom-nav");
       if (navAtencao) navAtencao.style.display = corporativo ? "none" : "";
       if (navDisponibilidade) navDisponibilidade.style.display = corporativo ? "none" : "";
       if (propostaResumo) propostaResumo.style.display = corporativo ? "none" : "";
+      if (bottomNav) bottomNav.style.gridTemplateColumns = corporativo ? "repeat(3, 1fr)" : "repeat(5, 1fr)";
       if (corporativo) {
         const reviewDock = document.getElementById("reviewDock");
         if (reviewDock) reviewDock.classList.remove("show", "urgent");
