@@ -1,0 +1,8 @@
+V1.14 — AGENDAMENTO MULTI-EVENTO
+
+- consultoria.html passa a ser sensível a tipo_evento.
+- CORPORATIVO: data_evento + quantidade_pessoas obrigatórios; nome_empresa opcional.
+- CASAMENTO: regras atuais preservadas.
+- mesma agenda_consultorias para todos.
+- cache PWA atualizado.
+- backend esperado: v25.1_API_REGISTRAR_VISITA_MULTI_EVENTO.
