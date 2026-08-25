@@ -1,0 +1,12 @@
+ROLLBACK V1.14
+
+Se a homologação falhar:
+- não mergear a branch;
+- manter v25 atual ativa;
+- manter v25.1 desativada;
+- produção permanece na V1.13.
+
+Se a falha ocorrer após deploy:
+- restaurar main para a versão anterior do App;
+- redeploy Coolify;
+- reativar v25 e desativar v25.1 se necessário.

@@ -1,0 +1,33 @@
+CHECKLIST DE HOMOLOGAÇÃO — V1.14
+
+ANTES DE PUBLICAR
+1. Manter v25 atual ativa.
+2. Manter v25.1 desativada.
+3. Conferir branch/PR sem merge.
+
+TESTE CASAMENTO
+- abrir um casal real sem confirmar a visita;
+- confirmar visualmente que continuam aparecendo Nome do noivo, Email da noiva, Origem e Encantamentos;
+- confirmar que o botão continua 'Confirmar Consultoria'.
+
+TESTE CORPORATIVO
+- usar registro de teste tipo_evento=CORPORATIVO;
+- confirmar que aparecem somente Data do evento, Quantidade de pessoas, Nome da empresa e Observações;
+- Data e Quantidade devem vir pré-preenchidas quando existentes;
+- Nome da empresa pode ficar vazio;
+- tentar confirmar sem Data: deve bloquear;
+- tentar confirmar sem Quantidade: deve bloquear;
+- não concluir agendamento enquanto backend de produção ainda for v25.
+
+CUTOVER
+- ativar v25.1 e desativar v25 de forma controlada;
+- mergear App V1.14;
+- fazer deploy Coolify;
+- atualizar/reabrir PWA para novo cache.
+
+PONTA A PONTA
+- criar/usar lead corporativo controlado;
+- confirmar visita em vaga real;
+- conferir casais, agenda_consultorias e conversas;
+- conferir WhatsApp corporativo;
+- confirmar que nenhuma ação da Milene ocorreu.
