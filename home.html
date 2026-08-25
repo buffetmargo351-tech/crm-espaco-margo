@@ -723,8 +723,16 @@
       }).length;
     }
 
-    function contarEmpresasDaCHO(retornoOportunidades) {
-      return unificarTodasOportunidadesHome(retornoOportunidades).filter(casal => {
+    function contarEmpresasDaCHO(retornoOportunidades, casaisNovosApi = []) {
+      const mapa = new Map();
+      [
+        ...unificarTodasOportunidadesHome(retornoOportunidades || {}),
+        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
+      ].forEach(casal => {
+        if (casal && casal.casal_id) mapa.set(casal.casal_id, casal);
+      });
+
+      return Array.from(mapa.values()).filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         if (temVisitaAgendada(casal)) return false;
         if (status === "PERDIDO" || status === "GANHO") return false;
@@ -1330,7 +1338,7 @@
           const totalEmpresasHome = document.getElementById("totalEmpresasHome");
           const totalAgendadosHome = document.getElementById("totalAgendadosHome");
           const totalAtencaoHome = document.getElementById("totalAtencaoHome");
-          if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO(dadosOportunidades));
+          if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO(dadosOportunidades, casais));
           if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
           if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));
 
@@ -1353,6 +1361,8 @@
           });
         } catch (erroOportunidades) {
           console.warn("Não foi possível carregar oportunidades. Novos casais serão exibidos mesmo assim.", erroOportunidades);
+          const totalEmpresasHome = document.getElementById("totalEmpresasHome");
+          if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO({}, casais));
         }
 
         // Só depois de NOVOS + OPORTUNIDADES carregados o filtro anti-fantasma fica ativo.
