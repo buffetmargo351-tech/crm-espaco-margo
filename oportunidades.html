@@ -315,6 +315,7 @@
 
   <script>
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
+    const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
     const API_ENCERRADOS = "https://n8n.espacomargo.com.br/webhook/crm/encerrados";
     const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
     const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
@@ -412,12 +413,22 @@
       return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
     }
 
-    function organizarDadosPorStatus(retorno) {
+    function extrairListaCasais(dadosCasais) {
+      if (Array.isArray(dadosCasais)) return dadosCasais;
+      if (dadosCasais && Array.isArray(dadosCasais.casais)) return dadosCasais.casais;
+      if (dadosCasais && Array.isArray(dadosCasais.data)) return dadosCasais.data;
+      if (dadosCasais && Array.isArray(dadosCasais.items)) return dadosCasais.items;
+      if (dadosCasais && dadosCasais.casal_id) return [dadosCasais];
+      return [];
+    }
+
+    function organizarDadosPorStatus(retorno, casaisNovosApi = []) {
       const todos = [
         ...(retorno.agendar || []),
         ...(retorno.resgatar || []),
         ...(retorno.agendados || []),
-        ...(retorno.encerrados || [])
+        ...(retorno.encerrados || []),
+        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
       ];
 
       const mapa = new Map();
@@ -737,11 +748,21 @@
       try {
         const resposta = await fetch(API_OPORTUNIDADES + "?t=" + Date.now());
         const retorno = await resposta.json();
+
+        let casaisNovosApi = [];
+        try {
+          const rc = await fetch(API_CASAIS + "?t=" + Date.now(), { cache: "no-store" });
+          const jc = await rc.json();
+          casaisNovosApi = extrairListaCasais(jc);
+        } catch (e) {
+          console.warn("Não foi possível carregar NOVOS para compor EMPRESAS:", e);
+        }
+
         try {
           const re=await fetch(API_ENCERRADOS+"?t="+Date.now()); const je=await re.json();
           retorno.encerrados=Array.isArray(je)?je:(je.encerrados||je.casais||[]);
         } catch(e) { retorno.encerrados=[]; console.warn("Não foi possível carregar encerrados:",e); }
-        dados = organizarDadosPorStatus(retorno);
+        dados = organizarDadosPorStatus(retorno, casaisNovosApi);
         await carregarResumosPropostas();
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
