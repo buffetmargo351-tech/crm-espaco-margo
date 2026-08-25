@@ -7,110 +7,43 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-
     body { background: #f4f0ef; color: #2f2423; min-height: 100vh; }
-
     .phone-frame { max-width: 430px; margin: 0 auto; min-height: 100vh; background: #ffffff; position: relative; overflow: hidden; }
-
     .app { padding: 18px 18px 22px; min-height: 100vh; }
-
     .top-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; margin-bottom: 14px; }
-
-    .nav-arrow {
-      width: 36px; height: 36px; border-radius: 14px; border: 1px solid #eadada;
-      background: #ffffff; color: #d85f6f; font-size: 22px; font-weight: 900;
-      cursor: pointer; line-height: 1;
-    }
-
+    .nav-arrow { width: 36px; height: 36px; border-radius: 14px; border: 1px solid #eadada; background: #ffffff; color: #d85f6f; font-size: 22px; font-weight: 900; cursor: pointer; line-height: 1; }
     .couple-name { text-align: center; font-size: 21px; font-weight: 900; color: #2f2423; line-height: 1.1; }
-
+    .record-subtitle { text-align: center; font-size: 12px; color: #9a6b70; font-weight: 800; margin-top: -7px; margin-bottom: 14px; }
     .section { margin-bottom: 15px; }
-
     .section-title { font-size: 13px; font-weight: 900; color: #e15f70; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-
-    .date-card {
-      border: 1px solid #eadada; background: #fffaf9; border-radius: 16px;
-      padding: 10px 12px; margin-bottom: 9px; box-shadow: 0 7px 16px rgba(0,0,0,0.04);
-    }
-
+    .date-card { border: 1px solid #eadada; background: #fffaf9; border-radius: 16px; padding: 10px 12px; margin-bottom: 9px; box-shadow: 0 7px 16px rgba(0,0,0,0.04); }
     .date-title { font-size: 13px; font-weight: 900; color: #2f2423; margin-bottom: 8px; }
-
     .slots { display: flex; flex-wrap: wrap; gap: 7px; }
-
-    .slot {
-      border: 1px solid #eadada; background: #ffffff; color: #a35d61;
-      border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 900; cursor: pointer;
-    }
-
-    .slot.selected {
-      background: #f8e9ea; border-color: #d85f6f; color: #d85f6f;
-      box-shadow: 0 5px 12px rgba(216,95,111,0.13);
-    }
-
-    .retry-agenda {
-      border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff;
-      border-radius: 999px; padding: 8px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
-      box-shadow: 0 7px 14px rgba(216,95,111,0.16);
-    }
-
-    .missing-card {
-      background: #ffffff; border: 1px solid #eadada; border-radius: 16px;
-      padding: 11px 12px; margin-bottom: 8px; box-shadow: 0 7px 16px rgba(0,0,0,0.04);
-    }
-
+    .slot { border: 1px solid #eadada; background: #ffffff; color: #a35d61; border-radius: 999px; padding: 6px 11px; font-size: 12px; font-weight: 900; cursor: pointer; }
+    .slot.selected { background: #f8e9ea; border-color: #d85f6f; color: #d85f6f; box-shadow: 0 5px 12px rgba(216,95,111,0.13); }
+    .retry-agenda { border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff; border-radius: 999px; padding: 8px 13px; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 7px 14px rgba(216,95,111,0.16); }
+    .missing-card { background: #ffffff; border: 1px solid #eadada; border-radius: 16px; padding: 11px 12px; margin-bottom: 8px; box-shadow: 0 7px 16px rgba(0,0,0,0.04); }
     .field { margin-bottom: 9px; }
-
     .field:last-child { margin-bottom: 0; }
-
     .hidden { display: none !important; }
-
     label { display: block; font-size: 11px; color: #9a6b70; font-weight: 900; margin-bottom: 5px; }
-
-    input, textarea {
-      width: 100%; border: 1px solid #eadada; background: #fffaf9;
-      border-radius: 13px; padding: 10px 11px; font-size: 14px; color: #2f2423; outline: none;
-    }
-
+    input, textarea { width: 100%; border: 1px solid #eadada; background: #fffaf9; border-radius: 13px; padding: 10px 11px; font-size: 14px; color: #2f2423; outline: none; }
+    input:focus, textarea:focus { border-color: #d85f6f; box-shadow: 0 0 0 3px rgba(216,95,111,0.08); }
     textarea { resize: vertical; min-height: 58px; }
-
+    .field-help { font-size: 10px; color: #aa8588; margin-top: 4px; line-height: 1.25; }
     .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-
-    .chip {
-      border: 1px solid #eadada; background: #ffffff; color: #a35d61;
-      border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 900; cursor: pointer;
-    }
-
-    .chip.selected {
-      background: #f8e9ea; color: #d85f6f; border-color: #d85f6f;
-      box-shadow: 0 5px 12px rgba(216,95,111,0.12);
-    }
-
+    .chip { border: 1px solid #eadada; background: #ffffff; color: #a35d61; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 900; cursor: pointer; }
+    .chip.selected { background: #f8e9ea; color: #d85f6f; border-color: #d85f6f; box-shadow: 0 5px 12px rgba(216,95,111,0.12); }
     .actions { display: grid; grid-template-columns: 0.75fr 1.45fr; gap: 9px; margin-top: 17px; }
-
-    .btn-home, .btn-confirm {
-      height: 42px; border-radius: 15px; font-size: 12px; font-weight: 900; cursor: pointer;
-    }
-
+    .btn-home, .btn-confirm { height: 42px; border-radius: 15px; font-size: 12px; font-weight: 900; cursor: pointer; }
     .btn-home { border: 1.5px solid #e15f70; background: #ffffff; color: #e15f70; }
-
     .btn-confirm { border: none; background: linear-gradient(135deg, #df6475, #d45167); color: #ffffff; }
-
     .btn-confirm:disabled { opacity: 0.65; cursor: not-allowed; }
-
-    .success {
-      display: none; margin-top: 12px; background: #eef7e9; border: 1px solid #cfe7c9;
-      color: #4f8f5a; border-radius: 15px; padding: 12px; font-size: 13px; font-weight: 800; line-height: 1.35;
-    }
-
+    .success { display: none; margin-top: 12px; background: #eef7e9; border: 1px solid #cfe7c9; color: #4f8f5a; border-radius: 15px; padding: 12px; font-size: 13px; font-weight: 800; line-height: 1.35; }
     .success.open { display: block; }
-
     @media (min-width: 700px) {
       body { padding: 20px 0; }
-
-      .phone-frame {
-        min-height: calc(100vh - 40px); border-radius: 34px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-      }
+      .phone-frame { min-height: calc(100vh - 40px); border-radius: 34px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); }
     }
   </style>
 </head>
@@ -120,31 +53,47 @@
     <main class="app">
       <header class="top-nav">
         <button class="nav-arrow" onclick="voltarAtendimento()">‹</button>
-        <div class="couple-name" id="nomeCasal">Carregando...</div>
+        <div class="couple-name" id="nomeRegistro">Carregando...</div>
         <div></div>
       </header>
+      <div class="record-subtitle hidden" id="subtituloRegistro"></div>
 
       <section class="section">
         <div class="section-title">✨ Próximas vagas disponíveis</div>
         <div id="agendaConsultoriasLista">
           <div class="date-card">
             <div class="date-title">Carregando vagas...</div>
-            <div class="slots">
-              <button class="slot" type="button" disabled>aguarde</button>
-            </div>
+            <div class="slots"><button class="slot" type="button" disabled>aguarde</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section hidden" id="corporativoSection">
+        <div class="section-title">🏢 Dados do evento</div>
+        <div class="missing-card">
+          <div class="field">
+            <label for="dataEvento">Data do evento *</label>
+            <input id="dataEvento" type="date" />
+          </div>
+          <div class="field">
+            <label for="quantidadePessoas">Quantidade de pessoas *</label>
+            <input id="quantidadePessoas" type="number" min="1" inputmode="numeric" placeholder="Ex.: 180" />
+          </div>
+          <div class="field">
+            <label for="nomeEmpresa">Nome da empresa</label>
+            <input id="nomeEmpresa" type="text" placeholder="Ex.: Empresa XYZ" autocomplete="organization" />
+            <div class="field-help">Opcional — útil para pesquisar a empresa antes da visita.</div>
           </div>
         </div>
       </section>
 
       <section class="section" id="informacoesFaltantesSection">
         <div class="section-title">📌 Informações faltantes</div>
-
         <div class="missing-card">
           <div class="field" id="campoNomeNoivo">
             <label>Nome do noivo</label>
             <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
           </div>
-
           <div class="field" id="campoEmailNoiva">
             <label>Email da noiva</label>
             <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
@@ -154,7 +103,6 @@
 
       <section class="section" id="origemSection">
         <div class="section-title">🌎 Como você conheceu o Margô?</div>
-
         <div class="chips">
           <button class="chip" onclick="selecionarUnico(this)">Instagram</button>
           <button class="chip" onclick="selecionarUnico(this)">Google</button>
@@ -167,7 +115,6 @@
 
       <section class="section" id="encantamentosSection">
         <div class="section-title">✨ O que mais te encantou pelas fotos e vídeos?</div>
-
         <div class="chips">
           <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
           <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
@@ -182,8 +129,7 @@
 
       <section class="section">
         <div class="section-title">📝 Observações</div>
-
-        <textarea id="observacoesGerais" placeholder="Ex: mãe participa da decisão, casal valoriza área externa..."></textarea>
+        <textarea id="observacoesGerais" placeholder="Ex: informações importantes para preparar a visita..."></textarea>
       </section>
 
       <div class="actions">
@@ -191,9 +137,7 @@
         <button class="btn-confirm" id="btnConfirmar" onclick="confirmarConsultoria()">❤️ Confirmar Consultoria</button>
       </div>
 
-      <div class="success" id="successBox">
-        Consultoria agendada com sucesso. ❤️
-      </div>
+      <div class="success" id="successBox">Consultoria agendada com sucesso. ❤️</div>
     </main>
   </div>
 
@@ -203,17 +147,22 @@
     const API_AGENDA_CONSULTORIAS = "https://n8n.espacomargo.com.br/webhook/crm/listar-agenda-consultorias";
 
     let casalAtualId = null;
+    let registroAtual = {};
+    let tipoEventoAtual = "";
 
-    function limpar(valor) {
-      return String(valor || "").trim();
+    function limpar(valor) { return String(valor ?? "").trim(); }
+
+    function normalizar(valor) {
+      return limpar(valor).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    }
+
+    function ehCorporativo() {
+      return tipoEventoAtual === "CORPORATIVO";
     }
 
     function lerSessao() {
-      try {
-        return JSON.parse(localStorage.getItem("margo_usuario") || "null");
-      } catch (erro) {
-        return null;
-      }
+      try { return JSON.parse(localStorage.getItem("margo_usuario") || "null"); }
+      catch (_) { return null; }
     }
 
     function pegarUsuarioId() {
@@ -225,17 +174,13 @@
     function adicionarUsuarioNaUrl(url) {
       const usuarioId = pegarUsuarioId();
       if (!usuarioId) return url;
-      const separador = url.includes("?") ? "&" : "?";
-      return url + separador + "usuario_id=" + encodeURIComponent(usuarioId);
+      return url + (url.includes("?") ? "&" : "?") + "usuario_id=" + encodeURIComponent(usuarioId);
     }
 
-    function irParaMenuPrincipal() {
-      window.location.href = adicionarUsuarioNaUrl("menu.html");
-    }
+    function irParaMenuPrincipal() { window.location.href = adicionarUsuarioNaUrl("menu.html"); }
 
     function pegarCasalIdDaUrl() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("casal_id");
+      return new URLSearchParams(window.location.search).get("casal_id");
     }
 
     function voltarAtendimento() {
@@ -247,78 +192,65 @@
     }
 
     function nomeCasal(casal) {
-      const noiva = casal.nome_noiva || "";
-      const noivo = casal.nome_noivo || "";
-
+      const noiva = limpar(casal.nome_pessoa_1 || casal.nome_noiva);
+      const noivo = limpar(casal.nome_pessoa_2 || casal.nome_noivo);
       if (noiva && noivo) return noiva + " ❤️ " + noivo;
-      return noiva || noivo || "Casal sem nome";
+      return noiva || noivo || limpar(casal.nome_contato) || "Casal sem nome";
+    }
+
+    function nomeRegistro(casal) {
+      if (ehCorporativo()) {
+        return limpar(casal.nome_empresa) || limpar(casal.nome_contato) || "Empresa";
+      }
+      return nomeCasal(casal);
+    }
+
+    function dataParaInput(valor) {
+      const texto = limpar(valor);
+      if (!texto) return "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) return texto;
+      const br = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (br) return `${br[3]}-${br[2]}-${br[1]}`;
+      return "";
     }
 
     function formatarHoraBotao(hora) {
       const texto = limpar(hora);
-
       if (!texto) return "";
-
       const partes = texto.split(":");
       const h = String(Number(partes[0] || 0));
       const m = String(partes[1] || "00").padStart(2, "0");
-
-      if (m === "00") return h + "h";
-
-      return h + "h" + m;
+      return m === "00" ? h + "h" : h + "h" + m;
     }
 
     function criarMensagemAgenda(texto, permitirTentarNovamente = false) {
-      const container = document.getElementById("agendaConsultoriasLista");
       const botaoRetry = permitirTentarNovamente
         ? '<button class="retry-agenda" type="button" onclick="carregarAgendaConsultorias()">Tentar carregar novamente</button>'
         : '<button class="slot" type="button" disabled>aguarde</button>';
-
-      container.innerHTML = `
-        <div class="date-card">
-          <div class="date-title">${texto}</div>
-          <div class="slots">
-            ${botaoRetry}
-          </div>
-        </div>
-      `;
+      document.getElementById("agendaConsultoriasLista").innerHTML = `
+        <div class="date-card"><div class="date-title">${texto}</div><div class="slots">${botaoRetry}</div></div>`;
     }
 
-    function esperar(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    function esperar(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
     async function fetchComTimeout(url, timeoutMs = 12000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-
       try {
-        const resposta = await fetch(url, {
-          method: "GET",
-          cache: "no-store",
-          signal: controller.signal
-        });
-
-        return resposta;
-      } finally {
-        clearTimeout(timer);
-      }
+        return await fetch(url, { method: "GET", cache: "no-store", signal: controller.signal });
+      } finally { clearTimeout(timer); }
     }
 
     async function carregarAgendaConsultorias() {
       const container = document.getElementById("agendaConsultoriasLista");
       criarMensagemAgenda("Carregando vagas...");
-
       let ultimoErro = null;
 
       for (let tentativa = 1; tentativa <= 3; tentativa++) {
         try {
           const url = API_AGENDA_CONSULTORIAS + "?t=" + Date.now() + "&tentativa=" + tentativa;
           const resposta = await fetchComTimeout(url, 12000);
-
-          if (!resposta.ok) {
-            throw new Error("Erro ao buscar agenda de consultorias");
-          }
+          if (!resposta.ok) throw new Error("Erro ao buscar agenda de consultorias");
 
           const textoResposta = await resposta.text();
           const dados = textoResposta ? JSON.parse(textoResposta) : {};
@@ -331,42 +263,19 @@
 
           container.innerHTML = grupos.map(grupo => {
             const horarios = Array.isArray(grupo.horarios) ? grupo.horarios : [];
-
             const botoes = horarios.map(horario => {
               const hora = limpar(horario.hora);
               const agendaId = limpar(horario.agenda_id);
               const vagasLivres = limpar(horario.vagas_livres);
               const consultoras = limpar(horario.consultoras_disponiveis);
-
-              return `
-                <button
-                  class="slot"
-                  type="button"
-                  data-agenda-id="${agendaId}"
-                  data-hora="${hora}"
-                  data-vagas-livres="${vagasLivres}"
-                  data-consultoras-disponiveis="${consultoras}"
-                  onclick="selecionarHorario(this)"
-                >${formatarHoraBotao(hora)}</button>
-              `;
+              return `<button class="slot" type="button" data-agenda-id="${agendaId}" data-hora="${hora}" data-vagas-livres="${vagasLivres}" data-consultoras-disponiveis="${consultoras}" onclick="selecionarHorario(this)">${formatarHoraBotao(hora)}</button>`;
             }).join("");
-
-            return `
-              <div class="date-card" data-date="${limpar(grupo.data)}">
-                <div class="date-title">${limpar(grupo.data_exibicao) || limpar(grupo.data)}</div>
-                <div class="slots">
-                  ${botoes || '<button class="slot" type="button" disabled>sem vagas</button>'}
-                </div>
-              </div>
-            `;
+            return `<div class="date-card" data-date="${limpar(grupo.data)}"><div class="date-title">${limpar(grupo.data_exibicao) || limpar(grupo.data)}</div><div class="slots">${botoes || '<button class="slot" type="button" disabled>sem vagas</button>'}</div></div>`;
           }).join("");
-
           return;
-
         } catch (erro) {
           ultimoErro = erro;
           console.error("Erro ao carregar agenda. Tentativa " + tentativa + ":", erro);
-
           if (tentativa < 3) {
             criarMensagemAgenda("Carregando vagas... tentando novamente");
             await esperar(900);
@@ -378,164 +287,202 @@
       criarMensagemAgenda("Não foi possível carregar as vagas agora", true);
     }
 
-    function atualizarBlocoInformacoesFaltantes() {
-      const section = document.getElementById("informacoesFaltantesSection");
-      const campoNomeNoivo = document.getElementById("campoNomeNoivo");
-      const campoEmailNoiva = document.getElementById("campoEmailNoiva");
+    function configurarTelaPorTipo(casal) {
+      const corporativo = ehCorporativo();
 
-      if (section) section.classList.remove("hidden");
-      if (campoNomeNoivo) campoNomeNoivo.classList.remove("hidden");
-      if (campoEmailNoiva) campoEmailNoiva.classList.remove("hidden");
+      document.getElementById("corporativoSection").classList.toggle("hidden", !corporativo);
+      document.getElementById("informacoesFaltantesSection").classList.toggle("hidden", corporativo);
+      document.getElementById("origemSection").classList.toggle("hidden", corporativo);
+      document.getElementById("encantamentosSection").classList.toggle("hidden", corporativo);
+
+      const subtitulo = document.getElementById("subtituloRegistro");
+      const botao = document.getElementById("btnConfirmar");
+      const sucesso = document.getElementById("successBox");
+      const obs = document.getElementById("observacoesGerais");
+
+      if (corporativo) {
+        const contato = limpar(casal.nome_contato);
+        subtitulo.textContent = contato && limpar(casal.nome_empresa) ? "Contato: " + contato : "Evento corporativo";
+        subtitulo.classList.remove("hidden");
+        botao.textContent = "🏢 Confirmar Visita";
+        sucesso.textContent = "Visita corporativa agendada com sucesso. ✅";
+        obs.placeholder = "Ex: objetivo do evento, formato desejado, informações da empresa...";
+      } else {
+        subtitulo.textContent = "";
+        subtitulo.classList.add("hidden");
+        botao.textContent = "❤️ Confirmar Consultoria";
+        sucesso.textContent = "Consultoria agendada com sucesso. ❤️";
+        obs.placeholder = "Ex: mãe participa da decisão, casal valoriza área externa...";
+      }
     }
 
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
-
       if (!casalAtualId) {
-        document.getElementById("nomeCasal").textContent = "Casal não informado";
+        document.getElementById("nomeRegistro").textContent = "Registro não informado";
         return;
       }
 
       try {
-        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId));
+        const resposta = await fetch(API_CASAL + "?casal_id=" + encodeURIComponent(casalAtualId) + "&t=" + Date.now(), { cache: "no-store" });
         const casal = await resposta.json();
 
         if (casal.erro) {
-          document.getElementById("nomeCasal").textContent = "Casal não encontrado";
+          document.getElementById("nomeRegistro").textContent = "Registro não encontrado";
           return;
         }
 
-        document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+        registroAtual = casal;
+        tipoEventoAtual = normalizar(casal.tipo_evento);
+        if (!tipoEventoAtual && normalizar(casal.origem) === "META_CORPORATIVO") tipoEventoAtual = "CORPORATIVO";
 
-        if (casal.nome_noivo) {
-          document.getElementById("nomeNoivo").value = casal.nome_noivo;
+        configurarTelaPorTipo(casal);
+        document.getElementById("nomeRegistro").textContent = nomeRegistro(casal);
+
+        if (ehCorporativo()) {
+          document.getElementById("dataEvento").value = dataParaInput(casal.data_evento);
+          document.getElementById("quantidadePessoas").value = limpar(casal.quantidade_pessoas);
+          document.getElementById("nomeEmpresa").value = limpar(casal.nome_empresa);
+        } else {
+          if (casal.nome_noivo || casal.nome_pessoa_2) document.getElementById("nomeNoivo").value = casal.nome_noivo || casal.nome_pessoa_2;
+          if (casal.email) document.getElementById("emailNoiva").value = casal.email;
+
+          const origemCasal = limpar(casal.como_conheceu_margo || casal.origem);
+          if (origemCasal) selecionarChipPorTexto("origemSection", origemCasal);
+
+          if (casal.encantamentos_principais) {
+            casal.encantamentos_principais.split("|").forEach(valor => selecionarChipPorValor("encantamentosSection", valor.trim()));
+          }
         }
 
-        if (casal.email) {
-          document.getElementById("emailNoiva").value = casal.email;
-        }
-
-        atualizarBlocoInformacoesFaltantes();
-
-        const origemCasal = limpar(casal.como_conheceu_margo || casal.origem);
-
-        if (origemCasal) {
-          selecionarChipPorTexto("origemSection", origemCasal);
-        }
-
-        if (casal.encantamentos_principais) {
-          casal.encantamentos_principais.split("|").forEach(valor => {
-            selecionarChipPorValor("encantamentosSection", valor.trim());
-          });
-        }
-
-        if (casal.observacoes_gerais) {
-          document.getElementById("observacoesGerais").value = casal.observacoes_gerais;
-        }
-
+        if (casal.observacoes_gerais) document.getElementById("observacoesGerais").value = casal.observacoes_gerais;
       } catch (erro) {
-        console.error("Erro ao carregar casal:", erro);
-        document.getElementById("nomeCasal").textContent = "Erro ao carregar";
+        console.error("Erro ao carregar registro:", erro);
+        document.getElementById("nomeRegistro").textContent = "Erro ao carregar";
       }
     }
 
     function selecionarChipPorTexto(sectionId, texto) {
-      const chips = document.querySelectorAll("#" + sectionId + " .chip");
-
-      chips.forEach(chip => {
-        if (chip.textContent.trim().toLowerCase() === String(texto).trim().toLowerCase()) {
-          chip.classList.add("selected");
-        }
+      document.querySelectorAll("#" + sectionId + " .chip").forEach(chip => {
+        if (chip.textContent.trim().toLowerCase() === String(texto).trim().toLowerCase()) chip.classList.add("selected");
       });
     }
 
     function selecionarChipPorValor(sectionId, valor) {
-      const chips = document.querySelectorAll("#" + sectionId + " .chip");
-
-      chips.forEach(chip => {
-        if (chip.dataset.value === valor) {
-          chip.classList.add("selected");
-        }
+      document.querySelectorAll("#" + sectionId + " .chip").forEach(chip => {
+        if (chip.dataset.value === valor) chip.classList.add("selected");
       });
     }
 
     function selecionarHorario(botao) {
-      document.querySelectorAll(".slot").forEach(slot => {
-        slot.classList.remove("selected");
-      });
-
+      document.querySelectorAll(".slot").forEach(slot => slot.classList.remove("selected"));
       botao.classList.add("selected");
     }
 
-    function alternarChip(botao) {
-      botao.classList.toggle("selected");
-    }
+    function alternarChip(botao) { botao.classList.toggle("selected"); }
 
     function selecionarUnico(botao) {
-      const container = botao.parentElement;
-
-      container.querySelectorAll(".chip").forEach(chip => {
-        chip.classList.remove("selected");
-      });
-
+      botao.parentElement.querySelectorAll(".chip").forEach(chip => chip.classList.remove("selected"));
       botao.classList.add("selected");
     }
 
     function horaFormatada(texto) {
       const valor = limpar(texto);
-
       if (!valor) return "";
-
       if (valor.includes(":")) return valor;
-
       if (valor.includes("h")) {
         const partes = valor.split("h");
-        const h = String(partes[0] || "").padStart(2, "0");
-        const m = String(partes[1] || "00").padStart(2, "0");
-        return h + ":" + m;
+        return String(partes[0] || "").padStart(2, "0") + ":" + String(partes[1] || "00").padStart(2, "0");
       }
-
       return valor.padStart(2, "0") + ":00";
     }
 
+    function validarCorporativo() {
+      const dataEvento = limpar(document.getElementById("dataEvento").value);
+      const quantidadePessoas = limpar(document.getElementById("quantidadePessoas").value);
+
+      if (!dataEvento) {
+        alert("Informe a data do evento antes de confirmar a visita.");
+        document.getElementById("dataEvento").focus();
+        return false;
+      }
+
+      if (!quantidadePessoas || Number(quantidadePessoas) <= 0) {
+        alert("Informe a quantidade de pessoas antes de confirmar a visita.");
+        document.getElementById("quantidadePessoas").focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    function validarCasamento() {
+      const nomeNoivo = limpar(document.getElementById("nomeNoivo").value);
+      if (!nomeNoivo) {
+        alert("Informe o nome do noivo antes de confirmar.");
+        document.getElementById("nomeNoivo").focus();
+        return false;
+      }
+
+      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
+      if (!origemSelecionada) {
+        alert("Selecione como o casal conheceu o Espaço Margô.");
+        return false;
+      }
+
+      const encantamentos = Array.from(document.querySelectorAll("#encantamentosSection .chip.selected"));
+      if (!encantamentos.length) {
+        alert("Selecione pelo menos um item que encantou o casal.");
+        return false;
+      }
+
+      return true;
+    }
+
+    function montarPayloadCasamento(base) {
+      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
+      const encantamentos = [];
+      document.querySelectorAll("#encantamentosSection .chip.selected").forEach(chip => encantamentos.push(limpar(chip.dataset.value || chip.textContent)));
+
+      return {
+        ...base,
+        origem: "CRM_AGENDAR_CONSULTORIA",
+        nome_noivo: limpar(document.getElementById("nomeNoivo").value),
+        email: limpar(document.getElementById("emailNoiva").value),
+        como_conheceu_margo: limpar(origemSelecionada && origemSelecionada.textContent),
+        encantamentos_principais: encantamentos.join("|"),
+        observacoes_gerais: limpar(document.getElementById("observacoesGerais").value)
+      };
+    }
+
+    function montarPayloadCorporativo(base) {
+      return {
+        ...base,
+        origem: "CRM_AGENDAR_VISITA_CORPORATIVA",
+        tipo_evento: "CORPORATIVO",
+        data_evento: limpar(document.getElementById("dataEvento").value),
+        quantidade_pessoas: limpar(document.getElementById("quantidadePessoas").value),
+        nome_empresa: limpar(document.getElementById("nomeEmpresa").value),
+        observacoes_gerais: limpar(document.getElementById("observacoesGerais").value)
+      };
+    }
+
     async function confirmarConsultoria() {
-      atualizarBlocoInformacoesFaltantes();
-
       const horarioSelecionado = document.querySelector(".slot.selected");
-
       if (!horarioSelecionado) {
         alert("Selecione uma vaga disponível antes de confirmar.");
         return;
       }
 
       if (!casalAtualId) {
-        alert("Casal não encontrado.");
+        alert("Registro não encontrado.");
         return;
       }
 
-      const nomeNoivo = limpar(document.getElementById("nomeNoivo").value);
-
-      if (!nomeNoivo) {
-        alert("Informe o nome do noivo antes de confirmar.");
-        return;
-      }
-
-      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
-
-      if (!origemSelecionada) {
-        alert("Selecione como o casal conheceu o Espaço Margô.");
-        return;
-      }
-
-      const encantamentos = [];
-
-      document.querySelectorAll("#encantamentosSection .chip.selected").forEach(chip => {
-        encantamentos.push(limpar(chip.dataset.value || chip.textContent));
-      });
-
-      if (encantamentos.length === 0) {
-        alert("Selecione pelo menos um item que encantou o casal.");
-        return;
+      if (ehCorporativo()) {
+        if (!validarCorporativo()) return;
+      } else {
+        if (!validarCasamento()) return;
       }
 
       const dataCard = horarioSelecionado.closest(".date-card");
@@ -553,70 +500,54 @@
         return;
       }
 
-      const usuarioId = pegarUsuarioId();
-
-      const payload = {
+      const base = {
         casal_id: casalAtualId,
-
         agenda_id: agendaId,
         data_consultoria: dataConsultoria,
         hora_consultoria: horaFormatada(horaSelecionada),
-
-        usuario_id: usuarioId,
-        origem: "CRM_AGENDAR_CONSULTORIA",
-
-        nome_noivo: nomeNoivo,
-        email: limpar(document.getElementById("emailNoiva").value),
-        como_conheceu_margo: limpar(origemSelecionada.textContent),
-        encantamentos_principais: encantamentos.join("|"),
-        observacoes_gerais: limpar(document.getElementById("observacoesGerais").value)
+        usuario_id: pegarUsuarioId()
       };
 
+      const payload = ehCorporativo() ? montarPayloadCorporativo(base) : montarPayloadCasamento(base);
       const botao = document.getElementById("btnConfirmar");
+      const textoPadrao = ehCorporativo() ? "🏢 Confirmar Visita" : "❤️ Confirmar Consultoria";
+
       botao.disabled = true;
       botao.textContent = "Salvando...";
 
       try {
         const resposta = await fetch(API_CONSULTORIA, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
         const textoResposta = await resposta.text();
+        let retorno = {};
+        try { retorno = textoResposta ? JSON.parse(textoResposta) : {}; } catch (_) {}
 
-        console.log("STATUS v25:", resposta.status);
-        console.log("RESPOSTA v25:", textoResposta);
+        console.log("STATUS v25.1:", resposta.status);
+        console.log("RESPOSTA v25.1:", textoResposta);
         console.log("PAYLOAD ENVIADO:", payload);
 
-        if (!resposta.ok) {
-          throw new Error(textoResposta || "Erro ao salvar consultoria");
+        if (!resposta.ok || retorno.sucesso === false) {
+          throw new Error(retorno.mensagem || retorno.erro || textoResposta || "Erro ao salvar visita");
         }
 
         document.getElementById("successBox").classList.add("open");
-
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: "smooth"
-        });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 
         setTimeout(() => {
           window.location.href = adicionarUsuarioNaUrl("oportunidades.html?aba=agendados&t=" + Date.now());
         }, 1400);
-
       } catch (erro) {
-        console.error("Erro ao confirmar consultoria:", erro);
-        alert("Erro ao confirmar consultoria.");
-
+        console.error("Erro ao confirmar visita:", erro);
+        alert("Erro ao confirmar visita. " + (erro.message || ""));
         botao.disabled = false;
-        botao.textContent = "❤️ Confirmar Consultoria";
+        botao.textContent = textoPadrao;
       }
     }
 
-    // Não ocultar campos enquanto a consultora digita.
-    // A seção de informações faltantes fica sempre visível nesta tela.
     carregarAgendaConsultorias();
     carregarCasal();
   </script>
