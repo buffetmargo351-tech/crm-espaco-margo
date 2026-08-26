@@ -1,0 +1,25 @@
+V1.17 — TESTE MANUAL
+
+1. EMPRESAS
+- Abrir Home.
+- Confirmar que o contador EMPRESAS inclui lead corporativo já presente em /crm/oportunidades.
+- Abrir EMPRESAS e confirmar que o lead aparece com data_evento e quantidade_pessoas.
+
+2. NAVEGAÇÃO EM FILA
+- Abrir OPORTUNIDADES/AGENDAR e entrar no primeiro lead.
+- Confirmar botão ↓ no topo direito.
+- Tocar ↓ e confirmar abertura do próximo lead da mesma fila.
+- Repetir até o último; no último, ↓ deve ficar desabilitado.
+- Tocar ‹ e confirmar retorno para a mesma fila/aba.
+
+3. OUTRAS FILAS
+Repetir a navegação em pelo menos:
+- EMPRESAS
+- ATENÇÃO
+- AGENDADOS
+- NOVOS (se houver mais de um)
+
+4. REGRESSÃO
+- Confirmar que atendimento normal continua enviando mensagens.
+- Confirmar que corporativo continua HUMANO e sem Milene.
+- Confirmar que botão Início no rodapé continua levando à Home.
