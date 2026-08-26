@@ -1,0 +1,8 @@
+ROLLBACK V1.17
+
+Se houver regressão após deploy:
+1. reverter o merge da V1.17 no GitHub;
+2. redeploy do main no Coolify;
+3. confirmar retorno do cache PWA à versão anterior.
+
+A V1.17 não altera n8n, planilhas, Meta, WhatsApp ou regras da Milene.
