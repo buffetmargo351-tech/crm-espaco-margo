@@ -1,0 +1,7 @@
+V1.17 pronta para revisão.
+
+Escopo consolidado:
+- corrigir EMPRESAS para consumir retorno.empresas de /crm/oportunidades;
+- navegação direta para o próximo atendimento da mesma fila;
+- retorno pela seta superior à fila de origem;
+- cache PWA atualizado.
