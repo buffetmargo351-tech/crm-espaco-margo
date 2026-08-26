@@ -1,0 +1,5 @@
+V1.17
+- corrige ingestão de retorno.empresas no App;
+- adiciona navegação direta para o próximo atendimento da mesma fila;
+- seta superior retorna à fila de origem;
+- atualiza cache PWA.
