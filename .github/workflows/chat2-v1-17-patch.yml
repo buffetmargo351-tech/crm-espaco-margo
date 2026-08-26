@@ -1,0 +1,505 @@
+name: CHAT2 V1.17 Patch
+
+on:
+  push:
+    branches:
+      - chat2/v1.17-navegacao-fila-empresas
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-v1.17-patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Aplicar V1.17
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: esperado 1 match para {label}, encontrado {count}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # ------------------------------------------------------------
+          # 1) BUG EMPRESAS: /crm/oportunidades já entrega `empresas`,
+          #    mas Home/Oportunidades não incorporavam esse grupo.
+          # ------------------------------------------------------------
+          replace_once(
+              'home.html',
+              '''      const grupos = [
+                ...(retornoOportunidades.agendar || []),
+                ...(retornoOportunidades.resgatar || []),
+                ...(retornoOportunidades.agendados || [])
+              ];''',
+              '''      const grupos = [
+                ...(retornoOportunidades.agendar || []),
+                ...(retornoOportunidades.resgatar || []),
+                ...(retornoOportunidades.agendados || []),
+                ...(retornoOportunidades.empresas || [])
+              ];''',
+              'home inclui retorno.empresas'
+          )
+
+          replace_once(
+              'home.html',
+              '''          const agendados = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
+                    ? dadosOportunidades.agendados
+                    : [];
+
+                  [...agendar, ...resgatar, ...agendados].forEach(casal => {''',
+              '''          const agendados = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
+                    ? dadosOportunidades.agendados
+                    : [];
+                  const empresas = Array.isArray(dadosOportunidades && dadosOportunidades.empresas)
+                    ? dadosOportunidades.empresas
+                    : [];
+
+                  [...agendar, ...resgatar, ...agendados, ...empresas].forEach(casal => {''',
+              'home anti-fantasma inclui empresas'
+          )
+
+          replace_once(
+              'oportunidades.html',
+              '''      const todos = [
+                ...(retorno.agendar || []),
+                ...(retorno.resgatar || []),
+                ...(retorno.agendados || []),
+                ...(retorno.encerrados || []),
+                ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
+              ];''',
+              '''      const todos = [
+                ...(retorno.agendar || []),
+                ...(retorno.resgatar || []),
+                ...(retorno.agendados || []),
+                ...(retorno.empresas || []),
+                ...(retorno.encerrados || []),
+                ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
+              ];''',
+              'oportunidades inclui retorno.empresas'
+          )
+
+          # ------------------------------------------------------------
+          # 2) NAVEGAÇÃO VERTICAL EM FILA NO ATENDIMENTO
+          # ------------------------------------------------------------
+          replace_once(
+              'atendimento.html',
+              '''    .nav-arrow {
+              width: 34px;
+              height: 34px;
+              border-radius: 14px;
+              border: 1px solid #eadada;
+              background: #fff;
+              color: #d85f6f;
+              font-size: 22px;
+              font-weight: 800;
+              cursor: pointer;
+              line-height: 1;
+            }
+''',
+              '''    .nav-arrow {
+              width: 34px;
+              height: 34px;
+              border-radius: 14px;
+              border: 1px solid #eadada;
+              background: #fff;
+              color: #d85f6f;
+              font-size: 22px;
+              font-weight: 800;
+              cursor: pointer;
+              line-height: 1;
+            }
+
+            .nav-next {
+              width: 34px;
+              height: 34px;
+              border-radius: 14px;
+              border: 1px solid #e8cdd0;
+              background: #fff7f7;
+              color: #d85f6f;
+              font-size: 20px;
+              font-weight: 900;
+              cursor: pointer;
+              line-height: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .nav-next:disabled {
+              opacity: .28;
+              cursor: default;
+            }
+''',
+              'css botão próximo'
+          )
+
+          replace_once(
+              'atendimento.html',
+              '''        <button class="nav-arrow" onclick="voltarHome()">‹</button>
+                <div class="couple-name" id="nomeCasal">Carregando...</div>
+                <div></div>''',
+              '''        <button class="nav-arrow" onclick="voltarParaFila()" aria-label="Voltar para a fila">‹</button>
+                <div class="couple-name" id="nomeCasal">Carregando...</div>
+                <button class="nav-next" id="navProximoFila" type="button" onclick="proximoAtendimentoFila()" aria-label="Próximo atendimento da fila" title="Próximo da fila" disabled>↓</button>''',
+              'header próximo e voltar fila'
+          )
+
+          replace_once(
+              'atendimento.html',
+              '''    const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
+            const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
+            let casalAtualId = null;''',
+              '''    const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
+            const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
+            const API_CASAIS_FILA = "https://n8n.espacomargo.com.br/webhook/crm/casais";
+            const API_OPORTUNIDADES_FILA = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
+            const API_ENCERRADOS_FILA = "https://n8n.espacomargo.com.br/webhook/crm/encerrados";
+            const FILA_ATENDIMENTO_STORAGE = "margo_fila_atendimento_v1";
+            let casalAtualId = null;''',
+              'constantes fila'
+          )
+
+          replace_once(
+              'atendimento.html',
+              '''    let enviandoMidiaManual = false;
+
+            function travarAlturaDaTela() {''',
+              '''    let enviandoMidiaManual = false;
+            let tipoFilaAtendimento = "";
+            let filaAtendimentoIds = [];
+            let carregandoFilaAtendimento = false;
+
+            function travarAlturaDaTela() {''',
+              'estado fila'
+          )
+
+          replace_once(
+              'atendimento.html',
+              '''    function voltarHome() {
+              const query = montarQueryUsuario();
+              window.location.href = query ? "home.html?" + query : "home.html";
+            }
+
+            function nomeCasal(casal) {''',
+              '''    function voltarHome() {
+              const query = montarQueryUsuario();
+              window.location.href = query ? "home.html?" + query : "home.html";
+            }
+
+            function filaValida(valor) {
+              return ["novos", "agendar", "empresas", "resgatar", "agendados", "atencao", "encerrados"].includes(String(valor || "").trim().toLowerCase());
+            }
+
+            function filaDaUrl() {
+              const params = new URLSearchParams(window.location.search);
+              const fila = String(params.get("fila") || "").trim().toLowerCase();
+              return filaValida(fila) ? fila : "";
+            }
+
+            function filaDoReferrer() {
+              try {
+                if (!document.referrer) return "";
+                const ref = new URL(document.referrer);
+                if (ref.origin !== window.location.origin) return "";
+                if (ref.pathname.endsWith("/oportunidades.html")) {
+                  const aba = String(ref.searchParams.get("aba") || "agendar").trim().toLowerCase();
+                  return filaValida(aba) ? aba : "agendar";
+                }
+                if (ref.pathname.endsWith("/home.html")) return "novos";
+              } catch (_) {}
+              return "";
+            }
+
+            function lerContextoFilaSalvo() {
+              try {
+                const ctx = JSON.parse(sessionStorage.getItem(FILA_ATENDIMENTO_STORAGE) || "null");
+                if (!ctx || !Array.isArray(ctx.ids) || !filaValida(ctx.tipo)) return null;
+                if (Date.now() - Number(ctx.salvo_em || 0) > 6 * 60 * 60 * 1000) return null;
+                if (ctx.usuario_id && usuarioAtualId && String(ctx.usuario_id) !== String(usuarioAtualId)) return null;
+                return ctx;
+              } catch (_) {
+                return null;
+              }
+            }
+
+            function salvarContextoFila() {
+              if (!tipoFilaAtendimento || !filaAtendimentoIds.length) return;
+              try {
+                sessionStorage.setItem(FILA_ATENDIMENTO_STORAGE, JSON.stringify({
+                  tipo: tipoFilaAtendimento,
+                  ids: filaAtendimentoIds,
+                  usuario_id: usuarioAtualId || "",
+                  salvo_em: Date.now()
+                }));
+              } catch (_) {}
+            }
+
+            function extrairListaFila(dados) {
+              if (Array.isArray(dados)) return dados;
+              if (dados && Array.isArray(dados.casais)) return dados.casais;
+              if (dados && Array.isArray(dados.data)) return dados.data;
+              if (dados && Array.isArray(dados.items)) return dados.items;
+              if (dados && dados.casal_id) return [dados];
+              return [];
+            }
+
+            function normalizarStatusFila(status) {
+              return String(status || "").trim().toUpperCase();
+            }
+
+            function pertenceAoUsuarioFila(casal) {
+              if (!usuarioAtualId) return true;
+              return String(casal && casal.consultora_responsavel || "").trim() === String(usuarioAtualId).trim();
+            }
+
+            function primeiraRespostaFila(casal) {
+              const primeiraIA = String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
+              const statusMilene = String(casal && casal.ultimo_status_milene || "").trim().toUpperCase();
+              const temDataResposta = Boolean(String(casal && casal.data_ultima_resposta_ia || "").trim());
+              return primeiraIA || statusMilene === "RESPONDIDO" || temDataResposta;
+            }
+
+            function visitaAgendadaFila(casal) {
+              const status = normalizarStatusFila(casal && casal.status_casal);
+              return status === "CONSULTORIA_AGENDADA" || Boolean(String(casal && casal.agenda_id || "").trim());
+            }
+
+            function chaveVisitaFila(casal) {
+              const data = String(casal && casal.data_consultoria || "").trim();
+              const hora = String(casal && casal.hora_consultoria || "00:00").trim();
+              const p = data.split("/");
+              if (p.length !== 3) return "9999-99-99T99:99";
+              return `${p[2]}-${String(p[1]).padStart(2, "0")}-${String(p[0]).padStart(2, "0")}T${hora}`;
+            }
+
+            function unificarRegistrosFila(listas) {
+              const mapa = new Map();
+              listas.flat().forEach(casal => {
+                const id = String(casal && casal.casal_id || "").trim();
+                if (id) mapa.set(id, casal);
+              });
+              return Array.from(mapa.values());
+            }
+
+            function construirFilasAtendimento(retornoOportunidades, casaisApi, encerradosApi) {
+              const retorno = retornoOportunidades || {};
+              const todos = unificarRegistrosFila([
+                retorno.agendar || [],
+                retorno.resgatar || [],
+                retorno.agendados || [],
+                retorno.empresas || [],
+                retorno.atencao || [],
+                retorno.encerrados || [],
+                encerradosApi || [],
+                (casaisApi || []).filter(ehCorporativo)
+              ]);
+              const doUsuario = todos.filter(pertenceAoUsuarioFila);
+
+              const agendados = doUsuario
+                .filter(visitaAgendadaFila)
+                .sort((a, b) => chaveVisitaFila(a).localeCompare(chaveVisitaFila(b)));
+
+              const empresas = todos.filter(casal => {
+                const status = normalizarStatusFila(casal.status_casal);
+                if (visitaAgendadaFila(casal)) return false;
+                if (status === "PERDIDO" || status === "GANHO") return false;
+                return ehCorporativo(casal);
+              });
+
+              const atencao = doUsuario.filter(casal => {
+                const status = normalizarStatusFila(casal.status_casal);
+                if (visitaAgendadaFila(casal) || ehCorporativo(casal)) return false;
+                if (status === "PERDIDO" || status === "GANHO") return false;
+                return String(casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO";
+              });
+
+              const agendar = doUsuario.filter(casal => {
+                const status = normalizarStatusFila(casal.status_casal);
+                if (visitaAgendadaFila(casal) || ehCorporativo(casal)) return false;
+                if (String(casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO") return false;
+                return status === "EM_ATENDIMENTO" || (status === "NOVO" && primeiraRespostaFila(casal));
+              });
+
+              const resgatar = doUsuario.filter(casal => {
+                const status = normalizarStatusFila(casal.status_casal);
+                if (visitaAgendadaFila(casal) || ehCorporativo(casal)) return false;
+                if (String(casal.modo_atendimento_ia || "").trim().toUpperCase() === "HUMANO") return false;
+                return status === "VISITOU_NAO_FECHOU";
+              });
+
+              const encerrados = doUsuario.filter(casal => normalizarStatusFila(casal.status_casal) === "PERDIDO");
+
+              const novos = (casaisApi || []).filter(casal => {
+                const status = normalizarStatusFila(casal.status_casal);
+                return status === "NOVO" && !ehCorporativo(casal) && !primeiraRespostaFila(casal) && pertenceAoUsuarioFila(casal);
+              });
+
+              return { novos, agendar, empresas, resgatar, agendados, atencao, encerrados };
+            }
+
+            function idsDaFila(lista) {
+              return (Array.isArray(lista) ? lista : [])
+                .map(casal => String(casal && casal.casal_id || "").trim())
+                .filter(Boolean);
+            }
+
+            function atualizarBotaoProximoFila() {
+              const botao = document.getElementById("navProximoFila");
+              if (!botao) return;
+              const atual = filaAtendimentoIds.indexOf(String(casalAtualId || ""));
+              const temProximo = atual >= 0 && atual < filaAtendimentoIds.length - 1;
+              botao.disabled = !temProximo;
+              botao.title = temProximo
+                ? `Próximo da fila (${atual + 2} de ${filaAtendimentoIds.length})`
+                : (filaAtendimentoIds.length ? "Fim da fila" : "Fila não identificada");
+            }
+
+            function inferirTipoFila(filas, preferida) {
+              const atual = String(casalAtualId || "");
+              if (filaValida(preferida) && idsDaFila(filas[preferida]).includes(atual)) return preferida;
+              const prioridade = ["agendados", "empresas", "atencao", "agendar", "resgatar", "novos", "encerrados"];
+              return prioridade.find(tipo => idsDaFila(filas[tipo]).includes(atual)) || "";
+            }
+
+            async function inicializarNavegacaoFila() {
+              if (!casalAtualId || carregandoFilaAtendimento) return;
+              carregandoFilaAtendimento = true;
+              const botao = document.getElementById("navProximoFila");
+              if (botao) botao.disabled = true;
+
+              const salvo = lerContextoFilaSalvo();
+              const preferida = filaDaUrl() || filaDoReferrer() || (salvo && salvo.tipo) || "";
+
+              try {
+                const [rCasais, rOportunidades, rEncerrados] = await Promise.all([
+                  fetch(API_CASAIS_FILA + "?t=" + Date.now(), { cache: "no-store" }),
+                  fetch(API_OPORTUNIDADES_FILA + "?t=" + Date.now(), { cache: "no-store" }),
+                  fetch(API_ENCERRADOS_FILA + "?t=" + Date.now(), { cache: "no-store" })
+                ]);
+
+                const jCasais = rCasais.ok ? await rCasais.json() : [];
+                const jOportunidades = rOportunidades.ok ? await rOportunidades.json() : {};
+                const jEncerrados = rEncerrados.ok ? await rEncerrados.json() : [];
+
+                const casais = extrairListaFila(jCasais);
+                const encerrados = extrairListaFila(jEncerrados);
+                const filas = construirFilasAtendimento(jOportunidades, casais, encerrados);
+                tipoFilaAtendimento = inferirTipoFila(filas, preferida);
+                filaAtendimentoIds = tipoFilaAtendimento ? idsDaFila(filas[tipoFilaAtendimento]) : [];
+
+                if ((!filaAtendimentoIds.length || !filaAtendimentoIds.includes(String(casalAtualId))) && salvo && Array.isArray(salvo.ids) && salvo.ids.includes(String(casalAtualId))) {
+                  tipoFilaAtendimento = salvo.tipo;
+                  filaAtendimentoIds = salvo.ids.map(String);
+                }
+
+                salvarContextoFila();
+              } catch (erro) {
+                console.warn("Não foi possível montar a navegação em fila:", erro);
+                if (salvo && Array.isArray(salvo.ids) && salvo.ids.includes(String(casalAtualId))) {
+                  tipoFilaAtendimento = salvo.tipo;
+                  filaAtendimentoIds = salvo.ids.map(String);
+                }
+              } finally {
+                carregandoFilaAtendimento = false;
+                atualizarBotaoProximoFila();
+              }
+            }
+
+            function montarUrlAtendimentoFila(casalId, fila) {
+              const params = new URLSearchParams();
+              params.set("casal_id", casalId);
+              if (usuarioAtualId) params.set("usuario_id", usuarioAtualId);
+              if (filaValida(fila)) params.set("fila", fila);
+              return "atendimento.html?" + params.toString();
+            }
+
+            function proximoAtendimentoFila() {
+              const atual = filaAtendimentoIds.indexOf(String(casalAtualId || ""));
+              if (atual < 0 || atual >= filaAtendimentoIds.length - 1) {
+                atualizarBotaoProximoFila();
+                return;
+              }
+              const proximoId = filaAtendimentoIds[atual + 1];
+              salvarContextoFila();
+              window.location.href = montarUrlAtendimentoFila(proximoId, tipoFilaAtendimento);
+            }
+
+            function voltarParaFila() {
+              if (tipoFilaAtendimento === "novos") {
+                const query = montarQueryUsuario();
+                window.location.href = (query ? "home.html?" + query : "home.html") + "#novos";
+                return;
+              }
+              if (filaValida(tipoFilaAtendimento)) {
+                const params = new URLSearchParams();
+                params.set("aba", tipoFilaAtendimento);
+                if (usuarioAtualId) params.set("usuario_id", usuarioAtualId);
+                window.location.href = "oportunidades.html?" + params.toString();
+                return;
+              }
+              voltarHome();
+            }
+
+            function nomeCasal(casal) {''',
+              'funções navegação fila'
+          )
+
+          replace_once(
+              'atendimento.html',
+              '''    async function carregarCasal() {
+              casalAtualId = pegarCasalIdDaUrl();
+              usuarioAtualId = pegarUsuarioIdDaUrl();
+
+              if (!casalAtualId) {''',
+              '''    async function carregarCasal() {
+              casalAtualId = pegarCasalIdDaUrl();
+              usuarioAtualId = pegarUsuarioIdDaUrl();
+              inicializarNavegacaoFila().catch(erro => console.warn("Fila de atendimento indisponível:", erro));
+
+              if (!casalAtualId) {''',
+              'inicializa fila'
+          )
+
+          # Cache PWA
+          replace_once(
+              'service-worker.js',
+              'const CACHE_NAME = "crm-margo-pwa-v16-empresas-novos-20260825";',
+              'const CACHE_NAME = "crm-margo-pwa-v17-fila-vertical-empresas-20260826";',
+              'cache v17'
+          )
+
+          Path('README_V1_17_NAVEGACAO_FILA_EMPRESAS.txt').write_text('''V1.17 — NAVEGAÇÃO EM FILA + CORREÇÃO EMPRESAS\n\n1. Correção EMPRESAS\n- Home passa a incorporar retorno.empresas de /crm/oportunidades.\n- oportunidades.html passa a incorporar retorno.empresas.\n- Lead corporativo já presente na API de oportunidades deixa de ficar invisível no App.\n\n2. Navegação vertical de atendimento\n- Atendimento ganha botão ↓ no topo direito.\n- O botão abre diretamente o próximo registro da mesma fila.\n- Funciona para NOVOS, OPORTUNIDADES/AGENDAR, EMPRESAS, RESGATAR, AGENDADOS, ATENÇÃO e ENCERRADOS.\n- A fila é reconstruída pelas APIs reais e preservada em sessionStorage por segurança.\n- Ao chegar ao último registro, o botão fica desabilitado.\n- A seta ‹ do topo volta para a fila de origem, em vez de obrigar retorno ao menu.\n- O botão Início continua levando à Home.\n\n3. Segurança\n- Nenhuma mudança em Milene, WhatsApp, n8n, regras de funil ou dados.\n- EMPRESAS continua compartilhada; demais filas respeitam usuario_id.\n- Cache PWA atualizado para V1.17.\n''', encoding='utf-8')
+          PY
+
+      - name: Validar diff
+        run: |
+          git diff --check
+          grep -q 'retornoOportunidades.empresas' home.html
+          grep -q 'retorno.empresas' oportunidades.html
+          grep -q 'id="navProximoFila"' atendimento.html
+          grep -q 'function proximoAtendimentoFila' atendimento.html
+          grep -q 'crm-margo-pwa-v17-fila-vertical-empresas-20260826' service-worker.js
+
+      - name: Commit patch
+        run: |
+          git config user.name "CHAT2 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add home.html oportunidades.html atendimento.html service-worker.js README_V1_17_NAVEGACAO_FILA_EMPRESAS.txt
+          if git diff --cached --quiet; then
+            echo "Sem alterações para commit."
+            exit 0
+          fi
+          git commit -m "V1.17 — navegação vertical em fila e correção Empresas [skip-v1.17-patch]"
+          git push origin HEAD:${{ github.ref_name }}
