@@ -700,7 +700,8 @@
       const grupos = [
         ...(retornoOportunidades.agendar || []),
         ...(retornoOportunidades.resgatar || []),
-        ...(retornoOportunidades.agendados || [])
+        ...(retornoOportunidades.agendados || []),
+        ...(retornoOportunidades.empresas || [])
       ];
       const mapa = new Map();
       grupos.forEach(casal => {
@@ -1354,8 +1355,11 @@
           const agendados = Array.isArray(dadosOportunidades && dadosOportunidades.agendados)
             ? dadosOportunidades.agendados
             : [];
+          const empresas = Array.isArray(dadosOportunidades && dadosOportunidades.empresas)
+            ? dadosOportunidades.empresas
+            : [];
 
-          [...agendar, ...resgatar, ...agendados].forEach(casal => {
+          [...agendar, ...resgatar, ...agendados, ...empresas].forEach(casal => {
             const casalId = String(casal && casal.casal_id || "").trim();
             if (casalId) casalIdsValidosHome.add(casalId);
           });
