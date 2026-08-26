@@ -1,1 +1,0 @@
-Release V1.17 pronta para PR e homologação após deploy.
