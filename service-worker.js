@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v17-1-hotfix-empresas-atencao-20260826";
+const CACHE_NAME = "crm-margo-pwa-v17-2-empresas-fonte-20260827";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",

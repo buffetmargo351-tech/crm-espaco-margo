@@ -428,6 +428,7 @@
         ...(retorno.resgatar || []),
         ...(retorno.agendados || []),
         ...(retorno.empresas || []),
+        ...(retorno.atencao || []),
         ...(retorno.encerrados || []),
         ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
       ];
@@ -661,7 +662,7 @@
         const card = document.createElement("div");
         card.className = "card-casal";
 
-        card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id));
+        card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id) + "&fila=" + encodeURIComponent(tipo));
 
         const corporativo = tipo === "empresas" || ehCorporativo(casal);
         const nome = corporativo

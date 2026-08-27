@@ -701,7 +701,8 @@
         ...(retornoOportunidades.agendar || []),
         ...(retornoOportunidades.resgatar || []),
         ...(retornoOportunidades.agendados || []),
-        ...(retornoOportunidades.empresas || [])
+        ...(retornoOportunidades.empresas || []),
+        ...(retornoOportunidades.atencao || [])
       ];
       const mapa = new Map();
       grupos.forEach(casal => {
