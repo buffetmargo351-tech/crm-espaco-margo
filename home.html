@@ -728,8 +728,8 @@
     function contarEmpresasDaCHO(retornoOportunidades, casaisNovosApi = []) {
       const mapa = new Map();
       [
-        ...unificarTodasOportunidadesHome(retornoOportunidades || {}),
-        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
+        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : []),
+        ...unificarTodasOportunidadesHome(retornoOportunidades || {})
       ].forEach(casal => {
         if (casal && casal.casal_id) mapa.set(casal.casal_id, casal);
       });

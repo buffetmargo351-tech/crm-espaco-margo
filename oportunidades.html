@@ -424,13 +424,13 @@
 
     function organizarDadosPorStatus(retorno, casaisNovosApi = []) {
       const todos = [
+        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : []),
         ...(retorno.agendar || []),
         ...(retorno.resgatar || []),
         ...(retorno.agendados || []),
         ...(retorno.empresas || []),
         ...(retorno.atencao || []),
-        ...(retorno.encerrados || []),
-        ...(Array.isArray(casaisNovosApi) ? casaisNovosApi.filter(ehCorporativo) : [])
+        ...(retorno.encerrados || [])
       ];
 
       const mapa = new Map();

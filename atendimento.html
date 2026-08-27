@@ -1649,14 +1649,14 @@
     function construirFilasAtendimento(retornoOportunidades, casaisApi, encerradosApi) {
       const retorno = retornoOportunidades || {};
       const todos = unificarRegistrosFila([
+        (casaisApi || []).filter(ehCorporativo),
         retorno.agendar || [],
         retorno.resgatar || [],
         retorno.agendados || [],
         retorno.empresas || [],
         retorno.atencao || [],
         retorno.encerrados || [],
-        encerradosApi || [],
-        (casaisApi || []).filter(ehCorporativo)
+        encerradosApi || []
       ]);
       const doUsuario = todos.filter(pertenceAoUsuarioFila);
 
