@@ -662,7 +662,7 @@
         const card = document.createElement("div");
         card.className = "card-casal";
 
-        card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id) + "&fila=" + encodeURIComponent(tipo));
+        card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id) + "&fila=" + encodeURIComponent(tipo) + "&app_v=18_1");
 
         const corporativo = tipo === "empresas" || ehCorporativo(casal);
         const nome = corporativo
