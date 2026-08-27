@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-pdf-whatsapp-20260827";
+const CACHE_NAME = "crm-margo-pwa-v18-anexo-direto-pdf-20260827";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
