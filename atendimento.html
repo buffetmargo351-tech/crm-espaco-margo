@@ -425,7 +425,7 @@
 
     .media-tabs {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       margin-bottom: 9px;
     }
@@ -1288,7 +1288,8 @@
       <button type="button" onclick="encerrarOportunidade()" style="border:0;background:transparent;color:#9a5555;font-size:10px;font-weight:900;cursor:pointer;">ENCERRAR OPORTUNIDADE</button>
     </div>
     <div class="composer">
-      <button class="media-btn" id="mediaManualBtn" type="button" onclick="abrirBibliotecaMidia()" aria-label="Enviar foto, vídeo ou PDF">📎</button>
+      <button class="media-btn" id="mediaManualBtn" type="button" onclick="acaoAnexo()" aria-label="Anexar arquivo ou abrir biblioteca">📎</button>
+      <input id="pdfFileInput" type="file" accept="application/pdf,.pdf" style="display:none" onchange="enviarPdfSelecionado(event)" />
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
       <button class="send-btn" id="sendMessageBtn" type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">➤</button>
@@ -1328,7 +1329,7 @@
       <div class="media-header">
         <div>
           <div class="media-title" id="mediaTitle">Biblioteca Margô</div>
-          <div class="media-subtitle">Escolha uma foto, vídeo ou PDF aprovado e envie direto pelo WhatsApp.</div>
+          <div class="media-subtitle">Escolha manualmente uma foto ou vídeo aprovado e envie direto pelo WhatsApp.</div>
         </div>
         <button class="media-close" type="button" onclick="fecharBibliotecaMidia()" aria-label="Fechar">×</button>
       </div>
@@ -1338,7 +1339,6 @@
           <button class="media-tab" id="mediaTabTodos" type="button" onclick="filtrarBibliotecaMidia('TODOS')">TODOS</button>
           <button class="media-tab" id="mediaTabImagem" type="button" onclick="filtrarBibliotecaMidia('IMAGEM')">FOTOS</button>
           <button class="media-tab active" id="mediaTabVideo" type="button" onclick="filtrarBibliotecaMidia('VIDEO')">VÍDEOS</button>
-          <button class="media-tab" id="mediaTabDocumento" type="button" onclick="filtrarBibliotecaMidia('DOCUMENTO')">PDF</button>
         </div>
 
         <input class="media-search" id="mediaSearch" type="search"
@@ -1476,6 +1476,7 @@
     const API_MODO_ATENDIMENTO_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/modo-atendimento-milene";
     const API_LISTAR_MIDIAS_MILENE = "https://n8n.espacomargo.com.br/webhook/crm/midias-milene";
     const API_ENVIAR_MIDIA_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-midia-whatsapp";
+    const API_ENVIAR_DOCUMENTO_WHATSAPP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-documento-whatsapp";
     const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
     const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
     const API_CASAIS_FILA = "https://n8n.espacomargo.com.br/webhook/crm/casais";
@@ -2979,6 +2980,114 @@
     }
 
 
+    function atendimentoEhCorporativo() {
+      const tipo = String(casalAtual.tipo_evento || casalAtual.status_casal || "").trim().toUpperCase();
+      const origem = String(casalAtual.origem || "").trim().toUpperCase();
+      const rota = String(casalAtual.rota_corporativa || "").trim().toUpperCase();
+      return tipo === "CORPORATIVO" || origem === "META_CORPORATIVO" || rota === "TRUE" || rota === "SIM";
+    }
+
+    function acaoAnexo() {
+      if (atendimentoEhCorporativo()) {
+        const input = document.getElementById("pdfFileInput");
+        input.value = "";
+        input.click();
+        return;
+      }
+      abrirBibliotecaMidia();
+    }
+
+    async function registrarDocumentoManualNoHistorico(nomeArquivo) {
+      const payload = {
+        casal_id: casalAtualId || "",
+        telefone: casalAtual.telefone || "",
+        consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
+        direcao: "SAIDA",
+        tipo_mensagem: "DOCUMENTO",
+        mensagem: "📄 PDF enviado: " + nomeArquivo,
+        audio_url: "",
+        transcricao_audio: "",
+        enviado_por: "CHO",
+        origem_mensagem: "APP_CRM_HISTORICO",
+        status_registro: "REGISTRADO"
+      };
+
+      const resposta = await fetch(API_CONVERSAS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resposta.ok) {
+        throw new Error("PDF enviado, mas não foi possível registrar no histórico.");
+      }
+    }
+
+    async function enviarPdfSelecionado(event) {
+      const input = event && event.target ? event.target : document.getElementById("pdfFileInput");
+      const arquivo = input && input.files ? input.files[0] : null;
+      if (!arquivo) return;
+
+      const telefone = normalizarTelefoneWhatsApp(casalAtual.telefone);
+      if (!casalAtualId || telefone.length < 12 || telefone.length > 15) {
+        alert("Não foi possível identificar corretamente este atendimento ou telefone.");
+        input.value = "";
+        return;
+      }
+
+      const nome = String(arquivo.name || "documento.pdf");
+      const mime = String(arquivo.type || "").toLowerCase();
+      if (mime && mime !== "application/pdf" && !nome.toLowerCase().endsWith(".pdf")) {
+        alert("Selecione um arquivo PDF.");
+        input.value = "";
+        return;
+      }
+
+      const botao = document.getElementById("mediaManualBtn");
+      botao.disabled = true;
+      const textoOriginal = botao.textContent;
+      botao.textContent = "…";
+
+      try {
+        const form = new FormData();
+        form.append("arquivo", arquivo, nome);
+        form.append("telefone", telefone);
+        form.append("casal_id", casalAtualId);
+        form.append("usuario_id", usuarioAtualId || "");
+        form.append("nome_arquivo", nome);
+        form.append("origem_requisicao", "APP_CRM_ANEXO_DIRETO");
+
+        const resposta = await fetch(API_ENVIAR_DOCUMENTO_WHATSAPP, {
+          method: "POST",
+          body: form
+        });
+
+        let retorno = {};
+        try { retorno = await resposta.json(); } catch (_) {}
+
+        if (!resposta.ok || retorno.sucesso === false || retorno.enviado === false) {
+          throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio do PDF.");
+        }
+
+        try {
+          await registrarDocumentoManualNoHistorico(nome);
+          await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
+        } catch (erroRegistro) {
+          console.warn("PDF enviado, mas houve falha ao registrar histórico:", erroRegistro);
+        }
+
+        alert("PDF enviado pelo WhatsApp com sucesso.");
+      } catch (erro) {
+        console.error("Erro ao enviar PDF:", erro);
+        alert("O PDF não foi enviado. " + (erro.message || "Tente novamente."));
+      } finally {
+        botao.disabled = false;
+        botao.textContent = textoOriginal || "📎";
+        input.value = "";
+      }
+    }
+
+
     function fecharBibliotecaMidia() {
       document.getElementById("mediaOverlay").classList.remove("open");
     }
@@ -3001,11 +3110,10 @@
       document.getElementById("mediaTabTodos").classList.toggle("active", filtroMidiaManual === "TODOS");
       document.getElementById("mediaTabImagem").classList.toggle("active", filtroMidiaManual === "IMAGEM");
       document.getElementById("mediaTabVideo").classList.toggle("active", filtroMidiaManual === "VIDEO");
-      document.getElementById("mediaTabDocumento").classList.toggle("active", filtroMidiaManual === "DOCUMENTO");
     }
 
     function filtrarBibliotecaMidia(tipo) {
-      filtroMidiaManual = ["TODOS", "IMAGEM", "VIDEO", "DOCUMENTO"].includes(tipo) ? tipo : "TODOS";
+      filtroMidiaManual = ["TODOS", "IMAGEM", "VIDEO"].includes(tipo) ? tipo : "TODOS";
       atualizarTabsMidia();
       renderizarBibliotecaMidia();
     }
@@ -3028,7 +3136,7 @@
       const titulo = document.getElementById("mediaSelectedTitle");
       const legenda = document.getElementById("mediaCaption");
 
-      const icone = midia.tipo_midia === "VIDEO" ? "🎬" : (midia.tipo_midia === "DOCUMENTO" ? "📄" : "🖼️");
+      const icone = midia.tipo_midia === "VIDEO" ? "🎬" : "🖼️";
       titulo.textContent = icone + " " + (midia.titulo || midia.nome_arquivo || midia.midia_id);
       legenda.value = midia.legenda_whatsapp || "";
       area.classList.add("show");
@@ -3075,7 +3183,7 @@
 
         const icon = document.createElement("div");
         icon.className = "media-icon";
-        icon.textContent = midia.tipo_midia === "VIDEO" ? "🎬" : (midia.tipo_midia === "DOCUMENTO" ? "📄" : "🖼️");
+        icon.textContent = midia.tipo_midia === "VIDEO" ? "🎬" : "🖼️";
 
         const info = document.createElement("div");
 
@@ -3085,7 +3193,7 @@
 
         const meta = document.createElement("div");
         meta.className = "media-card-meta";
-        const tipoLabel = midia.tipo_midia === "VIDEO" ? "VÍDEO" : (midia.tipo_midia === "DOCUMENTO" ? "PDF" : "FOTO");
+        const tipoLabel = midia.tipo_midia === "VIDEO" ? "VÍDEO" : "FOTO";
         const duracao = Number(midia.duracao_segundos || 0) > 0
           ? " • " + midia.duracao_segundos + "s"
           : "";
@@ -3177,8 +3285,8 @@
     async function registrarMidiaManualNoHistorico(midia, legenda) {
       const tipo = String(midia.tipo_midia || "").toUpperCase();
       const titulo = midia.titulo || midia.nome_arquivo || midia.midia_id;
-      const icone = tipo === "VIDEO" ? "🎬" : (tipo === "DOCUMENTO" ? "📄" : "🖼️");
-      const rotulo = tipo === "VIDEO" ? "Vídeo enviado" : (tipo === "DOCUMENTO" ? "PDF enviado" : "Foto enviada");
+      const icone = tipo === "VIDEO" ? "🎬" : "🖼️";
+      const rotulo = tipo === "VIDEO" ? "Vídeo enviado" : "Foto enviada";
 
       const payload = {
         casal_id: casalAtualId || "",
@@ -3248,7 +3356,7 @@
           alert("A mídia foi enviada, mas o histórico do CRM não foi atualizado. Atualize a conversa e confira.");
         }
 
-        const tipoLabel = midiaManualSelecionada.tipo_midia === "VIDEO" ? "Vídeo" : (midiaManualSelecionada.tipo_midia === "DOCUMENTO" ? "PDF" : "Foto");
+        const tipoLabel = midiaManualSelecionada.tipo_midia === "VIDEO" ? "Vídeo" : "Foto";
         fecharBibliotecaMidia();
         alert(tipoLabel + " enviado pelo WhatsApp com sucesso.");
       } catch (erro) {
