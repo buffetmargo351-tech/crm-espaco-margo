@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-anexo-direto-pdf-20260827";
+const CACHE_NAME = "crm-margo-pwa-v18-1-atendimento-no-store-20260827";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
@@ -74,6 +74,7 @@ self.addEventListener("fetch", function (event) {
   const ehHtmlComHotfix =
     url.pathname.endsWith("/oportunidades.html") ||
     url.pathname.endsWith("/home.html") ||
+    url.pathname.endsWith("/atendimento.html") ||
     url.pathname === "/";
 
   if (ehHtmlComHotfix) {
