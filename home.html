@@ -587,6 +587,7 @@
         url += "?usuario_id=" + encodeURIComponent(usuarioAtualId);
       }
 
+      url += (url.includes("?") ? "&" : "?") + "app_v=18_1";
       return url;
     }
 
