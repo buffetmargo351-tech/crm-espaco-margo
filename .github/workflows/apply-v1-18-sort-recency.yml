@@ -24,20 +24,20 @@ jobs:
           MARKER = "CRM_SORT_RECENCY_V1"
           helper = r'''
               // CRM_SORT_RECENCY_V1 — filas ativas: atividade mais recente primeiro.
-              // Converte datas brasileiras (dd/mm/aaaa, hh:mm:ss) e ISO para timestamp real.
               function parseTimestampCRM(valor) {
                 const texto = String(valor || "").trim();
                 if (!texto) return 0;
 
                 const br = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,\s*|\s+)?(?:(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
                 if (br) {
-                  const dia = Number(br[1]);
-                  const mes = Number(br[2]) - 1;
-                  const ano = Number(br[3]);
-                  const hora = Number(br[4] || 0);
-                  const minuto = Number(br[5] || 0);
-                  const segundo = Number(br[6] || 0);
-                  const d = new Date(ano, mes, dia, hora, minuto, segundo);
+                  const d = new Date(
+                    Number(br[3]),
+                    Number(br[2]) - 1,
+                    Number(br[1]),
+                    Number(br[4] || 0),
+                    Number(br[5] || 0),
+                    Number(br[6] || 0)
+                  );
                   const ts = d.getTime();
                   return Number.isNaN(ts) ? 0 : ts;
                 }
@@ -53,19 +53,17 @@ jobs:
                   casal && casal.data_entrada,
                   casal && casal.created_at
                 ];
-
                 for (const valor of candidatos) {
                   const ts = parseTimestampCRM(valor);
                   if (ts) return ts;
                 }
-
                 return 0;
               }
 
               function ordenarPorAtividadeMaisRecente(lista) {
                 return [...(Array.isArray(lista) ? lista : [])].sort((a, b) => {
-                  const diferenca = timestampAtividadeLead(b) - timestampAtividadeLead(a);
-                  if (diferenca !== 0) return diferenca;
+                  const diff = timestampAtividadeLead(b) - timestampAtividadeLead(a);
+                  if (diff !== 0) return diff;
                   return String(b && b.casal_id || "").localeCompare(String(a && a.casal_id || ""));
                 });
               }
@@ -79,13 +77,12 @@ jobs:
             return text.replace(old, new, 1)
 
           # HOME — NOVOS
-          home_path = Path("home.html")
-          home = home_path.read_text(encoding="utf-8")
-
+          p = Path("home.html")
+          home = p.read_text(encoding="utf-8")
           if MARKER not in home:
             anchor = "    function primeiraRespostaJaEnviada(casal) {"
             if anchor not in home:
-              raise SystemExit("home.html: anchor não encontrado")
+              raise SystemExit("home: anchor não encontrado")
             home = home.replace(anchor, helper + anchor, 1)
 
           if "const casaisOrdenados = ordenarPorAtividadeMaisRecente(casaisNovos);" not in home:
@@ -93,66 +90,49 @@ jobs:
               home,
               '      if (!casaisNovos || casaisNovos.length === 0) {',
               '      const casaisOrdenados = ordenarPorAtividadeMaisRecente(casaisNovos);\n\n      if (!casaisOrdenados || casaisOrdenados.length === 0) {',
-              "home ordenar NOVOS"
+              "home ordenar"
             )
-            home = replace_once(
-              home,
+            home = replace_once(home,
               '      totalNovos.textContent = casaisNovos.length;',
               '      totalNovos.textContent = casaisOrdenados.length;',
-              "home total NOVOS"
-            )
-            home = replace_once(
-              home,
+              "home total")
+            home = replace_once(home,
               '      casaisNovos.forEach(casal => {',
               '      casaisOrdenados.forEach(casal => {',
-              "home render NOVOS"
-            )
-
-          home_path.write_text(home, encoding="utf-8")
+              "home render")
+          p.write_text(home, encoding="utf-8")
 
           # OPORTUNIDADES — AGENDAR / EMPRESAS / ATENÇÃO
-          op_path = Path("oportunidades.html")
-          op = op_path.read_text(encoding="utf-8")
-
+          p = Path("oportunidades.html")
+          op = p.read_text(encoding="utf-8")
           if MARKER not in op:
             anchor = "    function primeiraRespostaJaEnviada(casal) {"
             if anchor not in op:
-              raise SystemExit("oportunidades.html: anchor não encontrado")
+              raise SystemExit("oportunidades: anchor não encontrado")
             op = op.replace(anchor, helper + anchor, 1)
 
           if "const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);" not in op:
-            old = """      return {
-                agendar,
-                resgatar,
-                agendados,
-                empresas,
-                atencao,
-                encerrados,"""
-            # Python/YAML pode preservar recuo do bloco; normaliza para o recuo real do HTML.
-            old = old.replace("                ", "        ")
-            new = """      const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);
-              const empresasOrdenadas = ordenarPorAtividadeMaisRecente(empresas);
-              const atencaoOrdenada = ordenarPorAtividadeMaisRecente(atencao);
-
-              return {
-                agendar: agendarOrdenado,
-                resgatar,
-                agendados,
-                empresas: empresasOrdenadas,
-                atencao: atencaoOrdenada,
-                encerrados,"""
-            new = new.replace("              ", "      ").replace("                ", "        ")
-            op = replace_once(op, old, new, "oportunidades filas ativas")
-
-          op_path.write_text(op, encoding="utf-8")
+            op = replace_once(
+              op,
+              "      return {\n        agendar,\n",
+              "      const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);\n      const empresasOrdenadas = ordenarPorAtividadeMaisRecente(empresas);\n      const atencaoOrdenada = ordenarPorAtividadeMaisRecente(atencao);\n\n      return {\n        agendar: agendarOrdenado,\n",
+              "oportunidades início return"
+            )
+            op = replace_once(
+              op,
+              "        empresas,\n        atencao,\n        encerrados,",
+              "        empresas: empresasOrdenadas,\n        atencao: atencaoOrdenada,\n        encerrados,",
+              "oportunidades empresas/atenção"
+            )
+          p.write_text(op, encoding="utf-8")
 
           Path("README_V1_18_ORDENACAO_RECENCIA.txt").write_text(
             "CRM ESPAÇO MARGÔ — V1.18 — ORDENAÇÃO POR RECÊNCIA\n\n"
-            "NOVOS / AGENDAR / EMPRESAS / ATENÇÃO exibem primeiro o lead com atividade mais recente.\n\n"
-            "Prioridade da chave: ultima_mensagem_lead_em (quando existir) > ultimo_contato > data_entrada > created_at.\n"
-            "Datas brasileiras dd/mm/aaaa, hh:mm:ss são convertidas para timestamp real.\n"
+            "NOVOS / AGENDAR / EMPRESAS / ATENÇÃO exibem primeiro o lead com atividade mais recente.\n"
+            "Prioridade: ultima_mensagem_lead_em > ultimo_contato > data_entrada > created_at.\n"
+            "Datas brasileiras dd/mm/aaaa, hh:mm:ss são convertidas em timestamp real.\n"
             "AGENDADOS permanece ordenado pela data/hora da visita.\n"
-            "A mudança é somente visual; não altera fila, Milene, estágio ou responsável.\n",
+            "Não altera fila, Milene, estágio ou responsável; apenas a ordem visual.\n",
             encoding="utf-8"
           )
 
