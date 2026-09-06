@@ -23,8 +23,8 @@ jobs:
 
           MARKER = "CRM_SORT_RECENCY_V1"
           helper = r'''
-              // CRM_SORT_RECENCY_V1 — filas ativas: mensagem/contato mais recente primeiro.
-              // Interpreta datas brasileiras (dd/mm/aaaa, hh:mm:ss) e ISO sem depender de localeCompare.
+              // CRM_SORT_RECENCY_V1 — filas ativas: atividade mais recente primeiro.
+              // Converte datas brasileiras (dd/mm/aaaa, hh:mm:ss) e ISO para timestamp real.
               function parseTimestampCRM(valor) {
                 const texto = String(valor || "").trim();
                 if (!texto) return 0;
@@ -78,13 +78,14 @@ jobs:
               raise SystemExit(f"{label}: esperado 1 trecho, encontrado {count}")
             return text.replace(old, new, 1)
 
-          # home.html — NOVOS
+          # HOME — NOVOS
           home_path = Path("home.html")
           home = home_path.read_text(encoding="utf-8")
+
           if MARKER not in home:
             anchor = "    function primeiraRespostaJaEnviada(casal) {"
             if anchor not in home:
-              raise SystemExit("home.html: anchor primeiraRespostaJaEnviada não encontrado")
+              raise SystemExit("home.html: anchor não encontrado")
             home = home.replace(anchor, helper + anchor, 1)
 
           if "const casaisOrdenados = ordenarPorAtividadeMaisRecente(casaisNovos);" not in home:
@@ -92,41 +93,44 @@ jobs:
               home,
               '      if (!casaisNovos || casaisNovos.length === 0) {',
               '      const casaisOrdenados = ordenarPorAtividadeMaisRecente(casaisNovos);\n\n      if (!casaisOrdenados || casaisOrdenados.length === 0) {',
-              "home.html ordenar NOVOS"
+              "home ordenar NOVOS"
             )
             home = replace_once(
               home,
               '      totalNovos.textContent = casaisNovos.length;',
               '      totalNovos.textContent = casaisOrdenados.length;',
-              "home.html total NOVOS"
+              "home total NOVOS"
             )
             home = replace_once(
               home,
               '      casaisNovos.forEach(casal => {',
               '      casaisOrdenados.forEach(casal => {',
-              "home.html render NOVOS"
+              "home render NOVOS"
             )
 
           home_path.write_text(home, encoding="utf-8")
 
-          # oportunidades.html — AGENDAR / EMPRESAS / ATENÇÃO
+          # OPORTUNIDADES — AGENDAR / EMPRESAS / ATENÇÃO
           op_path = Path("oportunidades.html")
           op = op_path.read_text(encoding="utf-8")
+
           if MARKER not in op:
             anchor = "    function primeiraRespostaJaEnviada(casal) {"
             if anchor not in op:
-              raise SystemExit("oportunidades.html: anchor primeiraRespostaJaEnviada não encontrado")
+              raise SystemExit("oportunidades.html: anchor não encontrado")
             op = op.replace(anchor, helper + anchor, 1)
 
           if "const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);" not in op:
-            old = '''      return {
+            old = """      return {
                 agendar,
                 resgatar,
                 agendados,
                 empresas,
                 atencao,
-                encerrados,'''
-            new = '''      const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);
+                encerrados,"""
+            # Python/YAML pode preservar recuo do bloco; normaliza para o recuo real do HTML.
+            old = old.replace("                ", "        ")
+            new = """      const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);
               const empresasOrdenadas = ordenarPorAtividadeMaisRecente(empresas);
               const atencaoOrdenada = ordenarPorAtividadeMaisRecente(atencao);
 
@@ -136,13 +140,21 @@ jobs:
                 agendados,
                 empresas: empresasOrdenadas,
                 atencao: atencaoOrdenada,
-                encerrados,'''
-            op = replace_once(op, old, new, "oportunidades.html filas ativas")
+                encerrados,"""
+            new = new.replace("              ", "      ").replace("                ", "        ")
+            op = replace_once(op, old, new, "oportunidades filas ativas")
 
           op_path.write_text(op, encoding="utf-8")
 
-          readme = Path("README_V1_18_ORDENACAO_RECENCIA.txt")
-          readme.write_text('''CRM ESPAÇO MARGÔ — V1.18 — ORDENAÇÃO POR RECÊNCIA\n\nREGRA HOMOLOGADA:\nNOVOS / AGENDAR / EMPRESAS / ATENÇÃO exibem primeiro o lead com atividade mais recente.\n\nCHAVE DE ORDENAÇÃO:\n1. ultima_mensagem_lead_em, quando existir;\n2. ultimo_contato;\n3. data_entrada;\n4. created_at.\n\nDatas brasileiras dd/mm/aaaa, hh:mm:ss são convertidas para timestamp real antes da comparação.\n\nAGENDADOS NÃO foi alterado: permanece ordenado pela data/hora da visita.\n\nNão altera fila, Milene, status comercial ou dados do casal; altera somente a ordem visual das filas ativas.\n''', encoding="utf-8")
+          Path("README_V1_18_ORDENACAO_RECENCIA.txt").write_text(
+            "CRM ESPAÇO MARGÔ — V1.18 — ORDENAÇÃO POR RECÊNCIA\n\n"
+            "NOVOS / AGENDAR / EMPRESAS / ATENÇÃO exibem primeiro o lead com atividade mais recente.\n\n"
+            "Prioridade da chave: ultima_mensagem_lead_em (quando existir) > ultimo_contato > data_entrada > created_at.\n"
+            "Datas brasileiras dd/mm/aaaa, hh:mm:ss são convertidas para timestamp real.\n"
+            "AGENDADOS permanece ordenado pela data/hora da visita.\n"
+            "A mudança é somente visual; não altera fila, Milene, estágio ou responsável.\n",
+            encoding="utf-8"
+          )
 
       - name: Validate patch
         shell: bash
@@ -170,12 +182,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- home.html oportunidades.html README_V1_18_ORDENACAO_RECENCIA.txt; then
-            echo "No changes to commit"
-            exit 0
-          fi
           git config user.name "crm-espaco-margo-bot"
           git config user.email "actions@users.noreply.github.com"
           git add home.html oportunidades.html README_V1_18_ORDENACAO_RECENCIA.txt
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
           git commit -m "feat: ordenar filas ativas por contato mais recente"
           git push origin HEAD:main
