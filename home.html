@@ -665,6 +665,52 @@
       return consultoraCasal === usuarioAtual;
     }
 
+
+    // CRM_SORT_RECENCY_V1 — filas ativas: atividade mais recente primeiro.
+    function parseTimestampCRM(valor) {
+      const texto = String(valor || "").trim();
+      if (!texto) return 0;
+
+      const br = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,\s*|\s+)?(?:(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+      if (br) {
+        const d = new Date(
+          Number(br[3]),
+          Number(br[2]) - 1,
+          Number(br[1]),
+          Number(br[4] || 0),
+          Number(br[5] || 0),
+          Number(br[6] || 0)
+        );
+        const ts = d.getTime();
+        return Number.isNaN(ts) ? 0 : ts;
+      }
+
+      const iso = Date.parse(texto);
+      return Number.isNaN(iso) ? 0 : iso;
+    }
+
+    function timestampAtividadeLead(casal) {
+      const candidatos = [
+        casal && casal.ultima_mensagem_lead_em,
+        casal && casal.ultimo_contato,
+        casal && casal.data_entrada,
+        casal && casal.created_at
+      ];
+      for (const valor of candidatos) {
+        const ts = parseTimestampCRM(valor);
+        if (ts) return ts;
+      }
+      return 0;
+    }
+
+    function ordenarPorAtividadeMaisRecente(lista) {
+      return [...(Array.isArray(lista) ? lista : [])].sort((a, b) => {
+        const diff = timestampAtividadeLead(b) - timestampAtividadeLead(a);
+        if (diff !== 0) return diff;
+        return String(b && b.casal_id || "").localeCompare(String(a && a.casal_id || ""));
+      });
+    }
+
     function primeiraRespostaJaEnviada(casal) {
       const primeiraIA = String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
       const statusMilene = String(casal && casal.ultimo_status_milene || "").trim().toUpperCase();
@@ -769,15 +815,17 @@
       lista.innerHTML = "";
       totalOportunidadesEl.textContent = totalOportunidades;
 
-      if (!casaisNovos || casaisNovos.length === 0) {
+      const casaisOrdenados = ordenarPorAtividadeMaisRecente(casaisNovos);
+
+      if (!casaisOrdenados || casaisOrdenados.length === 0) {
         totalNovos.textContent = "0";
         lista.innerHTML = '<div class="empty">Nenhum novo casal para esta consultora no momento.</div>';
         return;
       }
 
-      totalNovos.textContent = casaisNovos.length;
+      totalNovos.textContent = casaisOrdenados.length;
 
-      casaisNovos.forEach(casal => {
+      casaisOrdenados.forEach(casal => {
         const card = document.createElement("div");
         card.className = "casal-card";
         card.onclick = () => abrirAtendimento(casal.casal_id);
