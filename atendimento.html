@@ -1991,10 +1991,24 @@
       window.location.href=usuarioAtualId?"oportunidades.html?aba=encerrados&usuario_id="+encodeURIComponent(usuarioAtualId):"oportunidades.html?aba=encerrados";
     }
 
+    function agendarCargaSecundariaAtendimento(corporativo) {
+      // PERFORMANCE V1.19:
+      // A abertura do atendimento prioriza casal + histórico.
+      // Fila (3 endpoints) e resumo de proposta são secundários e só começam
+      // depois que a conversa principal já foi carregada.
+      setTimeout(() => {
+        inicializarNavegacaoFila()
+          .catch(erro => console.warn("Fila de atendimento indisponível:", erro));
+
+        if (!corporativo) {
+          carregarResumoPropostaCasal(casalAtualId);
+        }
+      }, 800);
+    }
+
     async function carregarCasal() {
       casalAtualId = pegarCasalIdDaUrl();
       usuarioAtualId = pegarUsuarioIdDaUrl();
-      inicializarNavegacaoFila().catch(erro => console.warn("Fila de atendimento indisponível:", erro));
 
       if (!casalAtualId) {
         document.getElementById("nomeCasal").textContent = "Casal não informado";
@@ -2017,11 +2031,11 @@
         document.getElementById("dataCasamento").textContent = formatarDataEvento(casal);
         document.getElementById("qtdConvidados").textContent = formatarQuantidadeEvento(casal);
         atualizarResumoPropostaCabecalho(casal);
-        if (!corporativo) carregarResumoPropostaCasal(casalAtualId);
         renderizarEncantamentos(corporativo ? "" : casal.encantamentos_principais);
         configurarAtendimentoPorTipo(casal);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         iniciarAtualizacaoAutomaticaConversas();
+        agendarCargaSecundariaAtendimento(corporativo);
         if (!corporativo) {
           await carregarRevisaoPendenteAtual({ tocarSom: false });
           iniciarAtualizacaoAutomaticaRevisoes();
