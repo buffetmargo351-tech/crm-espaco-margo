@@ -458,6 +458,24 @@
       margin-bottom: 10px;
     }
 
+    .media-pdf-action {
+      width: 100%;
+      min-height: 42px;
+      margin-bottom: 10px;
+      border: 1px solid #e8bfc4;
+      border-radius: 14px;
+      background: #fff;
+      color: #a34f5c;
+      font-size: 11px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .media-pdf-action:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
     .media-list {
       display: grid;
       gap: 8px;
@@ -1329,7 +1347,7 @@
       <div class="media-header">
         <div>
           <div class="media-title" id="mediaTitle">Biblioteca Margô</div>
-          <div class="media-subtitle">Escolha manualmente uma foto ou vídeo aprovado e envie direto pelo WhatsApp.</div>
+          <div class="media-subtitle">Escolha uma foto ou vídeo aprovado, ou envie um PDF do seu computador direto pelo WhatsApp.</div>
         </div>
         <button class="media-close" type="button" onclick="fecharBibliotecaMidia()" aria-label="Fechar">×</button>
       </div>
@@ -1344,6 +1362,10 @@
         <input class="media-search" id="mediaSearch" type="search"
           placeholder="Buscar por título, categoria ou tag..."
           autocomplete="off" oninput="renderizarBibliotecaMidia()" />
+
+        <button class="media-pdf-action" id="mediaPdfBtn" type="button" onclick="abrirSeletorPdfBiblioteca()">
+          📄 ENVIAR PDF DO COMPUTADOR
+        </button>
 
         <div class="media-list" id="mediaList">
           <div class="media-empty">Carregando biblioteca...</div>
@@ -3011,6 +3033,13 @@
       abrirBibliotecaMidia();
     }
 
+    function abrirSeletorPdfBiblioteca() {
+      const input = document.getElementById("pdfFileInput");
+      if (!input) return;
+      input.value = "";
+      input.click();
+    }
+
     async function registrarDocumentoManualNoHistorico(nomeArquivo) {
       const payload = {
         casal_id: casalAtualId || "",
@@ -3058,9 +3087,14 @@
       }
 
       const botao = document.getElementById("mediaManualBtn");
+      const botaoPdf = document.getElementById("mediaPdfBtn");
       botao.disabled = true;
       const textoOriginal = botao.textContent;
       botao.textContent = "…";
+      if (botaoPdf) {
+        botaoPdf.disabled = true;
+        botaoPdf.textContent = "📄 ENVIANDO PDF...";
+      }
 
       try {
         const form = new FormData();
@@ -3090,6 +3124,7 @@
           console.warn("PDF enviado, mas houve falha ao registrar histórico:", erroRegistro);
         }
 
+        fecharBibliotecaMidia();
         alert("PDF enviado pelo WhatsApp com sucesso.");
       } catch (erro) {
         console.error("Erro ao enviar PDF:", erro);
@@ -3097,6 +3132,10 @@
       } finally {
         botao.disabled = false;
         botao.textContent = textoOriginal || "📎";
+        if (botaoPdf) {
+          botaoPdf.disabled = false;
+          botaoPdf.textContent = "📄 ENVIAR PDF DO COMPUTADOR";
+        }
         input.value = "";
       }
     }
