@@ -1307,7 +1307,7 @@
     </div>
     <div class="composer">
       <button class="media-btn" id="mediaManualBtn" type="button" onclick="acaoAnexo()" aria-label="Anexar arquivo ou abrir biblioteca">📎</button>
-      <input id="pdfFileInput" type="file" accept="application/pdf,.pdf" style="display:none" onchange="enviarPdfSelecionado(event)" />
+      <input id="fileAttachmentInput" type="file" accept="application/pdf,image/jpeg,.pdf,.jpg,.jpeg" style="display:none" onchange="enviarArquivoSelecionado(event)" />
       <input id="messageInput" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button class="audio-btn" onclick="alert('Envio de áudio será ativado em breve.')">🎤</button>
       <button class="send-btn" id="sendMessageBtn" type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">➤</button>
@@ -1347,7 +1347,7 @@
       <div class="media-header">
         <div>
           <div class="media-title" id="mediaTitle">Biblioteca Margô</div>
-          <div class="media-subtitle">Escolha uma foto ou vídeo aprovado, ou envie um PDF do seu computador direto pelo WhatsApp.</div>
+          <div class="media-subtitle">Escolha uma foto ou vídeo aprovado, ou envie um PDF/JPEG do seu computador direto pelo WhatsApp.</div>
         </div>
         <button class="media-close" type="button" onclick="fecharBibliotecaMidia()" aria-label="Fechar">×</button>
       </div>
@@ -1363,8 +1363,8 @@
           placeholder="Buscar por título, categoria ou tag..."
           autocomplete="off" oninput="renderizarBibliotecaMidia()" />
 
-        <button class="media-pdf-action" id="mediaPdfBtn" type="button" onclick="abrirSeletorPdfBiblioteca()">
-          📄 ENVIAR PDF DO COMPUTADOR
+        <button class="media-pdf-action" id="mediaFileBtn" type="button" onclick="abrirSeletorArquivoBiblioteca()">
+          📎 ENVIAR ARQUIVO DO COMPUTADOR
         </button>
 
         <div class="media-list" id="mediaList">
@@ -3025,7 +3025,7 @@
 
     function acaoAnexo() {
       if (atendimentoEhCorporativo()) {
-        const input = document.getElementById("pdfFileInput");
+        const input = document.getElementById("fileAttachmentInput");
         input.value = "";
         input.click();
         return;
@@ -3033,21 +3033,21 @@
       abrirBibliotecaMidia();
     }
 
-    function abrirSeletorPdfBiblioteca() {
-      const input = document.getElementById("pdfFileInput");
+    function abrirSeletorArquivoBiblioteca() {
+      const input = document.getElementById("fileAttachmentInput");
       if (!input) return;
       input.value = "";
       input.click();
     }
 
-    async function registrarDocumentoManualNoHistorico(nomeArquivo) {
+    async function registrarArquivoManualNoHistorico(nomeArquivo, tipoArquivo) {
       const payload = {
         casal_id: casalAtualId || "",
         telefone: casalAtual.telefone || "",
         consultora_responsavel: usuarioAtualId || casalAtual.consultora_responsavel || "",
         direcao: "SAIDA",
-        tipo_mensagem: "DOCUMENTO",
-        mensagem: "📄 PDF enviado: " + nomeArquivo,
+        tipo_mensagem: tipoArquivo === "image" ? "IMAGEM" : "DOCUMENTO",
+        mensagem: (tipoArquivo === "image" ? "🖼️ Imagem enviada: " : "📄 PDF enviado: ") + nomeArquivo,
         audio_url: "",
         transcricao_audio: "",
         enviado_por: "CHO",
@@ -3062,12 +3062,12 @@
       });
 
       if (!resposta.ok) {
-        throw new Error("PDF enviado, mas não foi possível registrar no histórico.");
+        throw new Error("Arquivo enviado, mas não foi possível registrar no histórico.");
       }
     }
 
-    async function enviarPdfSelecionado(event) {
-      const input = event && event.target ? event.target : document.getElementById("pdfFileInput");
+    async function enviarArquivoSelecionado(event) {
+      const input = event && event.target ? event.target : document.getElementById("fileAttachmentInput");
       const arquivo = input && input.files ? input.files[0] : null;
       if (!arquivo) return;
 
@@ -3078,22 +3078,26 @@
         return;
       }
 
-      const nome = String(arquivo.name || "documento.pdf");
+      const nome = String(arquivo.name || "arquivo");
       const mime = String(arquivo.type || "").toLowerCase();
-      if (mime && mime !== "application/pdf" && !nome.toLowerCase().endsWith(".pdf")) {
-        alert("Selecione um arquivo PDF.");
+      const nomeLower = nome.toLowerCase();
+      const ehPdf = mime === "application/pdf" || nomeLower.endsWith(".pdf");
+      const ehJpeg = mime === "image/jpeg" || mime === "image/jpg" || nomeLower.endsWith(".jpg") || nomeLower.endsWith(".jpeg");
+      if (!ehPdf && !ehJpeg) {
+        alert("Selecione um arquivo PDF, JPG ou JPEG.");
         input.value = "";
         return;
       }
+      const tipoArquivo = ehPdf ? "document" : "image";
 
       const botao = document.getElementById("mediaManualBtn");
-      const botaoPdf = document.getElementById("mediaPdfBtn");
+      const botaoArquivo = document.getElementById("mediaFileBtn");
       botao.disabled = true;
       const textoOriginal = botao.textContent;
       botao.textContent = "…";
-      if (botaoPdf) {
-        botaoPdf.disabled = true;
-        botaoPdf.textContent = "📄 ENVIANDO PDF...";
+      if (botaoArquivo) {
+        botaoArquivo.disabled = true;
+        botaoArquivo.textContent = ehPdf ? "📄 ENVIANDO PDF..." : "🖼️ ENVIANDO IMAGEM...";
       }
 
       try {
@@ -3114,27 +3118,27 @@
         try { retorno = await resposta.json(); } catch (_) {}
 
         if (!resposta.ok || retorno.sucesso === false || retorno.enviado === false) {
-          throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio do PDF.");
+          throw new Error(retorno.erro || retorno.mensagem || "O WhatsApp não confirmou o envio do arquivo.");
         }
 
         try {
-          await registrarDocumentoManualNoHistorico(nome);
+          await registrarArquivoManualNoHistorico(nome, tipoArquivo);
           await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
         } catch (erroRegistro) {
-          console.warn("PDF enviado, mas houve falha ao registrar histórico:", erroRegistro);
+          console.warn("Arquivo enviado, mas houve falha ao registrar histórico:", erroRegistro);
         }
 
         fecharBibliotecaMidia();
-        alert("PDF enviado pelo WhatsApp com sucesso.");
+        alert((ehPdf ? "PDF" : "Imagem JPEG") + " enviado pelo WhatsApp com sucesso.");
       } catch (erro) {
-        console.error("Erro ao enviar PDF:", erro);
-        alert("O PDF não foi enviado. " + (erro.message || "Tente novamente."));
+        console.error("Erro ao enviar arquivo:", erro);
+        alert("O arquivo não foi enviado. " + (erro.message || "Tente novamente."));
       } finally {
         botao.disabled = false;
         botao.textContent = textoOriginal || "📎";
-        if (botaoPdf) {
-          botaoPdf.disabled = false;
-          botaoPdf.textContent = "📄 ENVIAR PDF DO COMPUTADOR";
+        if (botaoArquivo) {
+          botaoArquivo.disabled = false;
+          botaoArquivo.textContent = "📎 ENVIAR ARQUIVO DO COMPUTADOR";
         }
         input.value = "";
       }
