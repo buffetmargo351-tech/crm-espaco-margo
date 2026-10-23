@@ -88,6 +88,33 @@
     .warning { display: none; margin-top: 8px; border-radius: 14px; padding: 10px; background: #fff6e6; color: #94610b; border: 1px solid #f3d19a; font-size: 12px; font-weight: 800; line-height: 1.35; }
     .warning.open { display: block; }
     .hint { margin-top: 8px; font-size: 11px; font-weight: 700; color: #8a6f6c; line-height: 1.35; }
+
+    .closing-wrap { display:none; }
+    .closing-wrap.open { display:block; }
+    .accordion { border:1px solid #eadada; border-radius:18px; background:#fffaf9; margin-bottom:10px; overflow:hidden; box-shadow:0 7px 16px rgba(0,0,0,.04); }
+    .accordion-head { width:100%; border:0; background:#fff2f4; padding:12px 13px; display:flex; align-items:center; justify-content:space-between; gap:8px; color:#b63f55; font-size:13px; font-weight:950; cursor:pointer; text-align:left; }
+    .accordion-body { display:none; padding:12px; }
+    .accordion.open .accordion-body { display:block; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .form-grid .full { grid-column:1/-1; }
+    .form-grid .field { margin-bottom:0; }
+    select { width:100%; border:1px solid #eadada; border-radius:14px; padding:12px; outline:none; font-size:14px; color:#2f2423; background:#fff; }
+    .required { color:#d45167; }
+    .radio-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .radio-card { border:1px solid #eadada; background:#fff; border-radius:14px; padding:10px; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:900; cursor:pointer; }
+    .radio-card input { width:17px; height:17px; accent-color:#d45167; }
+    .check-list { display:grid; gap:7px; max-height:270px; overflow:auto; padding-right:3px; }
+    .check-item { display:flex; gap:8px; align-items:flex-start; font-size:12px; font-weight:750; color:#4f3c3a; }
+    .check-item input { width:17px; height:17px; margin-top:1px; accent-color:#d45167; flex:0 0 auto; }
+    .payment-summary { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0 12px; }
+    .payment-box { border:1px solid #f0dadd; background:#fff; border-radius:14px; padding:10px; }
+    .payment-box .k { font-size:9px; font-weight:900; color:#9b7672; text-transform:uppercase; }
+    .payment-box .v { margin-top:4px; font-size:17px; font-weight:950; color:#b63f55; }
+    .payment-note { background:#fff4f5; border:1px solid #f0d3d7; border-radius:13px; padding:9px; font-size:11px; line-height:1.35; color:#7b5958; margin-top:8px; font-weight:750; }
+    .subhead { font-size:12px; font-weight:950; color:#5b4644; margin:12px 0 8px; }
+    .btn-contract { width:100%; margin-top:9px; border-radius:16px; padding:14px 12px; border:1px solid #d45167; background:#fff; color:#c5455b; font-size:13px; font-weight:950; cursor:pointer; }
+    .btn-contract:disabled { opacity:.42; cursor:not-allowed; }
+    .success.open + .btn-contract { margin-top:10px; }
     @media (min-width: 700px) { body { padding: 20px 0; } .phone-frame { min-height: calc(100vh - 40px); border-radius: 34px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); } }
   </style>
 </head>
@@ -110,32 +137,6 @@
         </div>
       </section>
 
-      <section class="section">
-        <div class="section-title">📌 Resumo para receber o casal</div>
-        <div class="card compact-grid">
-          <div class="compact-item"><div class="compact-label">Visita</div><div class="compact-value" id="infoVisita">--</div></div>
-          <div class="compact-item"><div class="compact-label">Evento</div><div class="compact-value" id="infoDataEvento">--</div></div>
-          <div class="compact-item"><div class="compact-label">Convidados</div><div class="compact-value" id="infoConvidados">--</div></div>
-          <div class="compact-item"><div class="compact-label">Disponibilidade</div><div class="compact-value" id="infoDisponibilidade">--</div></div>
-          <div class="compact-item"><div class="compact-label">Origem</div><div class="compact-value" id="infoOrigem">--</div></div>
-          <div class="compact-item"><div class="compact-label">Consultora Home Office</div><div class="compact-value" id="infoCHO">--</div></div>
-          <div class="compact-item full"><div class="compact-label">Observações já registradas</div><div class="compact-value" id="infoObservacoes">--</div></div>
-        </div>
-      </section>
-
-      <section class="section" id="informacoesFaltantesSection">
-        <div class="section-title">📌 Informações faltantes</div>
-        <div class="card">
-          <div class="field" id="campoNomeNoivo">
-            <label>Nome do noivo *</label>
-            <input id="nomeNoivo" type="text" placeholder="Digite o nome do noivo" />
-          </div>
-          <div class="field" id="campoEmailNoiva">
-            <label>Email da noiva</label>
-            <input id="emailNoiva" type="email" placeholder="Digite o email da noiva" />
-          </div>
-        </div>
-      </section>
 
       <section class="section" id="origemSection">
         <div class="section-title">🌎 Como você conheceu o Margô?</div>
@@ -184,34 +185,193 @@
       </section>
 
       <section class="section">
-        <div class="section-title">⚠️ Objeções</div>
-        <textarea id="objecoesCasal" placeholder="Ex: valor, data, distância, quantidade de convidados, comparação com outro espaço..."></textarea>
-      </section>
-
-      <section class="section">
-        <div class="section-title">📍 Resultado</div>
-        <div class="card single-options">
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="FECHOU" /> Fechou</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NEGOCIACAO" /> Negociação</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_FECHOU" /> Não fechou</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_COMPARECEU" /> Não compareceu</label>
-        </div>
-        <div class="hint">Campo visual para apoiar a reunião. Nesta versão, ainda não grava resultado em aba própria.</div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">💰 Valor do Evento Completo</div>
-        <input class="money-input" id="valorEventoCompleto" type="text" inputmode="decimal" placeholder="Ex.: R$ 45.000,00" />
-        <div class="hint">Campo visual para a Consultora Presencial informar durante a visita. Nesta versão, não grava na planilha.</div>
+        <div class="section-title">⚠️ Objeções do casal</div>
+        <textarea id="objecoesCasal" placeholder="Descreva as principais dúvidas ou objeções..."></textarea>
       </section>
 
       <section class="section">
         <div class="section-title">📝 Observações da Consultora Presencial</div>
-        <textarea id="observacoesCP" placeholder="Ex: casal gostou mais da cerimônia externa; mãe participa da decisão; objeção sobre data, valor ou quantidade..."></textarea>
-        <div class="hint">Esse registro será salvo nas observações gerais do casal para continuidade comercial.</div>
+        <textarea id="observacoesCP" placeholder="Registre aqui impressões, detalhes e pontos importantes da visita..."></textarea>
       </section>
 
+      <section class="section">
+        <div class="section-title">📍 Resultado da visita <span class="required">*</span></div>
+        <div class="card single-options">
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="FECHOU" onchange="resultadoMudou()" /> Fechou</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NEGOCIACAO" onchange="resultadoMudou()" /> Negociação</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_FECHOU" onchange="resultadoMudou()" /> Não fechou</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_COMPARECEU" onchange="resultadoMudou()" /> Não compareceu</label>
+        </div>
+      </section>
+
+      <div class="closing-wrap" id="fechamentoWrap">
+        <section class="accordion open" id="accNoiva">
+          <button class="accordion-head" type="button" onclick="toggleAccordion('accNoiva')"><span>👰 Dados da Noiva</span><span>⌃</span></button>
+          <div class="accordion-body">
+            <div class="form-grid">
+              <div class="field full"><label>Nome completo <span class="required">*</span></label><input id="p1_nome" /></div>
+              <div class="field"><label>Dia e mês do aniversário</label><input id="p1_aniversario" placeholder="DD/MM" /></div>
+              <div class="field"><label>Profissão <span class="required">*</span></label><input id="p1_profissao" /></div>
+              <div class="field"><label>RG <span class="required">*</span></label><input id="p1_rg" /></div>
+              <div class="field"><label>CPF <span class="required">*</span></label><input id="p1_cpf" /></div>
+              <div class="field"><label>Telefone <span class="required">*</span></label><input id="p1_telefone" inputmode="tel" /></div>
+              <div class="field"><label>E-mail <span class="required">*</span></label><input id="p1_email" type="email" /></div>
+              <div class="field"><label>CEP <span class="required">*</span></label><input id="p1_cep" /></div>
+              <div class="field full"><label>Endereço <span class="required">*</span></label><input id="p1_endereco" /></div>
+              <div class="field"><label>Bairro <span class="required">*</span></label><input id="p1_bairro" /></div>
+              <div class="field"><label>Cidade <span class="required">*</span></label><input id="p1_cidade" /></div>
+              <div class="field"><label>Estado <span class="required">*</span></label><input id="p1_estado" maxlength="2" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion" id="accNoivo">
+          <button class="accordion-head" type="button" onclick="toggleAccordion('accNoivo')"><span>🤵 Dados do Noivo</span><span>⌄</span></button>
+          <div class="accordion-body">
+            <div class="form-grid">
+              <div class="field full"><label>Nome completo <span class="required">*</span></label><input id="p2_nome" /></div>
+              <div class="field"><label>Dia e mês do aniversário</label><input id="p2_aniversario" placeholder="DD/MM" /></div>
+              <div class="field"><label>Profissão <span class="required">*</span></label><input id="p2_profissao" /></div>
+              <div class="field"><label>RG <span class="required">*</span></label><input id="p2_rg" /></div>
+              <div class="field"><label>CPF <span class="required">*</span></label><input id="p2_cpf" /></div>
+              <div class="field"><label>Telefone <span class="required">*</span></label><input id="p2_telefone" inputmode="tel" /></div>
+              <div class="field"><label>E-mail <span class="required">*</span></label><input id="p2_email" type="email" /></div>
+              <div class="field"><label>CEP <span class="required">*</span></label><input id="p2_cep" /></div>
+              <div class="field full"><label>Endereço <span class="required">*</span></label><input id="p2_endereco" /></div>
+              <div class="field"><label>Bairro <span class="required">*</span></label><input id="p2_bairro" /></div>
+              <div class="field"><label>Cidade <span class="required">*</span></label><input id="p2_cidade" /></div>
+              <div class="field"><label>Estado <span class="required">*</span></label><input id="p2_estado" maxlength="2" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion" id="accEvento">
+          <button class="accordion-head" type="button" onclick="toggleAccordion('accEvento')"><span>📅 Dados do Evento</span><span>⌄</span></button>
+          <div class="accordion-body">
+            <div class="form-grid">
+              <div class="field full"><label>Tipo de Evento <span class="required">*</span></label>
+                <select id="tipoEvento"><option>Casamento</option><option>Debutante</option><option>Bodas</option><option>Aniversário</option><option>Outro</option></select>
+              </div>
+              <div class="field"><label>Data do evento <span class="required">*</span></label><input id="dataEvento" type="date" /></div>
+              <div class="field"><label>Quantidade de convidados <span class="required">*</span></label><input id="qtdConvidados" type="number" min="1" /></div>
+              <div class="field full"><label>Horário <span class="required">*</span></label>
+                <select id="horarioEvento">
+                  <option value="">Selecione</option>
+                  <option>Início às 9:00h e término às 14:00h</option><option>Início às 16:30h e término às 21:30h</option>
+                  <option>Início às 17:00h e término às 22:00h</option><option>Início às 17:30h e término às 22:30h</option>
+                  <option>Início às 18:00h e término às 23:00h</option><option>Início às 18:30h e término às 23:30h</option>
+                  <option>Início às 19:00h e término às 0:00h</option><option>Início às 19:30h e término às 0:30h</option>
+                  <option>Início às 20:00h e término às 1:00h</option><option>Início às 7h e término às 22h</option>
+                  <option>Início às 7h e término às 18h</option><option>Início às 12h e término às 23h</option>
+                  <option>Início às 7h e término às 14h</option><option>Início às 16h e término às 23h</option><option>Início às 8h e término às 23h</option>
+                </select>
+              </div>
+              <div class="field full"><label>Horário de chegada dos noivos <span class="required">*</span></label>
+                <select id="horaChegadaNoivos"><option value="">Selecione</option><option>7:00h</option><option>8:00h</option><option>9:00h</option><option>10:00h</option><option>11:00h</option><option>12:00h</option><option>13:00h</option><option>14:00h</option><option>15:00h</option><option>16:00h</option><option>17:00h</option><option>18:00h</option><option>19:00h</option></select>
+              </div>
+              <div class="field full"><label>Observações sobre o horário do evento</label><textarea id="obsHorario" placeholder="Opcional"></textarea></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion" id="accCardapio">
+          <button class="accordion-head" type="button" onclick="toggleAccordion('accCardapio')"><span>🍽️ Cardápio / Serviços / Cortesias</span><span>⌄</span></button>
+          <div class="accordion-body">
+            <div class="field"><label>Cardápio Escolhido <span class="required">*</span></label>
+              <select id="cardapioEscolhido"><option value="">Selecione</option><option>Cardápio Strogonoff</option><option>Cardápio Premium</option><option>Cardápio Lagarto ao Molho Madeira</option><option>Cardápio Carnes & Massas</option><option>Cardápio Churrasco Prata</option><option>Cardápio Churrasco Ouro</option><option>Cardápio Churrasco Nobre</option><option>Cardápio Cozinha Mineira</option></select>
+            </div>
+            <div class="field"><label>Observações sobre o Cardápio</label><textarea id="obsCardapio" placeholder="Opcional"></textarea></div>
+            <div class="subhead">Chopeira</div>
+            <div class="radio-row">
+              <label class="radio-card"><input type="radio" name="chopeira" value="Sim" onchange="chopeiraMudou()" /> Sim</label>
+              <label class="radio-card"><input type="radio" name="chopeira" value="Não" checked onchange="chopeiraMudou()" /> Não</label>
+            </div>
+            <div class="field hidden" id="campoChopp" style="margin-top:8px"><label>Quantidade e tipo do Chopp</label><input id="qtdTipoChopp" placeholder="Ex.: 2 torres — Pilsen e Black" /></div>
+
+            <div class="subhead">CORTESIAS — escolha 1 opção <span class="required">*</span></div>
+            <div class="single-options">
+              <label class="single-option"><input type="radio" name="cortesia" value="150 Doces Finos para mesa do bolo" /> 150 Doces Finos para mesa do bolo</label>
+              <label class="single-option"><input type="radio" name="cortesia" value="Dia dos Noivos (exclusivo para 2 pessoas - mesa de frutas, café da manhã ou almoço)" /> Dia dos Noivos (exclusivo para 2 pessoas - mesa de frutas, café da manhã ou almoço)</label>
+              <label class="single-option"><input type="radio" name="cortesia" value="Assessoria do dia" /> Assessoria do dia</label>
+            </div>
+
+            <div class="subhead">Serviços e Produtos do seu evento <span class="required">*</span></div>
+            <div class="check-list" id="servicosLista">
+              <label class="check-item"><input class="service-cb" type="checkbox" value="DJ para cerimônia" /> DJ para cerimônia</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="DJ para festa" /> DJ para festa</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Pista de Dança Led Paris" /> Pista de Dança Led Paris</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Assessoria do dia e Cerimonialista" /> Assessoria do dia e Cerimonialista</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Celebração" /> Celebração</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Open Bar de Coquetel sem Álcool" /> Open Bar de Coquetel sem Álcool</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Open Bar de Coquetel com Álcool" /> Open Bar de Coquetel com Álcool</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Projetor para Retrospectiva" /> Projetor para Retrospectiva</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Carroça de Chocolate" /> Carroça de Chocolate</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Passarela Espelhada no Cerimonial" /> Passarela Espelhada no Cerimonial</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Fonte Flutuante" /> Fonte Flutuante</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Músicos/Organista para Cerimônia" /> Músicos/Organista para Cerimônia</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Músicos/Banda para Festa" /> Músicos/Banda para Festa</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Robô de Led" /> Robô de Led</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Espelho Mágico" /> Espelho Mágico</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Foto Spinner 360 graus" /> Foto Spinner 360 graus</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Letreiro LOVE" /> Letreiro LOVE</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Locação de Louças, Talheres e Outros Utensílios (conforme lista)" /> Locação de Louças, Talheres e Outros Utensílios (conforme lista)</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Estacionamento Grátis" /> Estacionamento Grátis</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Camarim VIP" /> Camarim VIP</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Equipamento de Som para DJ" /> Equipamento de Som para DJ</label>
+              <label class="check-item"><input class="service-cb" type="checkbox" value="Iluminação para Festa" /> Iluminação para Festa</label>
+            </div>
+            <div class="field" style="margin-top:10px"><label>Observações contratuais / adicionais</label><textarea id="obsContrato" placeholder="Opcional"></textarea></div>
+          </div>
+        </section>
+
+        <section class="accordion" id="accPagamento">
+          <button class="accordion-head" type="button" onclick="toggleAccordion('accPagamento')"><span>💰 Condições de Pagamento</span><span>⌄</span></button>
+          <div class="accordion-body">
+            <div class="field"><label>Valor Total do Evento <span class="required">*</span></label><input class="money-input" id="valorTotalContrato" inputmode="decimal" placeholder="R$ 0,00" oninput="calcularPagamento()" /></div>
+            <div class="payment-summary">
+              <div class="payment-box"><div class="k">Entrada (30%)</div><div class="v" id="entrada30Display">R$ 0,00</div></div>
+              <div class="payment-box"><div class="k">Saldo (70%)</div><div class="v" id="saldo70Display">R$ 0,00</div></div>
+            </div>
+            <div class="subhead">Forma da entrada <span class="required">*</span></div>
+            <div class="radio-row">
+              <label class="radio-card"><input type="radio" name="entradaModo" value="TOTAL" checked onchange="entradaModoMudou()" /> Total</label>
+              <label class="radio-card"><input type="radio" name="entradaModo" value="FRACIONADA" onchange="entradaModoMudou()" /> Fracionada</label>
+            </div>
+            <div class="payment-note">A entrada corresponde a 30% do contrato. Se fracionada: no máximo entrada no ato + 2 parcelas. A primeira é no ato e deve ser de no mínimo R$ 1.000,00.</div>
+
+            <div id="entradaFracionadaArea" class="hidden">
+              <div class="form-grid" style="margin-top:10px">
+                <div class="field"><label>Quantidade de pagamentos</label><select id="entradaQtd" onchange="entradaQtdMudou()"><option value="2">2 pagamentos</option><option value="3" selected>3 pagamentos</option></select></div>
+                <div class="field"><label>Entrada no ato <span class="required">*</span></label><input id="entrada1Valor" inputmode="decimal" placeholder="R$ 1.000,00" oninput="calcularPagamento()" /></div>
+                <div class="field"><label>2ª parcela — valor <span class="required">*</span></label><input id="entrada2Valor" inputmode="decimal" oninput="calcularPagamento()" /></div>
+                <div class="field"><label>2ª parcela — data <span class="required">*</span></label><input id="entrada2Data" type="date" /></div>
+                <div class="field" id="entrada3ValorField"><label>3ª parcela — valor <span class="required">*</span></label><input id="entrada3Valor" inputmode="decimal" oninput="calcularPagamento()" /></div>
+                <div class="field" id="entrada3DataField"><label>3ª parcela — data <span class="required">*</span></label><input id="entrada3Data" type="date" /></div>
+              </div>
+              <div class="payment-note" id="entradaSomaInfo">A soma deve fechar exatamente os 30%.</div>
+            </div>
+
+            <div class="subhead">Saldo restante (70%)</div>
+            <div class="form-grid">
+              <div class="field"><label>Quantidade de parcelas <span class="required">*</span></label><input id="saldoQtd" type="number" min="1" max="60" value="12" oninput="calcularPagamento()" /></div>
+              <div class="field"><label>Valor da parcela</label><input id="saldoValorParcela" readonly /></div>
+              <div class="field"><label>Primeiro vencimento <span class="required">*</span></label><input id="saldoPrimeiroVenc" type="date" onchange="primeiroVencimentoMudou()" /></div>
+              <div class="field"><label>Vencimento todo dia <span class="required">*</span></label><select id="saldoDia"></select></div>
+            </div>
+            <div class="payment-note"><strong>Forma de pagamento: PIX.</strong> As parcelas mensais serão geradas automaticamente no plano do contrato.</div>
+          </div>
+        </section>
+      </div>
+
       <div class="warning" id="warningBox"></div>
+
+      <div class="actions">
+        <button class="btn-home" onclick="voltar()">🏠 Voltar</button>
+        <button class="btn-confirm" id="btnSalvar" onclick="salvarRegistroCP()">❤️ Salvar Registro</button>
+      </div>
+      <button class="btn-contract" id="btnGerarContrato" type="button" disabled>📄 Gerar Contrato</button>
+      <div class="success" id="successBox"></div>
+
 
       <div class="actions">
         <button class="btn-home" onclick="voltar()">🏠 Voltar</button>
@@ -227,6 +387,7 @@
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
+    const API_FECHAMENTO_CP = "https://n8n.espacomargo.com.br/webhook/crm/fechamento-cp";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
@@ -339,15 +500,30 @@
       botao.classList.add("selected");
     }
 
-    function atualizarBlocoInformacoesFaltantes() {
-      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
-      const emailNoiva = document.getElementById("emailNoiva").value.trim();
-      const section = document.getElementById("informacoesFaltantesSection");
-      const campoNomeNoivo = document.getElementById("campoNomeNoivo");
-      const campoEmailNoiva = document.getElementById("campoEmailNoiva");
-      campoNomeNoivo.classList.toggle("hidden", !!nomeNoivo);
-      campoEmailNoiva.classList.toggle("hidden", !!emailNoiva);
-      section.classList.toggle("hidden", !!nomeNoivo && !!emailNoiva);
+
+    function valor(id) {
+      const el = document.getElementById(id);
+      return el ? String(el.value || "").trim() : "";
+    }
+
+    function preencher(id, v) {
+      const el = document.getElementById(id);
+      if (el && v !== undefined && v !== null && String(v).trim() !== "") el.value = v;
+    }
+
+    function dataBRParaISO(v) {
+      const s = String(v || "").trim();
+      let m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (m) return m[3] + "-" + m[2] + "-" + m[1];
+      m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m ? s : "";
+    }
+
+    function nomeCasal(casal) {
+      const p1 = casal.nome_pessoa_1 || casal.nome_noiva || casal.nome_contato || "";
+      const p2 = casal.nome_pessoa_2 || casal.nome_noivo || "";
+      if (p1 && p2) return p1 + " ❤️ " + p2;
+      return p1 || p2 || "Casal sem nome";
     }
 
     async function carregarCasal() {
@@ -366,17 +542,6 @@
         }
         casalAtual = casal;
         document.getElementById("nomeCasal").textContent = nomeCasal(casal);
-        document.getElementById("infoVisita").textContent = textoOuPadrao((casal.data_consultoria || "") + (casal.hora_consultoria ? " às " + casal.hora_consultoria : ""), "Não agendada");
-        document.getElementById("infoDataEvento").textContent = textoOuPadrao(casal.data_casamento, "Não informada");
-        document.getElementById("infoConvidados").textContent = casal.quantidade_convidados ? casal.quantidade_convidados + " convidados" : "Não informado";
-        document.getElementById("infoDisponibilidade").textContent = textoOuPadrao(casal.status_disponibilidade_data, "Não consultada");
-        document.getElementById("infoOrigem").textContent = textoOuPadrao(casal.origem || casal.como_conheceu_margo, "Não informada");
-        document.getElementById("infoCHO").textContent = textoOuPadrao(casal.consultora_responsavel, "Não informada");
-        document.getElementById("infoObservacoes").textContent = textoOuPadrao(casal.observacoes_gerais, "Sem observações registradas");
-
-        if (casal.nome_noivo) document.getElementById("nomeNoivo").value = casal.nome_noivo;
-        if (casal.email) document.getElementById("emailNoiva").value = casal.email;
-        atualizarBlocoInformacoesFaltantes();
 
         origemAtual = String(casal.origem || casal.como_conheceu_margo || "").trim();
         if (origemAtual) {
@@ -385,8 +550,17 @@
         }
 
         if (casal.encantamentos_principais) {
-          casal.encantamentos_principais.split("|").forEach(valor => selecionarChipPorValor("encantamentosSection", valor.trim()));
+          casal.encantamentos_principais.split("|").forEach(function(v){ selecionarChipPorValor("encantamentosSection", v.trim()); });
         }
+
+        preencher("p1_nome", casal.nome_pessoa_1 || casal.nome_noiva || casal.nome_contato || "");
+        preencher("p1_telefone", casal.telefone || "");
+        preencher("p1_email", casal.email || "");
+        preencher("p2_nome", casal.nome_pessoa_2 || casal.nome_noivo || "");
+        preencher("dataEvento", dataBRParaISO(casal.data_evento || casal.data_casamento || ""));
+        preencher("qtdConvidados", casal.quantidade_pessoas || casal.quantidade_convidados || "");
+
+        calcularPagamento();
       } catch (erro) {
         console.error("Erro ao carregar casal:", erro);
         document.getElementById("nomeCasal").textContent = "Erro ao carregar";
@@ -395,7 +569,7 @@
 
     function chipsSelecionados(sectionId) {
       return Array.from(document.querySelectorAll("#" + sectionId + " .chip.selected"))
-        .map(chip => chip.dataset.value || chip.textContent.trim())
+        .map(function(chip){ return chip.dataset.value || chip.textContent.trim(); })
         .filter(Boolean);
     }
 
@@ -403,6 +577,7 @@
       const box = document.getElementById("warningBox");
       box.textContent = texto;
       box.classList.add("open");
+      box.scrollIntoView({behavior:"smooth", block:"center"});
     }
 
     function esconderAviso() {
@@ -416,88 +591,229 @@
       return marcado ? marcado.value : "";
     }
 
-    async function salvarRegistroCP() {
-      esconderAviso();
-      atualizarBlocoInformacoesFaltantes();
-      if (!casalAtualId) {
-        mostrarAviso("Casal não identificado.");
-        return;
-      }
+    function toggleAccordion(id) {
+      document.getElementById(id).classList.toggle("open");
+    }
 
-      const nomeNoivo = document.getElementById("nomeNoivo").value.trim();
-      if (!nomeNoivo) {
-        document.getElementById("informacoesFaltantesSection").classList.remove("hidden");
-        document.getElementById("campoNomeNoivo").classList.remove("hidden");
-        mostrarAviso("Informe o nome do noivo antes de salvar o registro da visita.");
-        return;
-      }
-
-      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
-      const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
-      if (!origemFinal) {
-        document.getElementById("origemSection").classList.remove("hidden");
-        mostrarAviso("Informe como o casal conheceu o Espaço Margô.");
-        return;
-      }
-
-      const encantamentosFotos = chipsSelecionados("encantamentosSection");
-      const encantamentosVisita = chipsSelecionados("encantamentoPresencialSection");
-      const todosEncantamentos = Array.from(new Set([...encantamentosFotos, ...encantamentosVisita]));
-      if (todosEncantamentos.length === 0) {
-        mostrarAviso("Selecione pelo menos um encantamento percebido no casal.");
-        return;
-      }
-
-      const observacoesCP = document.getElementById("observacoesCP").value.trim();
-      const objecoes = document.getElementById("objecoesCasal").value.trim();
-      const resultado = resultadoSelecionado();
-      const valorEvento = document.getElementById("valorEventoCompleto").value.trim();
-
-      const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
-      const dataRegistro = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-      const partesRegistro = [];
-      partesRegistro.push("[Registro Consultora Presencial - " + dataRegistro + "]");
-      if (observacoesCP) partesRegistro.push("Observações: " + observacoesCP);
-      if (objecoes) partesRegistro.push("Objeções: " + objecoes);
-      if (resultado) partesRegistro.push("Resultado informado: " + resultado);
-      if (valorEvento) partesRegistro.push("Valor do Evento Completo informado: " + valorEvento);
-      if (partesRegistro.length === 1) partesRegistro.push("Visita presencial registrada pela Consultora Presencial.");
-      const blocoCP = partesRegistro.join("\n");
-      const observacoesGerais = observacoesBase ? observacoesBase + "\n\n" + blocoCP : blocoCP;
-
-      const payload = {
-        casal_id: casalAtualId,
-        nome_noivo: nomeNoivo,
-        email: document.getElementById("emailNoiva").value.trim(),
-        data_consultoria: casalAtual.data_consultoria || "",
-        hora_consultoria: casalAtual.hora_consultoria || "",
-        como_conheceu_margo: origemFinal,
-        encantamentos_principais: todosEncantamentos.join("|"),
-        observacoes_gerais: observacoesGerais
-      };
-
-      const botao = document.getElementById("btnSalvar");
-      botao.disabled = true;
-      botao.textContent = "Salvando...";
-
-      try {
-        const resposta = await fetch(API_CONSULTORIA, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!resposta.ok) throw new Error("Erro ao salvar registro da Consultora Presencial");
-        document.getElementById("successBox").classList.add("open");
-        botao.textContent = "Salvo";
-        setTimeout(voltar, 1800);
-      } catch (erro) {
-        console.error(erro);
-        mostrarAviso("Erro ao salvar registro da Consultora Presencial. Confira o workflow de consultoria.");
-        botao.disabled = false;
-        botao.textContent = "❤️ Salvar Registro";
+    function resultadoMudou() {
+      const fechou = resultadoSelecionado() === "FECHOU";
+      document.getElementById("fechamentoWrap").classList.toggle("open", fechou);
+      const btn = document.getElementById("btnSalvar");
+      btn.textContent = fechou ? "✅ Salvar Fechamento" : "❤️ Salvar Registro";
+      if (fechou) {
+        document.getElementById("accNoiva").classList.add("open");
+        setTimeout(function(){ document.getElementById("fechamentoWrap").scrollIntoView({behavior:"smooth",block:"start"}); },100);
       }
     }
 
+    function chopeiraMudou() {
+      const sim = document.querySelector('input[name="chopeira"]:checked')?.value === "Sim";
+      document.getElementById("campoChopp").classList.toggle("hidden", !sim);
+    }
+
+    function moedaNumero(v) {
+      let s = String(v || "").replace(/R\$/gi,"").replace(/\s/g,"").trim();
+      if (s.includes(",")) s = s.replace(/\./g,"").replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function fmtMoeda(n) {
+      return Number(n || 0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+    }
+
+    function entradaModoAtual() {
+      return document.querySelector('input[name="entradaModo"]:checked')?.value || "TOTAL";
+    }
+
+    function entradaModoMudou() {
+      const fr = entradaModoAtual() === "FRACIONADA";
+      document.getElementById("entradaFracionadaArea").classList.toggle("hidden", !fr);
+      calcularPagamento();
+    }
+
+    function entradaQtdMudou() {
+      const tres = valor("entradaQtd") === "3";
+      document.getElementById("entrada3ValorField").classList.toggle("hidden", !tres);
+      document.getElementById("entrada3DataField").classList.toggle("hidden", !tres);
+      calcularPagamento();
+    }
+
+    function primeiroVencimentoMudou() {
+      const d = valor("saldoPrimeiroVenc");
+      if (d) {
+        const dia = Number(d.split("-")[2] || 5);
+        document.getElementById("saldoDia").value = String(Math.min(Math.max(dia,1),28));
+      }
+      calcularPagamento();
+    }
+
+    function calcularPagamento() {
+      const total = moedaNumero(valor("valorTotalContrato"));
+      const entrada = Math.round(total * 30) / 100;
+      const saldo = Math.round((total - entrada) * 100) / 100;
+      document.getElementById("entrada30Display").textContent = fmtMoeda(entrada);
+      document.getElementById("saldo70Display").textContent = fmtMoeda(saldo);
+
+      const qtd = Math.max(1, Number(valor("saldoQtd") || 1));
+      document.getElementById("saldoValorParcela").value = fmtMoeda(saldo / qtd);
+
+      if (entradaModoAtual() === "FRACIONADA") {
+        const n = valor("entradaQtd") === "2" ? 2 : 3;
+        const soma = moedaNumero(valor("entrada1Valor")) + moedaNumero(valor("entrada2Valor")) + (n === 3 ? moedaNumero(valor("entrada3Valor")) : 0);
+        const falta = Math.round((entrada - soma) * 100) / 100;
+        const box = document.getElementById("entradaSomaInfo");
+        box.textContent = Math.abs(falta) < 0.01 ? "✓ Entrada fecha exatamente os 30%." : "Faltam " + fmtMoeda(falta) + " para completar os 30%.";
+      }
+    }
+
+    function preencherDiasVencimento() {
+      const s = document.getElementById("saldoDia");
+      s.innerHTML = "";
+      for (let i=1;i<=28;i++) {
+        const o=document.createElement("option");
+        o.value=String(i); o.textContent=String(i);
+        if (i===5) o.selected=true;
+        s.appendChild(o);
+      }
+    }
+
+    function servicosSelecionados() {
+      return Array.from(document.querySelectorAll(".service-cb:checked")).map(function(el){ return el.value; });
+    }
+
+    function radioValor(nome) {
+      const el = document.querySelector('input[name="' + nome + '"]:checked');
+      return el ? el.value : "";
+    }
+
+    function coletarDadosContrato() {
+      return {
+        nome_1:valor("p1_nome"), aniversario_1:valor("p1_aniversario"), profissao_1:valor("p1_profissao"), rg_1:valor("p1_rg"), cpf_1:valor("p1_cpf"),
+        telefone_1:valor("p1_telefone"), email_1:valor("p1_email"), endereco_1:valor("p1_endereco"), cep_1:valor("p1_cep"), bairro_1:valor("p1_bairro"), cidade_1:valor("p1_cidade"), estado_1:valor("p1_estado").toUpperCase(),
+        nome_2:valor("p2_nome"), aniversario_2:valor("p2_aniversario"), profissao_2:valor("p2_profissao"), rg_2:valor("p2_rg"), cpf_2:valor("p2_cpf"),
+        telefone_2:valor("p2_telefone"), email_2:valor("p2_email"), endereco_2:valor("p2_endereco"), cep_2:valor("p2_cep"), bairro_2:valor("p2_bairro"), cidade_2:valor("p2_cidade"), estado_2:valor("p2_estado").toUpperCase(),
+        tipo_evento:valor("tipoEvento"), quantidade_convidados:valor("qtdConvidados"), data_evento:valor("dataEvento"), horario:valor("horarioEvento"),
+        horario_chegada_noivos:valor("horaChegadaNoivos"), observacoes_horario:valor("obsHorario"),
+        cardapio_escolhido:valor("cardapioEscolhido"), observacoes_cardapio:valor("obsCardapio"), chopeira:radioValor("chopeira"),
+        quantidade_tipo_chopp:valor("qtdTipoChopp"), cortesia:radioValor("cortesia"), servicos_produtos:servicosSelecionados(),
+        observacoes_contrato:valor("obsContrato")
+      };
+    }
+
+    function validarDadosContrato(d) {
+      const obrig = ["nome_1","profissao_1","rg_1","cpf_1","telefone_1","email_1","endereco_1","cep_1","bairro_1","cidade_1","estado_1",
+        "nome_2","profissao_2","rg_2","cpf_2","telefone_2","email_2","endereco_2","cep_2","bairro_2","cidade_2","estado_2",
+        "tipo_evento","quantidade_convidados","data_evento","horario","horario_chegada_noivos","cardapio_escolhido","cortesia"];
+      const faltam = obrig.filter(function(k){ return !String(d[k] || "").trim(); });
+      if (faltam.length) return "Complete os campos obrigatórios do contrato antes de salvar.";
+      if (!d.servicos_produtos.length) return "Selecione pelo menos um serviço/produto do evento.";
+      if (d.chopeira === "Sim" && !d.quantidade_tipo_chopp) return "Informe a quantidade e o tipo do chopp.";
+      return "";
+    }
+
+    function montarEntradaParcelas() {
+      if (entradaModoAtual() === "TOTAL") return [];
+      const qtd = valor("entradaQtd") === "2" ? 2 : 3;
+      const hoje = new Date();
+      const iso = hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0")+"-"+String(hoje.getDate()).padStart(2,"0");
+      const arr = [{valor:moedaNumero(valor("entrada1Valor")),data:iso},{valor:moedaNumero(valor("entrada2Valor")),data:valor("entrada2Data")}];
+      if (qtd === 3) arr.push({valor:moedaNumero(valor("entrada3Valor")),data:valor("entrada3Data")});
+      return arr;
+    }
+
+    async function salvarFechamentoCP() {
+      const dados = coletarDadosContrato();
+      const erroDados = validarDadosContrato(dados);
+      if (erroDados) { mostrarAviso(erroDados); return; }
+
+      const total = moedaNumero(valor("valorTotalContrato"));
+      if (total <= 0) { mostrarAviso("Informe o valor total do evento."); return; }
+
+      const entrada = Math.round(total * 30) / 100;
+      if (entradaModoAtual() === "FRACIONADA") {
+        const parcelas = montarEntradaParcelas();
+        if (parcelas[0].valor < 1000) { mostrarAviso("A entrada no ato deve ser de no mínimo R$ 1.000,00."); return; }
+        if (parcelas.some(function(p){ return p.valor <= 0 || !p.data; })) { mostrarAviso("Preencha valor e data das parcelas da entrada."); return; }
+        const soma = Math.round(parcelas.reduce(function(a,p){ return a+p.valor; },0)*100)/100;
+        if (Math.abs(soma - entrada) > .01) { mostrarAviso("A soma da entrada precisa fechar exatamente 30% do contrato."); return; }
+      }
+
+      const saldoQtd = Number(valor("saldoQtd") || 0);
+      if (!saldoQtd || !valor("saldoPrimeiroVenc")) { mostrarAviso("Informe quantidade de parcelas e primeiro vencimento do saldo."); return; }
+
+      const payload = {
+        casal_id:casalAtualId,
+        consultora_id:usuarioAtualId,
+        resultado_visita:"FECHOU",
+        dados_contrato:dados,
+        valor_total:total,
+        entrada_modo:entradaModoAtual(),
+        entrada_parcelas:montarEntradaParcelas(),
+        saldo_quantidade:saldoQtd,
+        saldo_primeiro_vencimento:valor("saldoPrimeiroVenc"),
+        saldo_dia:Number(valor("saldoDia") || 5),
+        observacoes_fechamento:valor("observacoesCP")
+      };
+
+      const btn=document.getElementById("btnSalvar");
+      btn.disabled=true; btn.textContent="Salvando fechamento...";
+      try {
+        const resp=await fetch(API_FECHAMENTO_CP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+        const txt=await resp.text();
+        let data={}; try{ data=JSON.parse(txt); }catch(e){}
+        if(!resp.ok || data.sucesso!==true) throw new Error(data.message || data.erro || txt || "Erro ao salvar fechamento.");
+        document.getElementById("successBox").textContent="Fechamento salvo com sucesso. Contrato pronto para geração. ✅";
+        document.getElementById("successBox").classList.add("open");
+        document.getElementById("btnGerarContrato").disabled=false;
+        document.getElementById("btnGerarContrato").dataset.fechamentoId=data.fechamento_id || "";
+        btn.textContent="✅ Fechamento Salvo";
+      } catch(erro) {
+        console.error(erro);
+        mostrarAviso(erro.message || "Erro ao salvar fechamento.");
+        btn.disabled=false; btn.textContent="✅ Salvar Fechamento";
+      }
+    }
+
+    async function salvarRegistroCP() {
+      esconderAviso();
+      if (!casalAtualId) { mostrarAviso("Casal não identificado."); return; }
+      const resultado = resultadoSelecionado();
+      if (!resultado) { mostrarAviso("Selecione o resultado da visita."); return; }
+      if (resultado === "FECHOU") { await salvarFechamentoCP(); return; }
+
+      const origemSelecionada = document.querySelector("#origemSection .chip.selected");
+      const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
+      const todosEncantamentos = Array.from(new Set([].concat(chipsSelecionados("encantamentosSection"), chipsSelecionados("encantamentoPresencialSection"))));
+      const observacoesCP = valor("observacoesCP");
+      const objecoes = valor("objecoesCasal");
+      const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
+      const dataRegistro = new Date().toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});
+      const bloco = "[Registro Consultora Presencial - "+dataRegistro+"]\nResultado: "+resultado+
+        (observacoesCP ? "\nObservações: "+observacoesCP : "")+(objecoes ? "\nObjeções: "+objecoes : "");
+      const payload = {
+        casal_id:casalAtualId,
+        nome_noivo:casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "",
+        email:casalAtual.email || "",
+        data_consultoria:casalAtual.data_consultoria || "",
+        hora_consultoria:casalAtual.hora_consultoria || "",
+        como_conheceu_margo:origemFinal,
+        encantamentos_principais:todosEncantamentos.join("|"),
+        observacoes_gerais:observacoesBase ? observacoesBase+"\n\n"+bloco : bloco
+      };
+      const btn=document.getElementById("btnSalvar");
+      btn.disabled=true; btn.textContent="Salvando...";
+      try{
+        const resp=await fetch(API_CONSULTORIA,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+        if(!resp.ok) throw new Error("Erro ao salvar registro.");
+        document.getElementById("successBox").textContent="Registro da visita salvo com sucesso. ✅";
+        document.getElementById("successBox").classList.add("open");
+        btn.textContent="Salvo";
+      }catch(erro){
+        mostrarAviso("Erro ao salvar registro da Consultora Presencial.");
+        btn.disabled=false; btn.textContent="❤️ Salvar Registro";
+      }
+    }
 
     function bloquearAcessoCRM(mensagem, detalhe) {
       document.body.className = "crm-bloqueado";
@@ -602,6 +918,9 @@
     async function iniciarTela() {
       usuarioAtualId = pegarUsuarioIdDaUrl() || localStorage.getItem("margo_usuario_id") || "";
       casalAtualId = pegarCasalIdDaUrl();
+      preencherDiasVencimento();
+      entradaModoMudou();
+      entradaQtdMudou();
       await carregarVisitasAgendadas();
       if (casalAtualId) await carregarCasal();
     }
