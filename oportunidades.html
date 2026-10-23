@@ -151,6 +151,12 @@
       background: #eef0fb;
       border-color: #bdc5ec;
     }
+    .card-resumo.resultados .numero,
+    .card-resumo.resultados .texto { color: #2f8a55; }
+    .card-resumo.resultados.active {
+      background: #eef8f2;
+      border-color: #b9dec8;
+    }
 
     .section-title {
       font-size: 13px;
@@ -294,6 +300,11 @@
           <div class="texto">Agendados</div>
         </div>
 
+        <div class="card-resumo resultados" id="card-resultados" onclick="trocarAba('resultados')">
+          <div class="numero" id="totalResultados">0</div>
+          <div class="texto">Resultados</div>
+        </div>
+
         <div class="card-resumo empresas" id="card-empresas" onclick="trocarAba('empresas')">
           <div class="numero" id="totalEmpresas">0</div>
           <div class="texto">Empresas</div>
@@ -339,6 +350,7 @@
       agendar: [],
       resgatar: [],
       agendados: [],
+      resultados: [],
       empresas: [],
       atencao: [],
       encerrados: [],
@@ -346,6 +358,7 @@
         agendar: 0,
         resgatar: 0,
         agendados: 0,
+        resultados: 0,
         empresas: 0,
         atencao: 0,
         encerrados: 0
@@ -359,6 +372,7 @@
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
       agendados: "Visitas agendadas",
+      resultados: "Negócios fechados",
       empresas: "Empresas para atendimento",
       atencao: "Atendimentos assumidos por você",
       encerrados: "Oportunidades encerradas"
@@ -368,7 +382,7 @@
       const params = new URLSearchParams(window.location.search);
       const aba = params.get("aba");
 
-      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "empresas" || aba === "atencao" || aba === "agendar") {
+      if (aba === "resgatar" || aba === "encerrados" || aba === "agendados" || aba === "resultados" || aba === "empresas" || aba === "atencao" || aba === "agendar") {
         return aba;
       }
 
@@ -520,6 +534,7 @@
         ...(retorno.agendar || []),
         ...(retorno.resgatar || []),
         ...(retorno.agendados || []),
+        ...(retorno.resultados || []),
         ...(retorno.empresas || []),
         ...(retorno.atencao || []),
         ...(retorno.encerrados || [])
@@ -535,6 +550,10 @@
 
       const agendados = ordenarAgendadosPorChegadaMaisRecente(
         unicos.filter(temVisitaAgendada)
+      );
+
+      const resultados = ordenarPorAtividadeMaisRecente(
+        todosUnicos.filter(casal => normalizarStatus(casal.status_casal) === "GANHO")
       );
 
       const encerrados = unicos.filter(casal => normalizarStatus(casal.status_casal) === "PERDIDO");
@@ -577,6 +596,7 @@
         agendar: agendarOrdenado,
         resgatar,
         agendados,
+        resultados,
         empresas: empresasOrdenadas,
         atencao: atencaoOrdenada,
         encerrados,
@@ -584,6 +604,7 @@
           agendar: agendar.length,
           resgatar: resgatar.length,
           agendados: agendados.length,
+          resultados: resultados.length,
           empresas: empresas.length,
           atencao: atencao.length,
           encerrados: encerrados.length
@@ -606,7 +627,7 @@
         const lista = Array.isArray(j) ? j : (j.resumos || []);
         const mapa = new Map(lista.map(x => [String(x.casal_id || ""), x]));
 
-        ["agendar", "resgatar", "agendados", "empresas", "atencao", "encerrados"].forEach(grupo => {
+        ["agendar", "resgatar", "agendados", "resultados", "empresas", "atencao", "encerrados"].forEach(grupo => {
           (dados[grupo] || []).forEach(casal => {
             const resumo = mapa.get(String(casal.casal_id || ""));
             if (resumo) {
@@ -791,6 +812,16 @@
           infoExtra = `<div class="linha-info">🗓 Visita: ${visita || "Horário não informado"}</div>`;
         }
 
+        if (tipo === "resultados") {
+          statusTexto = "Fechado";
+          alerta = "";
+          const valorFechado = formatarMoeda(casal.valor_contrato || "");
+          const quandoFechou = casal.data_hora_fechamento || "";
+          infoExtra =
+            (valorFechado ? `<div class="linha-info">💰 Contrato: ${valorFechado}</div>` : "") +
+            (quandoFechou ? `<div class="linha-info">✅ Fechado em: ${quandoFechou}</div>` : "");
+        }
+
         if (tipo === "empresas") {
           statusTexto = "Evento corporativo";
           alerta = "Atendimento humano. Lead corporativo fora da fila de casamentos.";
@@ -865,6 +896,7 @@
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
         document.getElementById("totalAgendados").textContent = dados.totais.agendados;
+        document.getElementById("totalResultados").textContent = dados.totais.resultados;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
         document.getElementById("totalEmpresas").textContent = dados.totais.empresas;
         document.getElementById("totalAtencao").textContent = dados.totais.atencao;
