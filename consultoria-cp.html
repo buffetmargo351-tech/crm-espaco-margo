@@ -98,6 +98,9 @@
     .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
     .form-grid .full { grid-column:1/-1; }
     .form-grid .field { margin-bottom:0; }
+    .cep-line { display:flex; gap:7px; align-items:stretch; }
+    .cep-line input { flex:1; min-width:0; }
+    .btn-cep { flex:0 0 auto; border:1px solid #e9bfc6; background:#fff1f3; color:#c5455b; border-radius:12px; padding:0 11px; font-size:11px; font-weight:900; cursor:pointer; }
     select { width:100%; border:1px solid #eadada; border-radius:14px; padding:12px; outline:none; font-size:14px; color:#2f2423; background:#fff; }
     .required { color:#d45167; }
     .radio-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -220,8 +223,10 @@
               <div class="field"><label>CPF <span class="required">*</span></label><input id="p1_cpf" /></div>
               <div class="field"><label>Telefone <span class="required">*</span></label><input id="p1_telefone" inputmode="tel" /></div>
               <div class="field"><label>E-mail <span class="required">*</span></label><input id="p1_email" type="email" /></div>
-              <div class="field"><label>CEP <span class="required">*</span></label><input id="p1_cep" /></div>
+              <div class="field full"><label>CEP <span class="required">*</span></label><div class="cep-line"><input id="p1_cep" inputmode="numeric" onblur="buscarCepPessoa(1)" /><button type="button" class="btn-cep" onclick="buscarCepPessoa(1)">🔎 Buscar CEP</button></div></div>
               <div class="field full"><label>Endereço <span class="required">*</span></label><input id="p1_endereco" /></div>
+              <div class="field"><label>Número <span class="required">*</span></label><input id="p1_numero" /></div>
+              <div class="field"><label>Complemento</label><input id="p1_complemento" placeholder="Opcional" /></div>
               <div class="field"><label>Bairro <span class="required">*</span></label><input id="p1_bairro" /></div>
               <div class="field"><label>Cidade <span class="required">*</span></label><input id="p1_cidade" /></div>
               <div class="field"><label>Estado <span class="required">*</span></label><input id="p1_estado" maxlength="2" /></div>
@@ -240,8 +245,10 @@
               <div class="field"><label>CPF <span class="required">*</span></label><input id="p2_cpf" /></div>
               <div class="field"><label>Telefone <span class="required">*</span></label><input id="p2_telefone" inputmode="tel" /></div>
               <div class="field"><label>E-mail <span class="required">*</span></label><input id="p2_email" type="email" /></div>
-              <div class="field"><label>CEP <span class="required">*</span></label><input id="p2_cep" /></div>
+              <div class="field full"><label>CEP <span class="required">*</span></label><div class="cep-line"><input id="p2_cep" inputmode="numeric" onblur="buscarCepPessoa(2)" /><button type="button" class="btn-cep" onclick="buscarCepPessoa(2)">🔎 Buscar CEP</button></div></div>
               <div class="field full"><label>Endereço <span class="required">*</span></label><input id="p2_endereco" /></div>
+              <div class="field"><label>Número <span class="required">*</span></label><input id="p2_numero" /></div>
+              <div class="field"><label>Complemento</label><input id="p2_complemento" placeholder="Opcional" /></div>
               <div class="field"><label>Bairro <span class="required">*</span></label><input id="p2_bairro" /></div>
               <div class="field"><label>Cidade <span class="required">*</span></label><input id="p2_cidade" /></div>
               <div class="field"><label>Estado <span class="required">*</span></label><input id="p2_estado" maxlength="2" /></div>
@@ -699,12 +706,36 @@
       return el ? el.value : "";
     }
 
+    async function buscarCepPessoa(numeroPessoa) {
+      const prefixo = "p" + numeroPessoa + "_";
+      const cep = valor(prefixo + "cep").replace(/\D/g, "");
+      if (cep.length !== 8) return;
+      const botao = document.querySelector("#" + prefixo + "cep")?.parentElement?.querySelector(".btn-cep");
+      const textoOriginal = botao ? botao.textContent : "";
+      if (botao) { botao.disabled = true; botao.textContent = "Buscando..."; }
+      try {
+        const resp = await fetch("https://viacep.com.br/ws/" + cep + "/json/", { cache:"no-store" });
+        const data = await resp.json();
+        if (!resp.ok || data.erro) throw new Error("CEP não encontrado");
+        preencher(prefixo + "endereco", data.logradouro || "");
+        preencher(prefixo + "bairro", data.bairro || "");
+        preencher(prefixo + "cidade", data.localidade || "");
+        preencher(prefixo + "estado", data.uf || "");
+        const numeroEl = document.getElementById(prefixo + "numero");
+        if (numeroEl && !numeroEl.value) numeroEl.focus();
+      } catch (erro) {
+        console.warn("CEP não localizado:", erro);
+      } finally {
+        if (botao) { botao.disabled = false; botao.textContent = textoOriginal; }
+      }
+    }
+
     function coletarDadosContrato() {
       return {
         nome_1:valor("p1_nome"), aniversario_1:valor("p1_aniversario"), profissao_1:valor("p1_profissao"), rg_1:valor("p1_rg"), cpf_1:valor("p1_cpf"),
-        telefone_1:valor("p1_telefone"), email_1:valor("p1_email"), endereco_1:valor("p1_endereco"), cep_1:valor("p1_cep"), bairro_1:valor("p1_bairro"), cidade_1:valor("p1_cidade"), estado_1:valor("p1_estado").toUpperCase(),
+        telefone_1:valor("p1_telefone"), email_1:valor("p1_email"), endereco_1:valor("p1_endereco"), numero_1:valor("p1_numero"), complemento_1:valor("p1_complemento"), cep_1:valor("p1_cep"), bairro_1:valor("p1_bairro"), cidade_1:valor("p1_cidade"), estado_1:valor("p1_estado").toUpperCase(),
         nome_2:valor("p2_nome"), aniversario_2:valor("p2_aniversario"), profissao_2:valor("p2_profissao"), rg_2:valor("p2_rg"), cpf_2:valor("p2_cpf"),
-        telefone_2:valor("p2_telefone"), email_2:valor("p2_email"), endereco_2:valor("p2_endereco"), cep_2:valor("p2_cep"), bairro_2:valor("p2_bairro"), cidade_2:valor("p2_cidade"), estado_2:valor("p2_estado").toUpperCase(),
+        telefone_2:valor("p2_telefone"), email_2:valor("p2_email"), endereco_2:valor("p2_endereco"), numero_2:valor("p2_numero"), complemento_2:valor("p2_complemento"), cep_2:valor("p2_cep"), bairro_2:valor("p2_bairro"), cidade_2:valor("p2_cidade"), estado_2:valor("p2_estado").toUpperCase(),
         tipo_evento:valor("tipoEvento"), quantidade_convidados:valor("qtdConvidados"), data_evento:valor("dataEvento"), horario:valor("horarioEvento"),
         horario_chegada_noivos:valor("horaChegadaNoivos"), observacoes_horario:valor("obsHorario"),
         cardapio_escolhido:valor("cardapioEscolhido"), observacoes_cardapio:valor("obsCardapio"), chopeira:radioValor("chopeira"),
@@ -714,8 +745,8 @@
     }
 
     function validarDadosContrato(d) {
-      const obrig = ["nome_1","profissao_1","rg_1","cpf_1","telefone_1","email_1","endereco_1","cep_1","bairro_1","cidade_1","estado_1",
-        "nome_2","profissao_2","rg_2","cpf_2","telefone_2","email_2","endereco_2","cep_2","bairro_2","cidade_2","estado_2",
+      const obrig = ["nome_1","profissao_1","rg_1","cpf_1","telefone_1","email_1","endereco_1","numero_1","cep_1","bairro_1","cidade_1","estado_1",
+        "nome_2","profissao_2","rg_2","cpf_2","telefone_2","email_2","endereco_2","numero_2","cep_2","bairro_2","cidade_2","estado_2",
         "tipo_evento","quantidade_convidados","data_evento","horario","horario_chegada_noivos","cardapio_escolhido","cortesia"];
       const faltam = obrig.filter(function(k){ return !String(d[k] || "").trim(); });
       if (faltam.length) return "Complete os campos obrigatórios do contrato antes de salvar.";
