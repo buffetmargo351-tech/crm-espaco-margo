@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-1-atendimento-no-store-20260827";
+const CACHE_NAME = "crm-margo-pwa-v18-2-agendados-20261023";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
