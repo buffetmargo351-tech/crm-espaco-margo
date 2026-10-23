@@ -460,6 +460,10 @@
           <div class="numero" id="totalAgendadosHome">0</div>
           <div class="texto">Agendados</div>
         </div>
+        <div class="card-resumo" onclick="abrirResultados()">
+          <div class="numero" id="totalResultadosHome">0</div>
+          <div class="texto">Resultados</div>
+        </div>
         <div class="card-resumo" onclick="abrirAtencao()">
           <div class="numero" id="totalAtencaoHome">0</div>
           <div class="texto">Atenção</div>
@@ -498,6 +502,10 @@
     function abrirAgendados() {
       const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
       window.location.href = "oportunidades.html?aba=agendados" + q;
+    }
+    function abrirResultados() {
+      const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
+      window.location.href = "oportunidades.html?aba=resultados" + q;
     }
     function abrirAtencao() {
       const q = usuarioAtualId ? "&usuario_id=" + encodeURIComponent(usuarioAtualId) : "";
@@ -791,6 +799,12 @@
 
     function contarAgendadosDaCHO(retornoOportunidades) {
       return unificarOportunidadesHome(retornoOportunidades).filter(temVisitaAgendada).length;
+    }
+
+    function contarResultados(retornoOportunidades) {
+      return Array.isArray(retornoOportunidades && retornoOportunidades.resultados)
+        ? retornoOportunidades.resultados.length
+        : 0;
     }
 
     function contarOportunidadesDaCHO(retornoOportunidades) {
@@ -1388,9 +1402,11 @@
           totalOportunidades = contarOportunidadesDaCHO(dadosOportunidades);
           const totalEmpresasHome = document.getElementById("totalEmpresasHome");
           const totalAgendadosHome = document.getElementById("totalAgendadosHome");
+          const totalResultadosHome = document.getElementById("totalResultadosHome");
           const totalAtencaoHome = document.getElementById("totalAtencaoHome");
           if (totalEmpresasHome) totalEmpresasHome.textContent = String(contarEmpresasDaCHO(dadosOportunidades, casais));
           if (totalAgendadosHome) totalAgendadosHome.textContent = String(contarAgendadosDaCHO(dadosOportunidades));
+          if (totalResultadosHome) totalResultadosHome.textContent = String(contarResultados(dadosOportunidades));
           if (totalAtencaoHome) totalAtencaoHome.textContent = String(contarAtencaoDaCHO(dadosOportunidades));
 
           // V1.9: oportunidade também é um casal válido.
@@ -1408,8 +1424,11 @@
           const empresas = Array.isArray(dadosOportunidades && dadosOportunidades.empresas)
             ? dadosOportunidades.empresas
             : [];
+          const resultados = Array.isArray(dadosOportunidades && dadosOportunidades.resultados)
+            ? dadosOportunidades.resultados
+            : [];
 
-          [...agendar, ...resgatar, ...agendados, ...empresas].forEach(casal => {
+          [...agendar, ...resgatar, ...agendados, ...empresas, ...resultados].forEach(casal => {
             const casalId = String(casal && casal.casal_id || "").trim();
             if (casalId) casalIdsValidosHome.add(casalId);
           });
@@ -1441,7 +1460,9 @@
         totalNovos.textContent = "0";
         totalOportunidadesEl.textContent = "0";
         const totalEmpresasHome = document.getElementById("totalEmpresasHome");
+        const totalResultadosHome = document.getElementById("totalResultadosHome");
         if (totalEmpresasHome) totalEmpresasHome.textContent = "0";
+        if (totalResultadosHome) totalResultadosHome.textContent = "0";
       }
     }
 
