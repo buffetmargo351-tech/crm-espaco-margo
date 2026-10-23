@@ -369,7 +369,7 @@
         <button class="btn-home" onclick="voltar()">🏠 Voltar</button>
         <button class="btn-confirm" id="btnSalvar" onclick="salvarRegistroCP()">❤️ Salvar Registro</button>
       </div>
-      <button class="btn-contract" id="btnGerarContrato" type="button" disabled>📄 Gerar Contrato</button>
+      <button class="btn-contract" id="btnGerarContrato" type="button" disabled title="Geração do PDF será conectada na próxima etapa">📄 Gerar Contrato</button>
       <div class="success" id="successBox"></div>
 
 
@@ -763,10 +763,8 @@
         const txt=await resp.text();
         let data={}; try{ data=JSON.parse(txt); }catch(e){}
         if(!resp.ok || data.sucesso!==true) throw new Error(data.message || data.erro || txt || "Erro ao salvar fechamento.");
-        document.getElementById("successBox").textContent="Fechamento salvo com sucesso. Contrato pronto para geração. ✅";
+        document.getElementById("successBox").textContent="Fechamento salvo com sucesso. ✅";
         document.getElementById("successBox").classList.add("open");
-        document.getElementById("btnGerarContrato").disabled=false;
-        document.getElementById("btnGerarContrato").dataset.fechamentoId=data.fechamento_id || "";
         btn.textContent="✅ Fechamento Salvo";
       } catch(erro) {
         console.error(erro);
