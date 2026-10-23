@@ -398,6 +398,7 @@
     const API_FECHAMENTO_CP = "https://n8n.espacomargo.com.br/webhook/crm/fechamento-cp";
     const API_GERAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/gerar-contrato-cp";
     const API_ENVIAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-contrato-cp";
+    const API_CONFERIR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/conferir-contrato-cp";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
@@ -756,6 +757,7 @@
       const payload = {
         casal_id:casalAtualId,
         consultora_id:usuarioAtualId,
+        senha_acesso:obterSenhaSessao(),
         resultado_visita:"FECHOU",
         dados_contrato:dados,
         valor_total:total,
@@ -801,7 +803,7 @@
         const resp=await fetch(API_GERAR_CONTRATO_CP,{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId})
+          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId,senha_acesso:obterSenhaSessao()})
         });
         const txt=await resp.text();
         let data={}; try{data=JSON.parse(txt);}catch(e){}
@@ -822,12 +824,45 @@
       }
     }
 
-    function conferirContratoCP() {
-      if(!contratoAtual || !contratoAtual.contrato_pdf_url) {
+    async function conferirContratoCP() {
+      esconderAviso();
+      if(!contratoAtual || !contratoAtual.contrato_pdf_id) {
         mostrarAviso("Gere o contrato antes de conferir.");
         return;
       }
-      window.open(contratoAtual.contrato_pdf_url,"_blank","noopener");
+
+      const janela = window.open("", "_blank");
+      if (janela) {
+        janela.document.write("<p style='font-family:sans-serif;padding:20px'>Carregando contrato...</p>");
+      }
+
+      try {
+        const resp = await fetch(API_CONFERIR_CONTRATO_CP, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            casal_id:casalAtualId,
+            usuario_id:usuarioAtualId,
+            senha_acesso:obterSenhaSessao()
+          })
+        });
+        if(!resp.ok) {
+          const t=await resp.text();
+          throw new Error(t || "Erro ao abrir o contrato.");
+        }
+        const blob=await resp.blob();
+        const url=URL.createObjectURL(blob);
+        if (janela) janela.location.href=url;
+        else {
+          const a=document.createElement("a");
+          a.href=url; a.target="_blank"; a.rel="noopener"; a.click();
+        }
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 300000);
+      } catch(erro) {
+        if (janela) janela.close();
+        console.error(erro);
+        mostrarAviso("Não foi possível abrir o PDF para conferência.");
+      }
     }
 
     async function enviarContratoWhatsApp() {
@@ -849,7 +884,7 @@
         const resp=await fetch(API_ENVIAR_CONTRATO_CP,{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId})
+          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId,senha_acesso:obterSenhaSessao()})
         });
         const txt=await resp.text();
         let data={}; try{data=JSON.parse(txt);}catch(e){}
