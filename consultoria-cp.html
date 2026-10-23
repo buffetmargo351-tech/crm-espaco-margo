@@ -114,6 +114,10 @@
     .subhead { font-size:12px; font-weight:950; color:#5b4644; margin:12px 0 8px; }
     .btn-contract { width:100%; margin-top:9px; border-radius:16px; padding:14px 12px; border:1px solid #d45167; background:#fff; color:#c5455b; font-size:13px; font-weight:950; cursor:pointer; }
     .btn-contract:disabled { opacity:.42; cursor:not-allowed; }
+    .contract-actions { display:none; margin-top:9px; gap:9px; }
+    .contract-actions.open { display:grid; }
+    .btn-send-contract { width:100%; border-radius:16px; padding:14px 12px; border:none; background:linear-gradient(135deg,#2f9d65,#258653); color:#fff; font-size:13px; font-weight:950; cursor:pointer; }
+    .btn-send-contract:disabled { opacity:.55; cursor:not-allowed; }
     .success.open + .btn-contract { margin-top:10px; }
     @media (min-width: 700px) { body { padding: 20px 0; } .phone-frame { min-height: calc(100vh - 40px); border-radius: 34px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); } }
   </style>
@@ -369,7 +373,11 @@
         <button class="btn-home" onclick="voltar()">🏠 Voltar</button>
         <button class="btn-confirm" id="btnSalvar" onclick="salvarRegistroCP()">❤️ Salvar Registro</button>
       </div>
-      <button class="btn-contract" id="btnGerarContrato" type="button" disabled title="Geração do PDF será conectada na próxima etapa">📄 Gerar Contrato</button>
+      <button class="btn-contract" id="btnGerarContrato" type="button" disabled onclick="gerarContratoCP()">📄 Gerar Contrato</button>
+      <div class="contract-actions" id="contratoActions">
+        <button class="btn-contract" id="btnConferirContrato" type="button" onclick="conferirContratoCP()">👁️ Conferir Contrato (PDF)</button>
+        <button class="btn-send-contract" id="btnEnviarContrato" type="button" onclick="enviarContratoWhatsApp()">📲 Enviar Contrato pelo WhatsApp</button>
+      </div>
       <div class="success" id="successBox"></div>
 
 
@@ -388,11 +396,14 @@
     const API_OPORTUNIDADES = "https://n8n.espacomargo.com.br/webhook/crm/oportunidades";
     const API_VALIDAR_USUARIO = "https://n8n.espacomargo.com.br/webhook/crm/validar-usuario";
     const API_FECHAMENTO_CP = "https://n8n.espacomargo.com.br/webhook/crm/fechamento-cp";
+    const API_GERAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/gerar-contrato-cp";
+    const API_ENVIAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-contrato-cp";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
     let origemAtual = "";
+    let contratoAtual = null;
 
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -763,13 +774,96 @@
         const txt=await resp.text();
         let data={}; try{ data=JSON.parse(txt); }catch(e){}
         if(!resp.ok || data.sucesso!==true) throw new Error(data.message || data.erro || txt || "Erro ao salvar fechamento.");
-        document.getElementById("successBox").textContent="Fechamento salvo com sucesso. ✅";
+        document.getElementById("successBox").textContent="Fechamento salvo com sucesso. Agora gere o contrato. ✅";
         document.getElementById("successBox").classList.add("open");
+        document.getElementById("btnGerarContrato").disabled=false;
+        document.getElementById("btnGerarContrato").dataset.fechamentoId=data.fechamento_id || "";
+        contratoAtual=null;
+        document.getElementById("contratoActions").classList.remove("open");
         btn.textContent="✅ Fechamento Salvo";
       } catch(erro) {
         console.error(erro);
         mostrarAviso(erro.message || "Erro ao salvar fechamento.");
         btn.disabled=false; btn.textContent="✅ Salvar Fechamento";
+      }
+    }
+
+
+    async function gerarContratoCP() {
+      esconderAviso();
+      if (!casalAtualId) { mostrarAviso("Casal não identificado."); return; }
+
+      const btn=document.getElementById("btnGerarContrato");
+      btn.disabled=true;
+      btn.textContent="Gerando contrato...";
+
+      try {
+        const resp=await fetch(API_GERAR_CONTRATO_CP,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId})
+        });
+        const txt=await resp.text();
+        let data={}; try{data=JSON.parse(txt);}catch(e){}
+        if(!resp.ok || data.sucesso!==true || !data.contrato_pdf_url){
+          throw new Error(data.message || data.erro || txt || "Erro ao gerar contrato.");
+        }
+
+        contratoAtual=data;
+        document.getElementById("contratoActions").classList.add("open");
+        document.getElementById("successBox").textContent="Contrato gerado. Confira o PDF antes de enviar. ✅";
+        document.getElementById("successBox").classList.add("open");
+        btn.textContent="✅ Contrato Gerado";
+      } catch(erro) {
+        console.error(erro);
+        mostrarAviso(erro.message || "Erro ao gerar contrato.");
+        btn.disabled=false;
+        btn.textContent="📄 Gerar Contrato";
+      }
+    }
+
+    function conferirContratoCP() {
+      if(!contratoAtual || !contratoAtual.contrato_pdf_url) {
+        mostrarAviso("Gere o contrato antes de conferir.");
+        return;
+      }
+      window.open(contratoAtual.contrato_pdf_url,"_blank","noopener");
+    }
+
+    async function enviarContratoWhatsApp() {
+      esconderAviso();
+      if(!contratoAtual || !contratoAtual.contrato_pdf_url) {
+        mostrarAviso("Gere e confira o contrato antes de enviar.");
+        return;
+      }
+
+      const nome = nomeCasal(casalAtual);
+      const ok = window.confirm("Enviar agora o contrato em PDF pelo WhatsApp para " + nome + "?\n\nConfirme somente depois de conferir o documento.");
+      if(!ok) return;
+
+      const btn=document.getElementById("btnEnviarContrato");
+      btn.disabled=true;
+      btn.textContent="Enviando pelo WhatsApp...";
+
+      try {
+        const resp=await fetch(API_ENVIAR_CONTRATO_CP,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({casal_id:casalAtualId,usuario_id:usuarioAtualId})
+        });
+        const txt=await resp.text();
+        let data={}; try{data=JSON.parse(txt);}catch(e){}
+        if(!resp.ok || data.sucesso!==true) {
+          throw new Error(data.message || data.erro || txt || "Erro ao enviar contrato.");
+        }
+        document.getElementById("successBox").textContent="Contrato enviado pelo WhatsApp com sucesso. ✅";
+        document.getElementById("successBox").classList.add("open");
+        btn.textContent="✅ Contrato Enviado";
+      } catch(erro) {
+        console.error(erro);
+        mostrarAviso(erro.message || "Erro ao enviar contrato pelo WhatsApp.");
+        btn.disabled=false;
+        btn.textContent="📲 Enviar Contrato pelo WhatsApp";
       }
     }
 
