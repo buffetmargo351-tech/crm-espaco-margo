@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-2-agendados-20261023";
+const CACHE_NAME = "crm-margo-pwa-v18-3-cp-fechamento-20261023";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
@@ -75,6 +75,7 @@ self.addEventListener("fetch", function (event) {
     url.pathname.endsWith("/oportunidades.html") ||
     url.pathname.endsWith("/home.html") ||
     url.pathname.endsWith("/atendimento.html") ||
+    url.pathname.endsWith("/consultoria-cp.html") ||
     url.pathname === "/";
 
   if (ehHtmlComHotfix) {
