@@ -142,6 +142,16 @@
       border-color: #9ec9c2;
     }
 
+    .card-resumo.agendados .numero,
+    .card-resumo.agendados .texto {
+      color: #6875b8;
+    }
+
+    .card-resumo.agendados.active {
+      background: #eef0fb;
+      border-color: #bdc5ec;
+    }
+
     .section-title {
       font-size: 13px;
       font-weight: 900;
@@ -279,6 +289,11 @@
           <div class="texto">Agendar</div>
         </div>
 
+        <div class="card-resumo agendados" id="card-agendados" onclick="trocarAba('agendados')">
+          <div class="numero" id="totalAgendados">0</div>
+          <div class="texto">Agendados</div>
+        </div>
+
         <div class="card-resumo empresas" id="card-empresas" onclick="trocarAba('empresas')">
           <div class="numero" id="totalEmpresas">0</div>
           <div class="texto">Empresas</div>
@@ -294,7 +309,7 @@
           <div class="texto">Atenção</div>
         </div>
 
-        <div class="card-resumo agendados" id="card-encerrados" onclick="trocarAba('encerrados')">
+        <div class="card-resumo encerrados" id="card-encerrados" onclick="trocarAba('encerrados')">
           <div class="numero" id="totalEncerrados">0</div>
           <div class="texto">Encerrados</div>
         </div>
@@ -437,6 +452,37 @@
       });
     }
 
+    // AGENDADOS: quem entrou mais recentemente na fila aparece primeiro.
+    // Se o backend expuser um timestamp específico do agendamento, ele tem prioridade.
+    // Caso contrário, usa a atividade/contato mais recente como fallback seguro.
+    function timestampChegadaAgendado(casal) {
+      const candidatos = [
+        casal && casal.agendado_em,
+        casal && casal.agenda_created_at,
+        casal && casal.status_atualizado_em,
+        casal && casal.updated_at,
+        casal && casal.ultima_mensagem_lead_em,
+        casal && casal.ultimo_contato,
+        casal && casal.data_entrada,
+        casal && casal.created_at
+      ];
+
+      for (const valor of candidatos) {
+        const ts = parseTimestampCRM(valor);
+        if (ts) return ts;
+      }
+
+      return 0;
+    }
+
+    function ordenarAgendadosPorChegadaMaisRecente(lista) {
+      return [...(Array.isArray(lista) ? lista : [])].sort((a, b) => {
+        const diff = timestampChegadaAgendado(b) - timestampChegadaAgendado(a);
+        if (diff !== 0) return diff;
+        return String(b && b.casal_id || "").localeCompare(String(a && a.casal_id || ""));
+      });
+    }
+
     function primeiraRespostaJaEnviada(casal) {
       const primeiraIA = String(casal && casal.ia_primeira_resposta_enviada || "").trim().toUpperCase() === "SIM";
       const statusMilene = String(casal && casal.ultimo_status_milene || "").trim().toUpperCase();
@@ -487,9 +533,9 @@
       const todosUnicos = Array.from(mapa.values());
       const unicos = todosUnicos.filter(pertenceAoUsuario);
 
-      const agendados = unicos
-        .filter(temVisitaAgendada)
-        .sort((a, b) => chaveVisita(a).localeCompare(chaveVisita(b)));
+      const agendados = ordenarAgendadosPorChegadaMaisRecente(
+        unicos.filter(temVisitaAgendada)
+      );
 
       const encerrados = unicos.filter(casal => normalizarStatus(casal.status_casal) === "PERDIDO");
 
@@ -818,6 +864,7 @@
         await carregarResumosPropostas();
 
         document.getElementById("totalAgendar").textContent = dados.totais.agendar;
+        document.getElementById("totalAgendados").textContent = dados.totais.agendados;
         document.getElementById("totalResgatar").textContent = dados.totais.resgatar;
         document.getElementById("totalEmpresas").textContent = dados.totais.empresas;
         document.getElementById("totalAtencao").textContent = dados.totais.atencao;
