@@ -1254,6 +1254,7 @@
       </div>
 
       <div id="propostaResumo" style="font-size:11px;font-weight:800;color:#6d4b4b;text-align:center;margin-top:5px;">📄 Proposta: carregando...</div>
+      <div id="agendamentoResumo" style="display:none;font-size:11px;font-weight:900;color:#2f6f4f;text-align:center;margin-top:6px;padding:6px 8px;background:#eef7f1;border:1px solid #cfe6d7;border-radius:10px;"></div>
       <div class="dreams" id="sonhosCasal"></div>
     </header>
 
@@ -1861,6 +1862,28 @@
       return formatarConvidados(casal.quantidade_convidados);
     }
 
+    function atualizarResumoAgendamento(casal) {
+      const el = document.getElementById("agendamentoResumo");
+      if (!el) return;
+
+      const status = String(casal && casal.status_casal || "").trim().toUpperCase();
+      const agendaId = String(casal && casal.agenda_id || "").trim();
+      const data = String(casal && casal.data_consultoria || "").trim();
+      const hora = String(casal && casal.hora_consultoria || "").trim();
+      const agendado = status === "CONSULTORIA_AGENDADA" || Boolean(agendaId);
+
+      if (!agendado) {
+        el.style.display = "none";
+        el.textContent = "";
+        return;
+      }
+
+      const rotulo = ehCorporativo(casal) ? "Visita agendada" : "Consultoria agendada";
+      const quando = [data, hora ? "às " + hora : ""].filter(Boolean).join(" ");
+      el.textContent = "📍 " + rotulo + (quando ? ": " + quando : "");
+      el.style.display = "";
+    }
+
     function configurarAtendimentoPorTipo(casal) {
       const corporativo = ehCorporativo(casal);
       const navAtencao = document.getElementById("navAtencao");
@@ -2053,6 +2076,7 @@
         document.getElementById("dataCasamento").textContent = formatarDataEvento(casal);
         document.getElementById("qtdConvidados").textContent = formatarQuantidadeEvento(casal);
         atualizarResumoPropostaCabecalho(casal);
+        atualizarResumoAgendamento(casal);
         renderizarEncantamentos(corporativo ? "" : casal.encantamentos_principais);
         configurarAtendimentoPorTipo(casal);
         await carregarHistoricoConversas({ forcar: true, forcarScroll: true });
