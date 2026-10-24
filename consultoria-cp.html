@@ -205,9 +205,8 @@
         <div class="section-title">📍 Resultado da visita <span class="required">*</span></div>
         <div class="card single-options">
           <label class="single-option"><input type="radio" name="resultadoVisita" value="FECHOU" onchange="resultadoMudou()" /> Fechou</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NEGOCIACAO" onchange="resultadoMudou()" /> Negociação</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_FECHOU" onchange="resultadoMudou()" /> Não fechou</label>
-          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_COMPARECEU" onchange="resultadoMudou()" /> Não compareceu</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="EM_NEGOCIACAO" onchange="resultadoMudou()" /> Em negociação</label>
+          <label class="single-option"><input type="radio" name="resultadoVisita" value="NAO_COMPARECEU" onchange="resultadoMudou()" /> Não compareceu à visita</label>
         </div>
       </section>
 
@@ -406,6 +405,7 @@
     const API_GERAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/gerar-contrato-cp";
     const API_ENVIAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-contrato-cp";
     const API_CONFERIR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/conferir-contrato-cp";
+    const API_RESULTADO_VISITA_CP = "https://n8n.espacomargo.com.br/webhook/crm/resultado-visita-cp";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
@@ -424,6 +424,13 @@
     }
 
     function voltar() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("origem") === "resgatar") {
+        let url = "oportunidades.html?aba=resgatar&t=" + Date.now();
+        if (usuarioAtualId) url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
+        window.location.href = url;
+        return;
+      }
       let url = "menu.html?t=" + Date.now();
       if (usuarioAtualId) url += "&usuario_id=" + encodeURIComponent(usuarioAtualId);
       window.location.href = url;
@@ -478,6 +485,15 @@
           if (String(casal.casal_id || "") === String(casalAtualId || "")) option.selected = true;
           select.appendChild(option);
         });
+
+        const atualEstaNaLista = visitas.some(casal => String(casal.casal_id || "") === String(casalAtualId || ""));
+        if (casalAtualId && !atualEstaNaLista) {
+          const option = document.createElement("option");
+          option.value = casalAtualId;
+          option.textContent = "Resgate — " + nomeCasal(casalAtual || {});
+          option.selected = true;
+          select.insertBefore(option, select.firstChild);
+        }
 
         if (!casalAtualId && visitas[0]?.casal_id) {
           casalAtualId = visitas[0].casal_id;
@@ -940,36 +956,69 @@
       if (!resultado) { mostrarAviso("Selecione o resultado da visita."); return; }
       if (resultado === "FECHOU") { await salvarFechamentoCP(); return; }
 
+      if (!["EM_NEGOCIACAO","NAO_COMPARECEU"].includes(resultado)) {
+        mostrarAviso("Resultado de visita inválido.");
+        return;
+      }
+
       const origemSelecionada = document.querySelector("#origemSection .chip.selected");
       const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
-      const todosEncantamentos = Array.from(new Set([].concat(chipsSelecionados("encantamentosSection"), chipsSelecionados("encantamentoPresencialSection"))));
+      const todosEncantamentos = Array.from(new Set([].concat(
+        chipsSelecionados("encantamentosSection"),
+        chipsSelecionados("encantamentoPresencialSection")
+      )));
       const observacoesCP = valor("observacoesCP");
       const objecoes = valor("objecoesCasal");
       const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
       const dataRegistro = new Date().toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});
-      const bloco = "[Registro Consultora Presencial - "+dataRegistro+"]\nResultado: "+resultado+
-        (observacoesCP ? "\nObservações: "+observacoesCP : "")+(objecoes ? "\nObjeções: "+objecoes : "");
+      const rotulo = resultado === "EM_NEGOCIACAO" ? "EM NEGOCIAÇÃO" : "NÃO COMPARECEU À VISITA";
+      const bloco = "[Registro Consultora Presencial - "+dataRegistro+"]\nResultado: "+rotulo+
+        (origemFinal ? "\nOrigem: "+origemFinal : "")+
+        (todosEncantamentos.length ? "\nEncantamentos: "+todosEncantamentos.join(" | ") : "")+
+        (observacoesCP ? "\nObservações: "+observacoesCP : "")+
+        (objecoes ? "\nObjeções: "+objecoes : "");
+      const observacoesGerais = observacoesBase ? observacoesBase+"\n\n"+bloco : bloco;
+
       const payload = {
         casal_id:casalAtualId,
-        nome_noivo:casalAtual.nome_pessoa_2 || casalAtual.nome_noivo || "",
-        email:casalAtual.email || "",
-        data_consultoria:casalAtual.data_consultoria || "",
-        hora_consultoria:casalAtual.hora_consultoria || "",
-        como_conheceu_margo:origemFinal,
-        encantamentos_principais:todosEncantamentos.join("|"),
-        observacoes_gerais:observacoesBase ? observacoesBase+"\n\n"+bloco : bloco
+        usuario_id:usuarioAtualId,
+        resultado_visita:resultado,
+        observacoes_gerais:observacoesGerais
       };
+
       const btn=document.getElementById("btnSalvar");
-      btn.disabled=true; btn.textContent="Salvando...";
-      try{
-        const resp=await fetch(API_CONSULTORIA,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-        if(!resp.ok) throw new Error("Erro ao salvar registro.");
-        document.getElementById("successBox").textContent="Registro da visita salvo com sucesso. ✅";
+      btn.disabled=true;
+      btn.textContent="Salvando...";
+
+      try {
+        const resp=await fetch(API_RESULTADO_VISITA_CP,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(payload)
+        });
+        const txt=await resp.text();
+        let data={}; try{data=JSON.parse(txt);}catch(e){}
+        if(!resp.ok || data.sucesso!==true) {
+          throw new Error(data.erro || data.message || txt || "Erro ao salvar resultado da visita.");
+        }
+
+        document.getElementById("successBox").textContent =
+          resultado === "EM_NEGOCIACAO"
+            ? "Visita registrada como EM NEGOCIAÇÃO e movida para RESGATAR. ✅"
+            : "NÃO COMPARECEU registrado e movido para RESGATAR. ✅";
         document.getElementById("successBox").classList.add("open");
-        btn.textContent="Salvo";
-      }catch(erro){
-        mostrarAviso("Erro ao salvar registro da Consultora Presencial.");
-        btn.disabled=false; btn.textContent="❤️ Salvar Registro";
+        btn.textContent="✅ Movido para Resgatar";
+
+        setTimeout(function(){
+          let url="oportunidades.html?aba=resgatar&t="+Date.now();
+          if(usuarioAtualId) url+="&usuario_id="+encodeURIComponent(usuarioAtualId);
+          window.location.href=url;
+        },700);
+      } catch(erro) {
+        console.error(erro);
+        mostrarAviso(erro.message || "Erro ao registrar resultado da visita.");
+        btn.disabled=false;
+        btn.textContent="❤️ Salvar Registro";
       }
     }
 
@@ -1073,14 +1122,26 @@
       }
     }
 
+    function aplicarResultadoInicialDaUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const resultado = String(params.get("resultado") || "").toUpperCase();
+      if (!resultado) return;
+      const radio = document.querySelector('input[name="resultadoVisita"][value="' + resultado + '"]');
+      if (radio) {
+        radio.checked = true;
+        resultadoMudou();
+      }
+    }
+
     async function iniciarTela() {
       usuarioAtualId = pegarUsuarioIdDaUrl() || localStorage.getItem("margo_usuario_id") || "";
       casalAtualId = pegarCasalIdDaUrl();
       preencherDiasVencimento();
       entradaModoMudou();
       entradaQtdMudou();
-      await carregarVisitasAgendadas();
       if (casalAtualId) await carregarCasal();
+      await carregarVisitasAgendadas();
+      aplicarResultadoInicialDaUrl();
     }
 
     async function iniciarTelaComTrava() {
