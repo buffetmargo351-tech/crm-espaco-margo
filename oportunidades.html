@@ -288,6 +288,13 @@
     .resgate-action.reagendar { background:#eef0fb; border-color:#bdc5ec; color:#5865ad; }
     .resgate-action.perda { background:#fff5f5; border-color:#eccaca; color:#a54b55; }
     .resgate-action.full { grid-column:1/-1; }
+    .resgate-action.tentativa { background:#fff9ec; border-color:#ead6a0; color:#9a6d13; }
+    .resgate-tentativa-ok {
+      margin:6px 0 0 49px;
+      font-size:10px;
+      font-weight:900;
+      color:#2f8a55;
+    }
 
     .empty {
       display: none;
@@ -377,6 +384,7 @@
     const API_CASAIS = "https://n8n.espacomargo.com.br/webhook/crm/casais";
     const API_ENCERRADOS = "https://n8n.espacomargo.com.br/webhook/crm/encerrados";
     const API_STATUS_OPORTUNIDADE = "https://n8n.espacomargo.com.br/webhook/crm/status-oportunidade";
+    const API_RES_GATE_TENTATIVA = "https://n8n.espacomargo.com.br/webhook/crm/resgate-tentativa";
     const API_RESUMO_PROPOSTAS = "https://n8n.espacomargo.com.br/webhook/crm/resumo-propostas";
 
     let dados = {
@@ -817,12 +825,35 @@
       return mapa[motivo] || motivo;
     }
 
+    function temTentativaResgate(casal) {
+      return /\[RESGATE_TENTATIVA_1\s*-/.test(String(casal && casal.observacoes_gerais || ""));
+    }
+
+    async function registrarTentativaResgate(casalId,event) {
+      if(event) event.stopPropagation();
+      if(!confirm("Registrar que a 1ª tentativa de contato foi realizada?")) return;
+      try {
+        const r=await fetch(API_RES_GATE_TENTATIVA,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({casal_id:casalId,usuario_id:usuarioAtualId||"APP"})
+        });
+        const txt=await r.text();
+        let j={}; try{j=JSON.parse(txt);}catch(e){}
+        if(!r.ok || !j.sucesso) throw new Error(j.erro||j.message||txt||"Falha ao registrar tentativa");
+        await carregarOportunidades();
+      } catch(erro) {
+        console.error(erro);
+        alert("Não foi possível registrar a tentativa de contato.");
+      }
+    }
+
     async function encerrarResgate(casalId,motivo,event) {
       if(event) event.stopPropagation();
       const rotulo=rotuloMotivoResgate(motivo);
       let mensagem='Encerrar esta oportunidade como "'+rotulo+'"?';
       if(motivo==="SEM_RESPOSTA") {
-        mensagem='Marcar como "NÃO RESPONDE MAIS"?\n\nUse esta opção somente quando as tentativas de resgate já tiverem sido esgotadas.';
+        mensagem='Marcar como "NÃO RESPONDE MAIS"?';
       }
       if(!confirm(mensagem)) return;
       try {
@@ -900,12 +931,20 @@
             ? `<button type="button" class="resgate-action reagendar full" onclick="reagendarResgate('${casal.casal_id}',event)">📅 REAGENDAR VISITA</button>`
             : "";
 
-          infoExtra = selo + `
-            <div class="resgate-actions">
-              <button type="button" class="resgate-action ganho" onclick="abrirFechamentoResgate('${casal.casal_id}',event)">✅ FECHOU</button>
+          const tentou = temTentativaResgate(casal);
+          const perdas = tentou
+            ? `
               <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','FECHOU_COM_OUTRO_ESPACO',event)">OUTRO ESPAÇO</button>
               <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','SEM_INTERESSE',event)">SEM INTERESSE</button>
-              <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','SEM_RESPOSTA',event)">NÃO RESPONDE</button>
+              <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','SEM_RESPOSTA',event)">NÃO RESPONDE</button>`
+            : `
+              <button type="button" class="resgate-action tentativa full" onclick="registrarTentativaResgate('${casal.casal_id}',event)">📞 REGISTRAR 1ª TENTATIVA</button>`;
+
+          infoExtra = selo +
+            (tentou ? '<div class="resgate-tentativa-ok">✓ 1ª tentativa de contato registrada</div>' : '') + `
+            <div class="resgate-actions">
+              <button type="button" class="resgate-action ganho" onclick="abrirFechamentoResgate('${casal.casal_id}',event)">✅ FECHOU</button>
+              ${perdas}
               ${reagendar}
             </div>`;
         }
