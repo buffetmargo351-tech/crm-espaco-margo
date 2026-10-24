@@ -255,6 +255,39 @@
       font-weight: 900;
       line-height: 1.25;
     }
+    .resgate-badge {
+      display:inline-flex;
+      align-items:center;
+      margin:3px 0 5px 49px;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.15px;
+    }
+    .resgate-badge.negociacao { background:#fff3db; color:#a26708; border:1px solid #f1d69e; }
+    .resgate-badge.faltou { background:#fdebed; color:#b33d4f; border:1px solid #efbdc5; }
+    .resgate-actions {
+      margin:9px 0 0 49px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+    }
+    .resgate-action {
+      border:1px solid #eadada;
+      background:#fff;
+      color:#6e5552;
+      border-radius:10px;
+      padding:8px 6px;
+      font-size:9px;
+      line-height:1.15;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .resgate-action.ganho { background:#edf8f1; border-color:#b7dfc6; color:#287d4d; }
+    .resgate-action.reagendar { background:#eef0fb; border-color:#bdc5ec; color:#5865ad; }
+    .resgate-action.perda { background:#fff5f5; border-color:#eccaca; color:#a54b55; }
+    .resgate-action.full { grid-column:1/-1; }
 
     .empty {
       display: none;
@@ -585,7 +618,7 @@
       const resgatar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
         if (temVisitaAgendada(casal) || ehCorporativo(casal) || modoAtendimentoHumano(casal)) return false;
-        return status === "VISITOU_NAO_FECHOU";
+        return ["VISITOU_NAO_FECHOU","VISITOU_EM_NEGOCIACAO","NAO_COMPARECEU_VISITA"].includes(status);
       });
 
       const agendarOrdenado = ordenarPorAtividadeMaisRecente(agendar);
@@ -762,6 +795,58 @@
       await carregarOportunidades();
     }
 
+
+    function abrirFechamentoResgate(casalId,event) {
+      if(event) event.stopPropagation();
+      let url="consultoria-cp.html?casal_id="+encodeURIComponent(casalId)+"&resultado=FECHOU&origem=resgatar";
+      if(usuarioAtualId) url+="&usuario_id="+encodeURIComponent(usuarioAtualId);
+      window.location.href=url;
+    }
+
+    function reagendarResgate(casalId,event) {
+      if(event) event.stopPropagation();
+      window.location.href=urlComUsuario("atendimento.html?casal_id="+encodeURIComponent(casalId)+"&fila=resgatar&acao=reagendar");
+    }
+
+    function rotuloMotivoResgate(motivo) {
+      const mapa={
+        FECHOU_COM_OUTRO_ESPACO:"Fechou com outro espaço",
+        SEM_INTERESSE:"Não tem mais interesse",
+        SEM_RESPOSTA:"Não responde mais"
+      };
+      return mapa[motivo] || motivo;
+    }
+
+    async function encerrarResgate(casalId,motivo,event) {
+      if(event) event.stopPropagation();
+      const rotulo=rotuloMotivoResgate(motivo);
+      let mensagem='Encerrar esta oportunidade como "'+rotulo+'"?';
+      if(motivo==="SEM_RESPOSTA") {
+        mensagem='Marcar como "NÃO RESPONDE MAIS"?\n\nUse esta opção somente quando as tentativas de resgate já tiverem sido esgotadas.';
+      }
+      if(!confirm(mensagem)) return;
+      try {
+        const r=await fetch(API_STATUS_OPORTUNIDADE,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            casal_id:casalId,
+            acao:"ENCERRAR",
+            motivo_perda:motivo,
+            usuario_id:usuarioAtualId||"APP",
+            observacoes_fechamento:"Encerrado pela fila RESGATAR: "+rotulo
+          })
+        });
+        const txt=await r.text();
+        let j={}; try{j=JSON.parse(txt);}catch(e){}
+        if(!r.ok || !j.sucesso) throw new Error(j.erro||j.message||txt||"Falha ao encerrar");
+        await carregarOportunidades();
+      } catch(erro) {
+        console.error(erro);
+        alert("Não foi possível encerrar esta oportunidade.");
+      }
+    }
+
     function renderizarLista(tipo) {
       const lista = document.getElementById("listaCasais");
       const empty = document.getElementById("emptyState");
@@ -800,8 +885,29 @@
         }
 
         if (tipo === "resgatar") {
-          statusTexto = "Visitou e não fechou";
-          alerta = "Atenção: retomar contato e tentar resgatar.";
+          const statusResgate = normalizarStatus(casal.status_casal);
+          const faltou = statusResgate === "NAO_COMPARECEU_VISITA";
+          statusTexto = faltou ? "Não compareceu à visita" : "Visitou — em negociação";
+          alerta = faltou
+            ? "Tentar entender o imprevisto e recuperar a oportunidade."
+            : "Casal visitou o Margô e ainda está avaliando.";
+
+          const selo = faltou
+            ? '<div class="resgate-badge faltou">🔴 NÃO COMPARECEU À VISITA</div>'
+            : '<div class="resgate-badge negociacao">🟠 VISITOU — EM NEGOCIAÇÃO</div>';
+
+          const reagendar = faltou
+            ? `<button type="button" class="resgate-action reagendar full" onclick="reagendarResgate('${casal.casal_id}',event)">📅 REAGENDAR VISITA</button>`
+            : "";
+
+          infoExtra = selo + `
+            <div class="resgate-actions">
+              <button type="button" class="resgate-action ganho" onclick="abrirFechamentoResgate('${casal.casal_id}',event)">✅ FECHOU</button>
+              <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','FECHOU_COM_OUTRO_ESPACO',event)">OUTRO ESPAÇO</button>
+              <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','SEM_INTERESSE',event)">SEM INTERESSE</button>
+              <button type="button" class="resgate-action perda" onclick="encerrarResgate('${casal.casal_id}','SEM_RESPOSTA',event)">NÃO RESPONDE</button>
+              ${reagendar}
+            </div>`;
         }
 
         if (tipo === "agendados") {
