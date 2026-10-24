@@ -613,6 +613,7 @@
         if (temVisitaAgendada(casal)) return false;
         if (ehCorporativo(casal)) return false;
         if (status === "PERDIDO" || status === "GANHO") return false;
+        if (["VISITOU_NAO_FECHOU","VISITOU_EM_NEGOCIACAO","NAO_COMPARECEU_VISITA"].includes(status)) return false;
         return modoAtendimentoHumano(casal);
       });
 
@@ -625,7 +626,7 @@
 
       const resgatar = unicos.filter(casal => {
         const status = normalizarStatus(casal.status_casal);
-        if (temVisitaAgendada(casal) || ehCorporativo(casal) || modoAtendimentoHumano(casal)) return false;
+        if (temVisitaAgendada(casal) || ehCorporativo(casal)) return false;
         return ["VISITOU_NAO_FECHOU","VISITOU_EM_NEGOCIACAO","NAO_COMPARECEU_VISITA"].includes(status);
       });
 
