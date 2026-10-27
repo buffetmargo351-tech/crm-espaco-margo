@@ -127,13 +127,19 @@
     .portal-btn { width:100%; border-radius:14px; padding:12px 10px; font-size:12px; font-weight:950; cursor:pointer; border:1px solid #df6475; background:#fff; color:#c5455b; }
     .portal-btn.primary { border:0; background:linear-gradient(135deg,#df6475,#d45167); color:#fff; }
     .portal-btn:disabled { opacity:.55; cursor:wait; }
+    .photo-workspace {
+      display:grid;
+      grid-template-columns:128px minmax(0,1fr);
+      gap:12px;
+      align-items:center;
+    }
     .photo-preview {
-      width:min(46vw,176px);
+      width:128px;
       aspect-ratio:9/16;
       border-radius:15px;
       overflow:hidden;
       background:#211a15;
-      margin:0 auto 9px;
+      margin:0;
       position:relative;
       isolation:isolate;
       box-shadow:0 8px 22px rgba(47,36,35,.13);
@@ -207,12 +213,37 @@
       color:rgba(255,255,255,.90);
     }
     .photo-status {
-      margin:0 0 9px;
-      text-align:center;
+      margin:0 0 8px;
+      text-align:left;
       font-size:11px;
       font-weight:900;
       color:#7b625f;
       line-height:1.35;
+    }
+    .photo-side {
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .photo-side .portal-actions { gap:7px; }
+    .photo-side-label {
+      margin:10px 0 6px;
+      font-size:9px;
+      font-weight:950;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:#9a7e79;
+    }
+    .photo-side .portal-btn {
+      padding:10px 8px;
+      font-size:10px;
+      line-height:1.2;
+    }
+    @media (max-width:350px) {
+      .photo-workspace { grid-template-columns:112px minmax(0,1fr); gap:10px; }
+      .photo-preview { width:112px; }
+      .photo-side .portal-btn { font-size:9px; padding:9px 6px; }
     }
     .photo-status.ok { color:#2d7d46; }
     .portal-status { margin-top:9px; font-size:10px; font-weight:850; color:#8a6f6c; line-height:1.4; }
@@ -296,33 +327,32 @@
       <section class="section" id="fotoCasalSection">
         <div class="section-title">📷 Foto do casal</div>
         <div class="portal-card">
-          <div class="photo-preview" aria-label="Gabarito de enquadramento do Portal e Site dos Noivos">
-            <img id="fotoCasalPreview" src="https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp" alt="Prévia da foto do casal" />
-            <div class="photo-guide-brand">Espaço Margô</div>
-            <div class="photo-guide-copy" aria-hidden="true">
-              <div class="photo-guide-couple">
-                <span id="fotoGuideNome1">Noiva</span>
-                <span id="fotoGuideNome2">&amp; Noivo</span>
+          <div class="photo-workspace">
+            <div class="photo-preview" aria-label="Gabarito de enquadramento do Portal e Site dos Noivos">
+              <img id="fotoCasalPreview" src="https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp" alt="Prévia da foto do casal" />
+              <div class="photo-guide-brand">Espaço Margô</div>
+              <div class="photo-guide-copy" aria-hidden="true">
+                <div class="photo-guide-couple">
+                  <span id="fotoGuideNome1">Noiva</span>
+                  <span id="fotoGuideNome2">&amp; Noivo</span>
+                </div>
+                <div class="photo-guide-date" id="fotoGuideData">Data do evento</div>
               </div>
-              <div class="photo-guide-date" id="fotoGuideData">Data do evento</div>
+            </div>
+            <div class="photo-side">
+              <div class="photo-status" id="fotoCasalStatus">Foto padrão</div>
+              <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" onchange="enviarFotoCasal(this)" />
+              <div class="portal-actions">
+                <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
+              </div>
+              <div class="photo-side-label">Portal do casal</div>
+              <div class="portal-actions">
+                <button class="portal-btn" type="button" onclick="visualizarPortal()">👁️ Visualizar Portal</button>
+                <button class="portal-btn primary" type="button" onclick="revelarQrPortal()">▦ Revelar QR Code</button>
+              </div>
+              <div class="portal-status" id="portalCasalStatus"></div>
             </div>
           </div>
-          <div class="photo-status" id="fotoCasalStatus">Foto padrão</div>
-          <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" onchange="enviarFotoCasal(this)" />
-          <div class="portal-actions">
-            <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="portalCasalSection">
-        <div class="section-title">🔗 Portal do Casal</div>
-        <div class="portal-card">
-          <div class="portal-actions">
-            <button class="portal-btn" type="button" onclick="visualizarPortal()">👁️ Visualizar Portal</button>
-            <button class="portal-btn primary" type="button" onclick="revelarQrPortal()">▦ Revelar QR Code</button>
-          </div>
-          <div class="portal-status" id="portalCasalStatus">Portal disponível com fallback de foto padrão.</div>
         </div>
       </section>
 
@@ -741,15 +771,13 @@
         status.textContent=personalizada?"✓ Foto personalizada":"Foto padrão";
         status.classList.toggle("ok",personalizada);
         const ps=document.getElementById("portalCasalStatus");
-        ps.textContent=d.proposta_disponivel
-          ? "Portal disponível · Proposta disponível ✓"
-          : "Portal disponível com fallback de foto padrão.";
+        ps.textContent=d.proposta_disponivel ? "Proposta disponível ✓" : "";
       } catch(e) {
         console.warn("Portal status:",e);
         portalDataAtual=null;
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
         status.textContent="Foto padrão";
-        document.getElementById("portalCasalStatus").textContent="Portal disponível. Foto personalizada não é obrigatória.";
+        document.getElementById("portalCasalStatus").textContent="";
       }
     }
 
