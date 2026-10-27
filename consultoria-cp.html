@@ -122,6 +122,25 @@
     .btn-send-contract { width:100%; border-radius:16px; padding:14px 12px; border:none; background:linear-gradient(135deg,#2f9d65,#258653); color:#fff; font-size:13px; font-weight:950; cursor:pointer; }
     .btn-send-contract:disabled { opacity:.55; cursor:not-allowed; }
     .success.open + .btn-contract { margin-top:10px; }
+    .portal-card { border:1px solid #eadada; background:#fffaf9; border-radius:18px; padding:12px; box-shadow:0 7px 16px rgba(0,0,0,.04); }
+    .portal-actions { display:grid; gap:8px; }
+    .portal-btn { width:100%; border-radius:14px; padding:12px 10px; font-size:12px; font-weight:950; cursor:pointer; border:1px solid #df6475; background:#fff; color:#c5455b; }
+    .portal-btn.primary { border:0; background:linear-gradient(135deg,#df6475,#d45167); color:#fff; }
+    .portal-btn.soft { border-color:#eadada; color:#7b625f; background:#fff; }
+    .portal-btn:disabled { opacity:.55; cursor:wait; }
+    .photo-preview { width:100%; aspect-ratio:16/10; border-radius:14px; overflow:hidden; background:#efe5e2; margin-bottom:9px; position:relative; }
+    .photo-preview img { width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.84) contrast(.97) brightness(.98) sepia(.05); }
+    .photo-status { margin:0 0 9px; font-size:11px; font-weight:850; color:#7b625f; line-height:1.35; }
+    .photo-status.ok { color:#2d7d46; }
+    .portal-status { margin-top:9px; font-size:10px; font-weight:850; color:#8a6f6c; line-height:1.4; }
+    .qr-overlay { position:fixed; inset:0; z-index:9999; background:rgba(38,29,28,.76); display:none; align-items:center; justify-content:center; padding:20px; }
+    .qr-overlay.open { display:flex; }
+    .qr-card { width:min(100%,380px); background:#fff; border-radius:24px; padding:18px; text-align:center; box-shadow:0 24px 70px rgba(0,0,0,.30); }
+    .qr-card h3 { margin:0; color:#2f2423; font-size:18px; }
+    .qr-card p { margin:7px auto 14px; max-width:290px; color:#806b68; font-size:12px; line-height:1.4; font-weight:700; }
+    .qr-image-wrap { background:#fff; border:1px solid #eadada; border-radius:18px; padding:12px; margin:auto; width:min(100%,300px); }
+    .qr-image-wrap img { width:100%; aspect-ratio:1; object-fit:contain; display:block; }
+    .qr-close { width:100%; margin-top:14px; border:0; border-radius:14px; background:#2f2423; color:#fff; padding:12px; font-size:12px; font-weight:900; cursor:pointer; }
     @media (min-width: 700px) { body { padding: 20px 0; } .phone-frame { min-height: calc(100vh - 40px); border-radius: 34px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); } }
   </style>
 </head>
@@ -188,6 +207,31 @@
           <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
           <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
           <button class="chip" onclick="alternarChip(this)" data-value="experiencia_completa">Experiência completa</button>
+        </div>
+      </section>
+
+      <section class="section" id="fotoCasalSection">
+        <div class="section-title">📷 Foto do casal no Portal e no Site</div>
+        <div class="portal-card">
+          <div class="photo-preview"><img id="fotoCasalPreview" src="https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp" alt="Prévia da foto do casal" /></div>
+          <div class="photo-status" id="fotoCasalStatus">Foto padrão do Margô ativa.</div>
+          <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" capture="environment" onchange="enviarFotoCasal(this)" />
+          <div class="portal-actions">
+            <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Enviar Foto</button>
+            <button class="portal-btn soft" type="button" onclick="usarFotoPadrao()">Usar Foto Padrão do Margô</button>
+          </div>
+          <div class="hint">A foto é vinculada automaticamente ao casal desta visita. Nenhuma seleção de pasta ou associação manual é necessária.</div>
+        </div>
+      </section>
+
+      <section class="section" id="portalCasalSection">
+        <div class="section-title">🔗 Portal do Casal</div>
+        <div class="portal-card">
+          <div class="portal-actions">
+            <button class="portal-btn" type="button" onclick="visualizarPortal()">👁️ Visualizar Portal</button>
+            <button class="portal-btn primary" type="button" onclick="revelarQrPortal()">▦ Revelar QR Code</button>
+          </div>
+          <div class="portal-status" id="portalCasalStatus">Portal disponível com fallback de foto padrão.</div>
         </div>
       </section>
 
@@ -389,6 +433,15 @@
     </main>
   </div>
 
+  <div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-labelledby="qrTitulo">
+    <div class="qr-card">
+      <h3 id="qrTitulo">Portal do Casal</h3>
+      <p>Aponte a câmera do celular do casal para abrir o mesmo Portal desta visita.</p>
+      <div class="qr-image-wrap"><img id="qrPortalImg" alt="QR Code do Portal do Casal" /></div>
+      <button type="button" class="qr-close" onclick="fecharQrPortal()">Fechar</button>
+    </div>
+  </div>
+
   <script>
     const API_CASAL = "https://n8n.espacomargo.com.br/webhook/crm/casal";
     const API_CONSULTORIA = "https://n8n.espacomargo.com.br/webhook/crm/consultoria";
@@ -399,12 +452,17 @@
     const API_ENVIAR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/enviar-contrato-cp";
     const API_CONFERIR_CONTRATO_CP = "https://n8n.espacomargo.com.br/webhook/crm/conferir-contrato-cp";
     const API_RESULTADO_VISITA_CP = "https://n8n.espacomargo.com.br/webhook/crm/resultado-visita-cp";
+    const API_PORTAL_DATA = "https://n8n.espacomargo.com.br/webhook/crm/portal-casal-data";
+    const API_PORTAL_FOTO_UPLOAD = "https://n8n.espacomargo.com.br/webhook/crm/portal-casal-foto-upload";
+    const API_PORTAL_EVENTO = "https://n8n.espacomargo.com.br/webhook/crm/portal-casal-evento";
+    const API_PORTAL_QR = "https://n8n.espacomargo.com.br/webhook/crm/portal-casal-qr";
 
     let casalAtualId = null;
     let usuarioAtualId = null;
     let casalAtual = {};
     let origemAtual = "";
     let contratoAtual = null;
+    let portalDataAtual = null;
 
     function pegarCasalIdDaUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -554,6 +612,101 @@
       return p1 || p2 || "Casal sem nome";
     }
 
+    function portalFallbackFoto() {
+      return "https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp";
+    }
+
+    async function carregarEstadoPortal() {
+      if (!casalAtualId) return;
+      const status=document.getElementById("fotoCasalStatus");
+      try {
+        const r=await fetch(API_PORTAL_DATA+"?casal_id="+encodeURIComponent(casalAtualId)+"&t="+Date.now(),{cache:"no-store"});
+        const d=await r.json();
+        if(!r.ok||d.sucesso!==true) throw new Error(d.erro||d.message||"Portal indisponível");
+        portalDataAtual=d;
+        const personalizada=d.foto_estado==="PERSONALIZADA";
+        const img=document.getElementById("fotoCasalPreview");
+        img.src=(d.foto_url||portalFallbackFoto())+(personalizada?"&t="+Date.now():"");
+        img.onerror=function(){ this.onerror=null; this.src=portalFallbackFoto(); };
+        status.textContent=personalizada?"Foto personalizada salva e vinculada a este casal.":"Foto padrão do Margô ativa.";
+        status.classList.toggle("ok",personalizada);
+        const ps=document.getElementById("portalCasalStatus");
+        ps.textContent=d.proposta_disponivel
+          ? "Portal disponível · Proposta disponível ✓"
+          : "Portal disponível com fallback de foto padrão.";
+      } catch(e) {
+        console.warn("Portal status:",e);
+        portalDataAtual=null;
+        document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
+        status.textContent="Foto padrão ativa. O Portal continua disponível mesmo sem foto personalizada.";
+        document.getElementById("portalCasalStatus").textContent="Portal disponível. Foto personalizada não é obrigatória.";
+      }
+    }
+
+    async function enviarFotoCasal(input) {
+      const file=input.files&&input.files[0];
+      if(!file) return;
+      if(!/^image\//i.test(file.type||"")) { mostrarAviso("Selecione uma imagem."); input.value=""; return; }
+      if(file.size>15*1024*1024) { mostrarAviso("A foto deve ter no máximo 15 MB."); input.value=""; return; }
+      const btn=document.getElementById("btnFotoCasal");
+      const status=document.getElementById("fotoCasalStatus");
+      btn.disabled=true; btn.textContent="Enviando foto...";
+      status.textContent="Enviando e vinculando ao casal...";
+      try {
+        const fd=new FormData();
+        fd.append("casal_id",casalAtualId);
+        fd.append("foto",file,file.name||"foto-casal.jpg");
+        const r=await fetch(API_PORTAL_FOTO_UPLOAD,{method:"POST",body:fd});
+        const txt=await r.text();
+        let d={}; try{d=JSON.parse(txt);}catch(e){}
+        if(!r.ok||d.sucesso!==true) throw new Error(d.erro||d.message||txt||"Falha no upload");
+        await carregarEstadoPortal();
+        status.textContent="Foto personalizada salva e vinculada a este casal. ✓";
+        status.classList.add("ok");
+      } catch(e) {
+        console.error(e);
+        status.textContent="Upload falhou. A foto padrão continua ativa.";
+        mostrarAviso("Não foi possível enviar a foto. O Portal continua funcionando com a foto padrão.");
+      } finally {
+        btn.disabled=false; btn.textContent="📷 Tirar / Enviar Foto"; input.value="";
+      }
+    }
+
+    async function registrarEventoPortal(action) {
+      if(!casalAtualId) return;
+      try {
+        await fetch(API_PORTAL_EVENTO,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({casal_id:casalAtualId,action})});
+      } catch(e) { console.warn("Evento Portal não registrado:",e); }
+    }
+
+    async function usarFotoPadrao() {
+      if(!casalAtualId) return;
+      await registrarEventoPortal("USAR_FOTO_PADRAO");
+      await carregarEstadoPortal();
+    }
+
+    function portalUrlAtual() {
+      return portalDataAtual?.portal_url || ("https://casamento.espacomargo.com.br/portal-casal-home-v1/?casal_id="+encodeURIComponent(casalAtualId||""));
+    }
+
+    function visualizarPortal() {
+      if(!casalAtualId) { mostrarAviso("Selecione uma visita."); return; }
+      registrarEventoPortal("VISUALIZAR_PORTAL");
+      window.open(portalUrlAtual(),"portal-casal-preview","noopener");
+    }
+
+    function revelarQrPortal() {
+      if(!casalAtualId) { mostrarAviso("Selecione uma visita."); return; }
+      registrarEventoPortal("REVELAR_QR");
+      const img=document.getElementById("qrPortalImg");
+      img.src=API_PORTAL_QR+"?casal_id="+encodeURIComponent(casalAtualId)+"&t="+Date.now();
+      document.getElementById("qrOverlay").classList.add("open");
+    }
+
+    function fecharQrPortal() {
+      document.getElementById("qrOverlay").classList.remove("open");
+    }
+
     async function carregarCasal() {
       usuarioAtualId = pegarUsuarioIdDaUrl();
       casalAtualId = casalAtualId || pegarCasalIdDaUrl();
@@ -588,6 +741,7 @@
         preencher("dataEvento", dataBRParaISO(casal.data_evento || casal.data_casamento || ""));
         preencher("qtdConvidados", casal.quantidade_pessoas || casal.quantidade_convidados || "");
 
+        await carregarEstadoPortal();
         calcularPagamento();
       } catch (erro) {
         console.error("Erro ao carregar casal:", erro);
