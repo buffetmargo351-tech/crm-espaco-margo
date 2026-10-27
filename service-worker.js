@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-6-resgate-prioridade-20261024";
+const CACHE_NAME = "crm-margo-pwa-v18-7-portal-casal-20261027";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
