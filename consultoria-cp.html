@@ -730,7 +730,14 @@
         const personalizada=d.foto_estado==="PERSONALIZADA";
         const img=document.getElementById("fotoCasalPreview");
         img.src=(d.foto_url||portalFallbackFoto())+(personalizada?"&t="+Date.now():"");
-        img.onerror=function(){ this.onerror=null; this.src=portalFallbackFoto(); };
+        img.onerror=function(){
+          this.onerror=null;
+          this.src=portalFallbackFoto();
+          portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
+          status.textContent="Foto padrão";
+          status.classList.remove("ok");
+          registrarEventoPortal("USAR_FOTO_PADRAO");
+        };
         status.textContent=personalizada?"✓ Foto personalizada":"Foto padrão";
         status.classList.toggle("ok",personalizada);
         const ps=document.getElementById("portalCasalStatus");
