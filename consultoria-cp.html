@@ -1520,6 +1520,27 @@
       await iniciarTela();
     }
 
+    async function revalidarFotoAoRetornar() {
+      const cid = casalAtualId || pegarCasalIdDaUrl();
+      if (!cid) return;
+      casalAtualId = cid;
+      try {
+        await carregarEstadoPortal();
+      } catch (e) {
+        console.warn("Não foi possível revalidar a foto ao retornar:", e);
+      }
+    }
+
+    window.addEventListener("pageshow", function () {
+      setTimeout(revalidarFotoAoRetornar, 0);
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        setTimeout(revalidarFotoAoRetornar, 0);
+      }
+    });
+
     iniciarTelaComTrava();
   </script>
 </body>
