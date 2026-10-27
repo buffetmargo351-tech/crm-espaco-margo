@@ -126,11 +126,94 @@
     .portal-actions { display:grid; gap:8px; }
     .portal-btn { width:100%; border-radius:14px; padding:12px 10px; font-size:12px; font-weight:950; cursor:pointer; border:1px solid #df6475; background:#fff; color:#c5455b; }
     .portal-btn.primary { border:0; background:linear-gradient(135deg,#df6475,#d45167); color:#fff; }
-    .portal-btn.soft { border-color:#eadada; color:#7b625f; background:#fff; }
     .portal-btn:disabled { opacity:.55; cursor:wait; }
-    .photo-preview { width:100%; aspect-ratio:16/10; border-radius:14px; overflow:hidden; background:#efe5e2; margin-bottom:9px; position:relative; }
-    .photo-preview img { width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.84) contrast(.97) brightness(.98) sepia(.05); }
-    .photo-status { margin:0 0 9px; font-size:11px; font-weight:850; color:#7b625f; line-height:1.35; }
+    .photo-preview {
+      width:min(46vw,176px);
+      aspect-ratio:9/16;
+      border-radius:15px;
+      overflow:hidden;
+      background:#211a15;
+      margin:0 auto 9px;
+      position:relative;
+      isolation:isolate;
+      box-shadow:0 8px 22px rgba(47,36,35,.13);
+    }
+    .photo-preview img {
+      position:absolute;
+      inset:0;
+      z-index:-3;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:52% 50%;
+      display:block;
+      transform:scale(1.02);
+    }
+    .photo-preview::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      background:linear-gradient(180deg,rgba(236,222,203,.10) 0%,rgba(22,17,13,.02) 30%,rgba(17,12,9,.16) 56%,rgba(12,9,7,.78) 100%);
+      pointer-events:none;
+    }
+    .photo-preview::after {
+      content:"";
+      position:absolute;
+      inset:8px;
+      z-index:3;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:10px;
+      pointer-events:none;
+    }
+    .photo-guide-brand {
+      position:absolute;
+      z-index:2;
+      top:12px;
+      left:0;
+      right:0;
+      text-align:center;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:6px;
+      letter-spacing:.30em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.88);
+      text-shadow:0 1px 5px rgba(0,0,0,.28);
+    }
+    .photo-guide-copy {
+      position:absolute;
+      z-index:2;
+      left:10px;
+      right:10px;
+      bottom:47px;
+      text-align:center;
+      color:#fff;
+      text-shadow:0 1px 9px rgba(0,0,0,.38);
+    }
+    .photo-guide-couple {
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:22px;
+      line-height:.90;
+      letter-spacing:-.035em;
+      font-weight:400;
+    }
+    .photo-guide-couple span { display:block; }
+    .photo-guide-date {
+      margin-top:9px;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:7px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.90);
+    }
+    .photo-status {
+      margin:0 0 9px;
+      text-align:center;
+      font-size:11px;
+      font-weight:900;
+      color:#7b625f;
+      line-height:1.35;
+    }
     .photo-status.ok { color:#2d7d46; }
     .portal-status { margin-top:9px; font-size:10px; font-weight:850; color:#8a6f6c; line-height:1.4; }
     .qr-overlay { position:fixed; inset:0; z-index:9999; background:rgba(38,29,28,.76); display:none; align-items:center; justify-content:center; padding:20px; }
@@ -211,16 +294,24 @@
       </section>
 
       <section class="section" id="fotoCasalSection">
-        <div class="section-title">📷 Foto do casal no Portal e no Site</div>
+        <div class="section-title">📷 Foto do casal</div>
         <div class="portal-card">
-          <div class="photo-preview"><img id="fotoCasalPreview" src="https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp" alt="Prévia da foto do casal" /></div>
-          <div class="photo-status" id="fotoCasalStatus">Foto padrão do Margô ativa.</div>
+          <div class="photo-preview" aria-label="Gabarito de enquadramento do Portal e Site dos Noivos">
+            <img id="fotoCasalPreview" src="https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp" alt="Prévia da foto do casal" />
+            <div class="photo-guide-brand">Espaço Margô</div>
+            <div class="photo-guide-copy" aria-hidden="true">
+              <div class="photo-guide-couple">
+                <span id="fotoGuideNome1">Noiva</span>
+                <span id="fotoGuideNome2">&amp; Noivo</span>
+              </div>
+              <div class="photo-guide-date" id="fotoGuideData">Data do evento</div>
+            </div>
+          </div>
+          <div class="photo-status" id="fotoCasalStatus">Foto padrão</div>
           <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" capture="environment" onchange="enviarFotoCasal(this)" />
           <div class="portal-actions">
-            <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Enviar Foto</button>
-            <button class="portal-btn soft" type="button" onclick="usarFotoPadrao()">Usar Foto Padrão do Margô</button>
+            <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
           </div>
-          <div class="hint">A foto é vinculada automaticamente ao casal desta visita. Nenhuma seleção de pasta ou associação manual é necessária.</div>
         </div>
       </section>
 
@@ -616,6 +707,18 @@
       return "https://casamento.espacomargo.com.br/assets/galeria-por-do-sol-960.webp";
     }
 
+    function atualizarGabaritoFoto(casal) {
+      const n1=String(casal?.nome_pessoa_1 || casal?.nome_noiva || casal?.nome_contato || "Noiva").trim() || "Noiva";
+      const n2=String(casal?.nome_pessoa_2 || casal?.nome_noivo || "Noivo").trim() || "Noivo";
+      const data=String(casal?.data_evento || casal?.data_casamento || "").trim();
+      const nome1=document.getElementById("fotoGuideNome1");
+      const nome2=document.getElementById("fotoGuideNome2");
+      const dataEl=document.getElementById("fotoGuideData");
+      if(nome1) nome1.textContent=n1;
+      if(nome2) nome2.textContent="& "+n2;
+      if(dataEl) dataEl.textContent=data || "Data do evento";
+    }
+
     async function carregarEstadoPortal() {
       if (!casalAtualId) return;
       const status=document.getElementById("fotoCasalStatus");
@@ -628,7 +731,7 @@
         const img=document.getElementById("fotoCasalPreview");
         img.src=(d.foto_url||portalFallbackFoto())+(personalizada?"&t="+Date.now():"");
         img.onerror=function(){ this.onerror=null; this.src=portalFallbackFoto(); };
-        status.textContent=personalizada?"Foto personalizada salva e vinculada a este casal.":"Foto padrão do Margô ativa.";
+        status.textContent=personalizada?"✓ Foto personalizada":"Foto padrão";
         status.classList.toggle("ok",personalizada);
         const ps=document.getElementById("portalCasalStatus");
         ps.textContent=d.proposta_disponivel
@@ -638,7 +741,7 @@
         console.warn("Portal status:",e);
         portalDataAtual=null;
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
-        status.textContent="Foto padrão ativa. O Portal continua disponível mesmo sem foto personalizada.";
+        status.textContent="Foto padrão";
         document.getElementById("portalCasalStatus").textContent="Portal disponível. Foto personalizada não é obrigatória.";
       }
     }
@@ -651,7 +754,7 @@
       const btn=document.getElementById("btnFotoCasal");
       const status=document.getElementById("fotoCasalStatus");
       btn.disabled=true; btn.textContent="Enviando foto...";
-      status.textContent="Enviando e vinculando ao casal...";
+      status.textContent=portalDataAtual?.foto_estado==="PERSONALIZADA"?"✓ Foto personalizada":"Foto padrão";
       try {
         const fd=new FormData();
         fd.append("casal_id",casalAtualId);
@@ -661,14 +764,17 @@
         let d={}; try{d=JSON.parse(txt);}catch(e){}
         if(!r.ok||d.sucesso!==true) throw new Error(d.erro||d.message||txt||"Falha no upload");
         await carregarEstadoPortal();
-        status.textContent="Foto personalizada salva e vinculada a este casal. ✓";
+        status.textContent="✓ Foto personalizada";
         status.classList.add("ok");
       } catch(e) {
         console.error(e);
-        status.textContent="Upload falhou. A foto padrão continua ativa.";
-        mostrarAviso("Não foi possível enviar a foto. O Portal continua funcionando com a foto padrão.");
+        document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
+        status.textContent="Foto padrão";
+        status.classList.remove("ok");
+        registrarEventoPortal("USAR_FOTO_PADRAO");
+        mostrarAviso("Não foi possível trocar a foto. Foto padrão mantida.");
       } finally {
-        btn.disabled=false; btn.textContent="📷 Tirar / Enviar Foto"; input.value="";
+        btn.disabled=false; btn.textContent="📷 Tirar / Trocar Foto"; input.value="";
       }
     }
 
@@ -677,12 +783,6 @@
       try {
         await fetch(API_PORTAL_EVENTO,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({casal_id:casalAtualId,action})});
       } catch(e) { console.warn("Evento Portal não registrado:",e); }
-    }
-
-    async function usarFotoPadrao() {
-      if(!casalAtualId) return;
-      await registrarEventoPortal("USAR_FOTO_PADRAO");
-      await carregarEstadoPortal();
     }
 
     function portalUrlAtual() {
@@ -723,6 +823,7 @@
         }
         casalAtual = casal;
         document.getElementById("nomeCasal").textContent = nomeCasal(casal);
+        atualizarGabaritoFoto(casal);
 
         origemAtual = String(casal.origem || casal.como_conheceu_margo || "").trim();
         if (origemAtual) {
