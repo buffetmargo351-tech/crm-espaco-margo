@@ -129,14 +129,14 @@
     .portal-btn:disabled { opacity:.55; cursor:wait; }
     .photo-workspace {
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(112px,.82fr);
-      gap:10px;
+      grid-template-columns:minmax(0,1.42fr) minmax(122px,.92fr);
+      gap:12px;
       align-items:center;
     }
     .photo-preview {
       width:100%;
-      max-width:158px;
-      aspect-ratio:9/16;
+      max-width:none;
+      aspect-ratio:9/14.4;
       border-radius:15px;
       overflow:hidden;
       background:#211a15;
@@ -192,7 +192,7 @@
       z-index:2;
       left:10px;
       right:10px;
-      bottom:47px;
+      bottom:26px;
       text-align:center;
       color:#fff;
       text-shadow:0 1px 9px rgba(0,0,0,.38);
@@ -214,7 +214,7 @@
       color:rgba(255,255,255,.90);
     }
     .photo-status {
-      margin:0 0 8px;
+      margin:0 0 10px;
       text-align:left;
       font-size:11px;
       font-weight:900;
@@ -227,30 +227,37 @@
       flex-direction:column;
       justify-content:center;
     }
-    .photo-side .portal-actions { gap:7px; }
+    .photo-side .portal-actions {
+      display:grid;
+      gap:10px;
+    }
     .photo-side-label {
-      margin:10px 0 6px;
+      margin:16px 0 9px;
+      padding-top:12px;
+      border-top:1px solid #ecdedd;
       font-size:9px;
       font-weight:950;
-      letter-spacing:.04em;
+      letter-spacing:.08em;
       text-transform:uppercase;
       color:#9a7e79;
     }
     .photo-side .portal-btn {
-      width:auto;
+      width:100%;
       min-width:0;
-      align-self:stretch;
-      padding:7px 6px;
-      font-size:9px;
-      line-height:1.15;
-      border-radius:10px;
+      min-height:42px;
+      padding:9px 8px;
+      font-size:9.5px;
+      line-height:1.2;
+      border-radius:11px;
     }
-    .photo-side .portal-actions { gap:5px; }
-    .photo-side-label { margin:8px 0 5px; font-size:8px; }
     @media (max-width:350px) {
-      .photo-workspace { grid-template-columns:minmax(0,1fr) minmax(104px,.78fr); gap:8px; }
-      .photo-preview { max-width:142px; }
-      .photo-side .portal-btn { font-size:8.5px; padding:6px 5px; }
+      .photo-workspace {
+        grid-template-columns:minmax(0,1.30fr) minmax(112px,.92fr);
+        gap:9px;
+      }
+      .photo-side .portal-actions { gap:8px; }
+      .photo-side-label { margin:13px 0 8px; padding-top:10px; font-size:8px; }
+      .photo-side .portal-btn { min-height:38px; font-size:8.5px; padding:7px 6px; }
     }
     .photo-status.ok { color:#2d7d46; }
     .portal-status { margin-top:9px; font-size:10px; font-weight:850; color:#8a6f6c; line-height:1.4; }
