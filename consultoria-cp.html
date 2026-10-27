@@ -348,7 +348,7 @@
             </div>
             <div class="photo-side">
               <div class="photo-status" id="fotoCasalStatus">Foto padrão</div>
-              <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" onchange="enviarFotoCasal(this)" />
+              <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" capture="environment" onchange="enviarFotoCasal(this)" />
               <div class="portal-actions">
                 <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
               </div>
@@ -795,8 +795,10 @@
       if(file.size>15*1024*1024) { mostrarAviso("A foto deve ter no máximo 15 MB."); input.value=""; return; }
       const btn=document.getElementById("btnFotoCasal");
       const status=document.getElementById("fotoCasalStatus");
+      const img=document.getElementById("fotoCasalPreview");
+      const localPreviewUrl=URL.createObjectURL(file);
+      img.src=localPreviewUrl;
       btn.disabled=true; btn.textContent="Enviando foto...";
-      status.textContent=portalDataAtual?.foto_estado==="PERSONALIZADA"?"✓ Foto personalizada":"Foto padrão";
       try {
         const fd=new FormData();
         fd.append("casal_id",casalAtualId);
@@ -805,9 +807,21 @@
         const txt=await r.text();
         let d={}; try{d=JSON.parse(txt);}catch(e){}
         if(!r.ok||d.sucesso!==true) throw new Error(d.erro||d.message||txt||"Falha no upload");
-        await carregarEstadoPortal();
+        portalDataAtual={...(portalDataAtual||{}),foto_estado:"PERSONALIZADA",foto_url:d.foto_url||""};
         status.textContent="✓ Foto personalizada";
         status.classList.add("ok");
+        if(d.foto_url){
+          img.onerror=function(){
+            this.onerror=null;
+            this.src=portalFallbackFoto();
+            portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
+            status.textContent="Foto padrão";
+            status.classList.remove("ok");
+            registrarEventoPortal("USAR_FOTO_PADRAO");
+          };
+          img.src=d.foto_url+"&t="+Date.now();
+        }
+        await carregarEstadoPortal();
       } catch(e) {
         console.error(e);
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
@@ -817,6 +831,7 @@
         await registrarEventoPortal("USAR_FOTO_PADRAO");
         mostrarAviso("Não foi possível trocar a foto. Foto padrão mantida.");
       } finally {
+        setTimeout(function(){ try{URL.revokeObjectURL(localPreviewUrl);}catch(e){} },30000);
         btn.disabled=false; btn.textContent="📷 Tirar / Trocar Foto"; input.value="";
       }
     }
