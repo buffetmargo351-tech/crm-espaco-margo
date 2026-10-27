@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-8-foto-gabarito-20261027";
+const CACHE_NAME = "crm-margo-pwa-v18-9-foto-lateral-20261027";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
