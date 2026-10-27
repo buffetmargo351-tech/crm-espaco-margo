@@ -308,7 +308,7 @@
             </div>
           </div>
           <div class="photo-status" id="fotoCasalStatus">Foto padrão</div>
-          <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" capture="environment" onchange="enviarFotoCasal(this)" />
+          <input class="hidden" type="file" id="fotoCasalInput" accept="image/*" onchange="enviarFotoCasal(this)" />
           <div class="portal-actions">
             <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
           </div>
@@ -771,7 +771,8 @@
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
         status.textContent="Foto padrão";
         status.classList.remove("ok");
-        registrarEventoPortal("USAR_FOTO_PADRAO");
+        portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
+        await registrarEventoPortal("USAR_FOTO_PADRAO");
         mostrarAviso("Não foi possível trocar a foto. Foto padrão mantida.");
       } finally {
         btn.disabled=false; btn.textContent="📷 Tirar / Trocar Foto"; input.value="";
