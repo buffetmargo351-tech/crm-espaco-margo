@@ -231,9 +231,26 @@
       display:grid;
       gap:10px;
     }
+    .photo-remove-link {
+      appearance:none;
+      border:0;
+      background:transparent;
+      padding:0;
+      margin:9px 0 0;
+      width:max-content;
+      max-width:100%;
+      color:#9d7470;
+      font-size:9px;
+      font-weight:850;
+      line-height:1.25;
+      text-decoration:underline;
+      text-underline-offset:2px;
+      cursor:pointer;
+    }
+    .photo-remove-link:disabled { opacity:.5; cursor:wait; }
     .photo-side-label {
-      margin:16px 0 9px;
-      padding-top:12px;
+      margin:28px 0 10px;
+      padding-top:14px;
       border-top:1px solid #ecdedd;
       font-size:9px;
       font-weight:950;
@@ -256,7 +273,8 @@
         gap:9px;
       }
       .photo-side .portal-actions { gap:8px; }
-      .photo-side-label { margin:13px 0 8px; padding-top:10px; font-size:8px; }
+      .photo-remove-link { margin-top:7px; font-size:8px; }
+      .photo-side-label { margin:22px 0 8px; padding-top:11px; font-size:8px; }
       .photo-side .portal-btn { min-height:38px; font-size:8.5px; padding:7px 6px; }
     }
     .photo-status.ok { color:#2d7d46; }
@@ -359,6 +377,7 @@
               <div class="portal-actions">
                 <button class="portal-btn primary" type="button" id="btnFotoCasal" onclick="document.getElementById('fotoCasalInput').click()">📷 Tirar / Trocar Foto</button>
               </div>
+              <button class="photo-remove-link hidden" type="button" id="btnRemoverFoto" onclick="removerFotoCasal()">Remover foto</button>
               <div class="photo-side-label">Portal do casal</div>
               <div class="portal-actions">
                 <button class="portal-btn" type="button" onclick="visualizarPortal()">👁️ Visualizar Portal</button>
@@ -780,10 +799,12 @@
           portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
           status.textContent="Foto padrão";
           status.classList.remove("ok");
+          document.getElementById("btnRemoverFoto").classList.add("hidden");
           registrarEventoPortal("USAR_FOTO_PADRAO");
         };
         status.textContent=personalizada?"✓ Foto personalizada":"Foto padrão";
         status.classList.toggle("ok",personalizada);
+        document.getElementById("btnRemoverFoto").classList.toggle("hidden",!personalizada);
         const ps=document.getElementById("portalCasalStatus");
         ps.textContent=d.proposta_disponivel ? "Proposta disponível ✓" : "";
       } catch(e) {
@@ -791,6 +812,7 @@
         portalDataAtual=null;
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
         status.textContent="Foto padrão";
+        document.getElementById("btnRemoverFoto").classList.add("hidden");
         document.getElementById("portalCasalStatus").textContent="";
       }
     }
@@ -817,6 +839,7 @@
         portalDataAtual={...(portalDataAtual||{}),foto_estado:"PERSONALIZADA",foto_url:d.foto_url||""};
         status.textContent="✓ Foto personalizada";
         status.classList.add("ok");
+        document.getElementById("btnRemoverFoto").classList.remove("hidden");
         if(d.foto_url){
           img.onerror=function(){
             this.onerror=null;
@@ -834,12 +857,42 @@
         document.getElementById("fotoCasalPreview").src=portalFallbackFoto();
         status.textContent="Foto padrão";
         status.classList.remove("ok");
+        document.getElementById("btnRemoverFoto").classList.add("hidden");
         portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
         await registrarEventoPortal("USAR_FOTO_PADRAO");
         mostrarAviso("Não foi possível trocar a foto. Foto padrão mantida.");
       } finally {
         setTimeout(function(){ try{URL.revokeObjectURL(localPreviewUrl);}catch(e){} },30000);
         btn.disabled=false; btn.textContent="📷 Tirar / Trocar Foto"; input.value="";
+      }
+    }
+
+    async function removerFotoCasal() {
+      if(!casalAtualId) return;
+      const btn=document.getElementById("btnRemoverFoto");
+      const status=document.getElementById("fotoCasalStatus");
+      const img=document.getElementById("fotoCasalPreview");
+      btn.disabled=true;
+      try {
+        const r=await fetch(API_PORTAL_EVENTO,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({casal_id:casalAtualId,action:"USAR_FOTO_PADRAO"})
+        });
+        const txt=await r.text();
+        let d={}; try{d=JSON.parse(txt);}catch(e){}
+        if(!r.ok||d.sucesso!==true) throw new Error(d.erro||d.message||txt||"Falha ao remover foto");
+        portalDataAtual={...(portalDataAtual||{}),foto_estado:"PADRAO",foto_url:portalFallbackFoto()};
+        img.onerror=null;
+        img.src=portalFallbackFoto();
+        status.textContent="Foto padrão";
+        status.classList.remove("ok");
+        btn.classList.add("hidden");
+      } catch(e) {
+        console.error(e);
+        mostrarAviso("Não foi possível remover a foto agora.");
+      } finally {
+        btn.disabled=false;
       }
     }
 
