@@ -339,20 +339,15 @@
       <section class="section" id="encantamentoPresencialSection">
         <div class="section-title">🌿 O que encantou na visita presencial?</div>
         <div class="chips">
-          <button class="chip" onclick="alternarChip(this)" data-value="cerimonia_externa">Cerimônia externa</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="lago">Lago</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="jardim">Jardim</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="bosque">Bosque</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="camarins">Camarins</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="salao">Salão</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="mesa_do_bolo">Mesa do bolo</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="mesa_do_buffet">Mesa do buffet</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="churrasco">Churrasco</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="cerimonial">Cerimonial</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="por_do_sol">Pôr do sol</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="estrutura">Estrutura</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="atendimento">Atendimento</button>
-          <button class="chip" onclick="alternarChip(this)" data-value="experiencia_completa">Experiência completa</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="CERIMONIAL">Cerimonial</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="LAGOS">Lagos</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="JARDINS">Jardins</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="BOSQUE">Bosque</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="CAMARINS">Camarins</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="SALAO">Salão</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="MESA_DO_BOLO">Mesa do Bolo</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="AREA_DO_CHURRASCO">Área do Churrasco</button>
+          <button class="chip" onclick="alternarChip(this)" data-value="ATENDIMENTO">Atendimento</button>
         </div>
       </section>
 
@@ -955,6 +950,10 @@
           casal.encantamentos_principais.split("|").forEach(function(v){ selecionarChipPorValor("encantamentosSection", v.trim()); });
         }
 
+        if (casal.encantamentos_visita_presencial) {
+          casal.encantamentos_visita_presencial.split("|").forEach(function(v){ selecionarChipPorValor("encantamentoPresencialSection", v.trim()); });
+        }
+
         preencher("p1_nome", casal.nome_pessoa_1 || casal.nome_noiva || casal.nome_contato || "");
         preencher("p1_telefone", casal.telefone || "");
         preencher("p1_email", casal.email || "");
@@ -1319,11 +1318,42 @@
       }
     }
 
+    async function salvarEncantamentosVisitaPortal() {
+      if (!casalAtualId) throw new Error("Casal não identificado.");
+      const encantamentos=chipsSelecionados("encantamentoPresencialSection");
+      const resp=await fetch(API_PORTAL_EVENTO,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          casal_id:casalAtualId,
+          action:"SALVAR_ENCANTAMENTOS_VISITA",
+          encantamentos
+        })
+      });
+      const txt=await resp.text();
+      let data={}; try{data=JSON.parse(txt);}catch(e){}
+      if(!resp.ok || data.sucesso!==true) {
+        throw new Error(data.erro || data.message || txt || "Não foi possível salvar os encantamentos da visita.");
+      }
+      casalAtual.encantamentos_visita_presencial=encantamentos.join("|");
+      return encantamentos;
+    }
+
     async function salvarRegistroCP() {
       esconderAviso();
       if (!casalAtualId) { mostrarAviso("Casal não identificado."); return; }
       const resultado = resultadoSelecionado();
       if (!resultado) { mostrarAviso("Selecione o resultado da visita."); return; }
+
+      let encantamentosVisita=[];
+      try {
+        encantamentosVisita=await salvarEncantamentosVisitaPortal();
+      } catch(erro) {
+        console.error(erro);
+        mostrarAviso(erro.message || "Não foi possível salvar os encantamentos da visita.");
+        return;
+      }
+
       if (resultado === "FECHOU") { await salvarFechamentoCP(); return; }
 
       if (!["EM_NEGOCIACAO","NAO_COMPARECEU"].includes(resultado)) {
@@ -1333,10 +1363,7 @@
 
       const origemSelecionada = document.querySelector("#origemSection .chip.selected");
       const origemFinal = origemAtual || (origemSelecionada ? origemSelecionada.textContent.trim() : "");
-      const todosEncantamentos = Array.from(new Set([].concat(
-        chipsSelecionados("encantamentosSection"),
-        chipsSelecionados("encantamentoPresencialSection")
-      )));
+      const encantamentosFotoVideo = chipsSelecionados("encantamentosSection");
       const observacoesCP = valor("observacoesCP");
       const objecoes = valor("objecoesCasal");
       const observacoesBase = String(casalAtual.observacoes_gerais || "").trim();
@@ -1344,7 +1371,8 @@
       const rotulo = resultado === "EM_NEGOCIACAO" ? "EM NEGOCIAÇÃO" : "NÃO COMPARECEU À VISITA";
       const bloco = "[Registro Consultora Presencial - "+dataRegistro+"]\nResultado: "+rotulo+
         (origemFinal ? "\nOrigem: "+origemFinal : "")+
-        (todosEncantamentos.length ? "\nEncantamentos: "+todosEncantamentos.join(" | ") : "")+
+        (encantamentosFotoVideo.length ? "\nEncantamentos fotos/vídeos: "+encantamentosFotoVideo.join(" | ") : "")+
+        (encantamentosVisita.length ? "\nEncantamentos visita presencial: "+encantamentosVisita.join(" | ") : "")+
         (observacoesCP ? "\nObservações: "+observacoesCP : "")+
         (objecoes ? "\nObjeções: "+objecoes : "");
       const observacoesGerais = observacoesBase ? observacoesBase+"\n\n"+bloco : bloco;
