@@ -361,7 +361,8 @@
         if (destinoSalvo) {
           const uri = new URL(destinoSalvo, window.location.origin);
           if (uri.origin === window.location.origin &&
-              /\\/(?:oportunidades|atendimento)\\.html$/.test(uri.pathname)) {
+              ["/oportunidades.html","/atendimento.html"].some(
+                allowed => uri.pathname.endsWith(allowed))) {
             uri.searchParams.set("usuario_id", usuario.usuario_id || "");
             return uri.pathname + uri.search + uri.hash;
           }
