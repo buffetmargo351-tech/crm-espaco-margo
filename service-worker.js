@@ -1,4 +1,4 @@
-const CACHE_NAME = "crm-margo-pwa-v18-18-encantamentos-portal-v1-20261028";
+const CACHE_NAME = "crm-margo-pwa-milene-memory-20261109-v1";
 const ARQUIVOS_CACHE = [
   "./",
   "home.html",
@@ -67,6 +67,12 @@ self.addEventListener("fetch", function (event) {
   const url = new URL(request.url);
 
   if (request.method !== "GET") return;
+
+  // Orientações administrativas nunca são armazenadas no cache offline.
+  if (url.origin === self.location.origin && (url.pathname.endsWith('/memoria-milene.html') || url.pathname.endsWith('/menu.html'))) {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
 
   // Não intercepta chamadas externas/API.
   if (url.origin !== self.location.origin) return;
