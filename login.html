@@ -354,6 +354,22 @@
         return "";
       }
 
+      // Redirecionamento pós-alarme: só permitir páginas CRM da mesma origem.
+      // Substitui qualquer usuario_id recebido pela identidade autenticada.
+      try {
+        const destinoSalvo = localStorage.getItem("margo_redirect_after_login");
+        if (destinoSalvo) {
+          const uri = new URL(destinoSalvo, window.location.origin);
+          if (uri.origin === window.location.origin &&
+              ["/oportunidades.html","/atendimento.html"].some(
+                allowed => uri.pathname.endsWith(allowed))) {
+            uri.searchParams.set("usuario_id", usuario.usuario_id || "");
+            return uri.pathname + uri.search + uri.hash;
+          }
+        }
+      } catch (erro) {
+        console.warn("Destino salvo inválido, retornando ao menu.");
+      }
       return "menu.html?usuario_id=" + usuarioId;
     }
 
@@ -461,6 +477,7 @@
         }
 
         salvarSessao(dados, senhaAcesso);
+        localStorage.removeItem("margo_redirect_after_login");
         setMensagem("Acesso autorizado.", "success");
 
         setTimeout(() => {
