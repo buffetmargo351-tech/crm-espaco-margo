@@ -409,6 +409,26 @@
     let abaAtual = pegarAbaInicial();
     let usuarioAtualId = pegarUsuarioIdDaUrl();
 
+    // Margô Alerta: destino por casal, exclusivamente no card ATENÇÃO.
+    const paramsAlarme = new URLSearchParams(window.location.search);
+    const candidatoAlarme = String(paramsAlarme.get("casal_id") || "").trim();
+    const focoAlarmeCasal = abaAtual === "atencao" && /^CASAL_[A-Za-z0-9_-]{4,120}$/.test(candidatoAlarme)
+      ? candidatoAlarme : "";
+    let tentativasFocoAlarme = 0;
+    if (focoAlarmeCasal) {
+      let sessao = null;
+      try { sessao = JSON.parse(localStorage.getItem("margo_usuario") || "null"); }
+      catch (erro) { sessao = null; }
+      const idSessao = String(sessao && sessao.usuario_id || "").trim();
+      if (!idSessao || (usuarioAtualId && idSessao !== usuarioAtualId)) {
+        // Preserva o destino correto para o retorno após a autenticação.
+        try { localStorage.setItem("margo_redirect_after_login", window.location.href); } catch (erro) {}
+        window.location.replace("login.html");
+      } else {
+        usuarioAtualId = idSessao;
+      }
+    }
+
     const titulos = {
       agendar: "Casais para agendar consultoria",
       resgatar: "Casais para resgatar",
@@ -895,6 +915,12 @@
       dados[tipo].forEach(casal => {
         const card = document.createElement("div");
         card.className = "card-casal";
+        if (tipo === "atencao" && focoAlarmeCasal && String(casal.casal_id) === focoAlarmeCasal) {
+          card.id = "margo-alerta-casal-destacado";
+          card.style.border = "2px solid #b66a31";
+          card.style.boxShadow = "0 0 0 3px rgba(182,106,49,0.12)";
+          requestAnimationFrame(() => card.scrollIntoView({ block:"center", behavior:"smooth" }));
+        }
 
         card.onclick = () => window.location.href = urlComUsuario("atendimento.html?casal_id=" + encodeURIComponent(casal.casal_id) + "&fila=" + encodeURIComponent(tipo) + "&app_v=18_1");
 
@@ -1050,6 +1076,14 @@
 
         trocarAba(abaAtual);
 
+        // A gravação do ACK no CRM ocorre logo após o ACK canônico. Se a fila
+        // ainda não refletiu o novo modo HUMANO, atualizar por uma janela curta.
+        if (focoAlarmeCasal && abaAtual === "atencao" &&
+            !(dados.atencao || []).some(casal => String(casal.casal_id) === focoAlarmeCasal) &&
+            tentativasFocoAlarme < 10) {
+          tentativasFocoAlarme += 1;
+          setTimeout(carregarOportunidades, 1500);
+        }
       } catch (erro) {
         console.error("Erro ao carregar oportunidades:", erro);
 
