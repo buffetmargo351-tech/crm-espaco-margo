@@ -4097,11 +4097,23 @@
         actions.classList.add("show");
 
         botao.textContent = "Enviando proposta...";
-        await enviarPropostaManualViaApi(retorno);
+        try {
+          await enviarPropostaManualViaApi(retorno);
+        } catch (erroEnvio) {
+          // A proposta já foi gravada: erro de WhatsApp NUNCA deve sugerir regeneração.
+          console.error("Proposta gerada e salva; envio WhatsApp não confirmado:", erroEnvio);
+          alert(
+            "A proposta foi GERADA E SALVA no CRM, mas o envio pelo WhatsApp não foi confirmado. " +
+            "Não gere outra proposta. Use 'Chamar pelo WhatsApp' para reenviar a proposta existente."
+          );
+        }
 
       } catch (erro) {
-        console.error("Erro ao gerar proposta:", erro);
-        alert("Não foi possível gerar a proposta agora. Confira o workflow V30 ou tente novamente.");
+        console.error("Falha na tentativa de proposta (estado de gravação pode ser incerto):", erro);
+        alert(
+          "A tentativa de proposta não foi concluída na tela. Antes de gerar novamente, " +
+          "verifique se já existe uma proposta ativa para este casal, para evitar duplicidades."
+        );
       } finally {
         botao.disabled = false;
         botao.textContent = "Gerar Proposta Digital";
