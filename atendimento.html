@@ -1285,6 +1285,7 @@
 
       <div class="review-secondary-actions">
         <button class="review-btn secondary" type="button" onclick="gerarOutraRespostaPendente()">GERAR OUTRA</button>
+        <button class="review-btn secondary" id="reviewCancelBtn" type="button" onclick="cancelarRevisaoPendente()">CANCELAR</button>
         <button class="review-btn human" type="button" onclick="assumirAtendimentoPendente()">ASSUMIR ATENDIMENTO</button>
       </div>
 
@@ -2465,6 +2466,7 @@
       const urgente = String(revisao.prioridade || "").toUpperCase() === "URGENTE";
       dock.classList.add("show");
       dock.classList.toggle("urgent", urgente);
+      document.getElementById("reviewCancelBtn").style.display = urgente || String(revisao.acao_sugerida || "").toUpperCase() === "TRANSFERIR_HUMANO" ? "none" : "";
       document.getElementById("humanModeDock").classList.remove("show");
 
       const title = document.getElementById("reviewTitle");
@@ -2630,6 +2632,32 @@
       } catch (erro) {
         alert("Não foi possível concluir a revisão. " + (erro.message || ""));
       }
+    }
+
+    async function cancelarRevisaoPendente() {
+      if (!revisaoPendenteAtual || executandoAcaoRevisao) return;
+      const revisaoId = String(revisaoPendenteAtual.revisao_id || "");
+      if (!revisaoId) return;
+      if (String(revisaoPendenteAtual.prioridade || "").toUpperCase() === "URGENTE" ||
+          String(revisaoPendenteAtual.acao_sugerida || "").toUpperCase() === "TRANSFERIR_HUMANO") {
+        alert("Este chamado urgente precisa ser tratado. Use ASSUMIR ATENDIMENTO.");
+        return;
+      }
+      if (!confirm("Cancelar somente esta sugestão? Nenhuma mensagem será enviada e o modo de atendimento será mantido.")) return;
+      try {
+        const retorno = await postarAcaoRevisao("CANCELAR");
+        if (!retorno || retorno.sucesso !== true ||
+            String(retorno.revisao_id || "") !== revisaoId || retorno.status !== "DESCARTADA") {
+          throw new Error("O servidor não confirmou o cancelamento.");
+        }
+      } catch (erro) {
+        alert("Não foi possível cancelar a sugestão. " + (erro.message || ""));
+        return;
+      }
+      if (revisaoPendenteAtual && String(revisaoPendenteAtual.revisao_id) === revisaoId) {
+        esconderRevisaoPendente();
+      }
+      await sincronizarDepoisDaRevisao();
     }
 
     async function gerarOutraRespostaPendente() {
