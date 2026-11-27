@@ -2470,7 +2470,8 @@
       document.getElementById("humanModeDock").classList.remove("show");
 
       const title = document.getElementById("reviewTitle");
-      title.textContent = urgente ? "MILENE PRECISA DE AJUDA" : "RESPOSTA SUGERIDA PELA MILENE";
+      const falhaSugestao = revisao.falha_tecnica_resposta_vazia === true;
+      title.textContent = urgente ? "MILENE PRECISA DE AJUDA" : falhaSugestao ? "FALHA NA GERAÇÃO DA RESPOSTA" : "RESPOSTA SUGERIDA PELA MILENE";
       title.classList.toggle("urgent", urgente);
 
       document.getElementById("reviewActionChip").textContent =
@@ -2482,6 +2483,7 @@
         (mensagem ? "\n" + textoSeguroHTML(mensagem) : "\nSem texto disponível.");
 
       const textarea = document.getElementById("reviewResponseText");
+      textarea.placeholder = falhaSugestao ? "A Milene não gerou resposta. Use GERAR OUTRA, escreva uma resposta ou cancele a sugestão." : "";
       if (revisaoAnteriorId !== revisao.revisao_id || document.activeElement !== textarea) {
         textarea.value = revisao.resposta_sugerida || "";
       }
