@@ -1107,24 +1107,27 @@
     .review-primary-actions,
     .review-secondary-actions {
       display: grid;
-      gap: 6px;
-      margin-top: 7px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
     .review-primary-actions {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .review-secondary-actions {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .review-btn {
       border: 0;
       border-radius: 11px;
-      padding: 9px 8px;
-      font-size: 10px;
+      min-height: 44px;
+      min-width: 0;
+      padding: 9px 4px;
+      font-size: 11px;
       font-weight: 950;
+      touch-action: manipulation;
       line-height: 1.15;
       cursor: pointer;
     }
@@ -1281,11 +1284,13 @@
 
       <div class="review-primary-actions">
         <button class="review-btn send" id="reviewSendBtn" type="button" onclick="enviarRevisaoPendente()">ENVIAR</button>
+        <button class="review-btn secondary" type="button" onclick="gerarOutraRespostaPendente()">OUTRA</button>
+        <button class="review-btn secondary" id="reviewCancelBtn" type="button" onclick="cancelarRevisaoPendente()">CANCELAR</button>
       </div>
 
+      <div id="reviewSendStatus" role="status" aria-live="polite" style="display:none;margin-top:8px;color:#745954;font-size:11px;font-weight:700;"></div>
+
       <div class="review-secondary-actions">
-        <button class="review-btn secondary" type="button" onclick="gerarOutraRespostaPendente()">GERAR OUTRA</button>
-        <button class="review-btn secondary" id="reviewCancelBtn" type="button" onclick="cancelarRevisaoPendente()">CANCELAR</button>
         <button class="review-btn human" type="button" onclick="assumirAtendimentoPendente()">ASSUMIR ATENDIMENTO</button>
       </div>
 
@@ -2461,6 +2466,11 @@
       const estavaNoFinalDoChat = usuarioEstaNoFinalDoChat();
       const revisaoAnteriorId = revisaoPendenteAtual && revisaoPendenteAtual.revisao_id;
       revisaoPendenteAtual = revisao;
+      if (revisaoAnteriorId !== revisao.revisao_id) {
+        const status = document.getElementById("reviewSendStatus");
+        status.style.display = "none";
+        status.textContent = "";
+      }
 
       const dock = document.getElementById("reviewDock");
       const urgente = String(revisao.prioridade || "").toUpperCase() === "URGENTE";
@@ -2483,7 +2493,7 @@
         (mensagem ? "\n" + textoSeguroHTML(mensagem) : "\nSem texto disponível.");
 
       const textarea = document.getElementById("reviewResponseText");
-      textarea.placeholder = falhaSugestao ? "A Milene não gerou resposta. Use GERAR OUTRA, escreva uma resposta ou cancele a sugestão." : "";
+      textarea.placeholder = falhaSugestao ? "A Milene não gerou resposta. Use OUTRA, escreva uma resposta ou cancele a sugestão." : "";
       if (revisaoAnteriorId !== revisao.revisao_id || document.activeElement !== textarea) {
         textarea.value = revisao.resposta_sugerida || "";
       }
@@ -2510,7 +2520,7 @@
     }
 
     async function carregarRevisaoPendenteAtual(opcoes = {}) {
-      if (!casalAtualId) return;
+      if (!casalAtualId || executandoAcaoRevisao) return;
 
       try {
         const resposta = await fetch(
@@ -2518,9 +2528,10 @@
           { cache: "no-store" }
         );
 
-        if (!resposta.ok) return;
+        if (!resposta.ok || executandoAcaoRevisao) return;
 
         const retorno = await resposta.json();
+        if (executandoAcaoRevisao) return;
         const revisoes = Array.isArray(retorno.revisoes) ? retorno.revisoes : [];
 
         const doCasal = revisoes
@@ -2577,8 +2588,8 @@
         let retorno = {};
         try { retorno = corpoBruto ? JSON.parse(corpoBruto) : {}; } catch (_) { retorno = {}; }
 
-        if (!resposta.ok || retorno.sucesso === false) {
-          const detalhe = retorno.erro || retorno.mensagem || corpoBruto || "Sem corpo de resposta";
+        if (!resposta.ok || retorno.sucesso !== true) {
+          const detalhe = retorno.erro || retorno.mensagem || (corpoBruto ? "Resposta do servidor sem confirmação." : "Servidor não confirmou a operação.");
           throw new Error(`REVISÃO HTTP ${resposta.status}: ${detalhe}`);
         }
 
@@ -2606,7 +2617,10 @@
     }
 
     async function enviarRevisaoPendente() {
-      if (!revisaoPendenteAtual) return;
+      if (!revisaoPendenteAtual || executandoAcaoRevisao) return;
+      const revisaoId = String(revisaoPendenteAtual.revisao_id || "");
+      if (!revisaoId) return;
+      const status = document.getElementById("reviewSendStatus");
 
       const textarea = document.getElementById("reviewResponseText");
       const texto = String(textarea.value || "").trim();
@@ -2620,8 +2634,10 @@
       const atual = normalizarTextoComparacao(texto);
       const houveEdicao = original !== atual;
 
+      status.style.display = "";
+      status.textContent = "Processando envio pela Milene. Aguarde a confirmação.";
       try {
-        await postarAcaoRevisao(houveEdicao ? "EDITAR_ENVIAR" : "APROVAR_ENVIAR", {
+        const retorno = await postarAcaoRevisao(houveEdicao ? "EDITAR_ENVIAR" : "APROVAR_ENVIAR", {
           resposta_final: texto,
           tipo_aprendizado: "",
           instrucao_revisao: "",
@@ -2629,10 +2645,21 @@
           qualidade: "APROVADO"
         });
 
-        esconderRevisaoPendente();
+        if (!retorno || retorno.sucesso !== true ||
+            String(retorno.revisao_id || "") !== revisaoId ||
+            !["APROVADA_E_ENVIADA", "EDITADA_E_ENVIADA"].includes(retorno.status)) {
+          throw new Error("O envio não foi confirmado pelo servidor.");
+        }
+        status.style.display = "none";
+        if (revisaoPendenteAtual && String(revisaoPendenteAtual.revisao_id) === revisaoId) {
+          esconderRevisaoPendente();
+        }
         await sincronizarDepoisDaRevisao();
       } catch (erro) {
-        alert("Não foi possível concluir a revisão. " + (erro.message || ""));
+        status.textContent = "Envio não confirmado. Confira o histórico antes de repetir.";
+        alert("Não foi possível confirmar o envio. " + (erro.message || ""));
+        // Preserve the draft and do not treat uncertain transport as sent.
+        await carregarHistoricoConversas({ forcar: true, forcarScroll: false }).catch(() => {});
       }
     }
 
